@@ -1,0 +1,13 @@
+{
+  "name": "joovy",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^4.3.5"
+  },
+  "dependencies": {
+    "discord.js": "^12.5.3",
+    "ts-node": "^10.1.0"
+  }
+}
