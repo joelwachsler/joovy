@@ -77,11 +77,20 @@ class CmdHandler {
           name: `${r.title} (${r.timestamp})`,
           message,
         }
-        await this.sendMessage(`[${newItem.name}](${query}) has been queued.`)
+        await this.sendMessage(`[${newItem.name}](${newItem.link}) has been queued.`)
         await this.playlist.addItemToQueue(newItem)
       } else {
         await this.sendMessage('Sorry, couldn\'t parse the video id...')
       }
+    } else {
+      const { videos: [ match ] } = await yts.search(query)
+      const newItem: QueueItem = {
+        link: match.url,
+        name: `${match.title} (${match.timestamp})`,
+        message,
+      }
+      await this.sendMessage(`[${newItem.name}](${newItem.link}) has been queued.`)
+      await this.playlist.addItemToQueue(newItem)
     }
   }
 
