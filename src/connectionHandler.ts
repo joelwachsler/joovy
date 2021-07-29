@@ -1,80 +1,95 @@
-import { Message, VoiceConnection } from 'discord.js';
-import ytdl from 'ytdl-core';
+import { Message, MessageEmbed, VoiceConnection, VoiceState } from 'discord.js';
+import yts from 'yt-search';
 import { logger } from './logger';
+import { Player } from './player';
+import { Playlist } from './playlist';
 
-const connectionHandlerMapper = new Map<string, ConnectionHandler>()
+const connectionHandlerMapper = new Map<string, CmdHandler>()
 
-interface QueueItem {
+export interface QueueItem {
   name: string
   link: string
   message: Message
 }
 
-export class ConnectionHandler {
+export type SendMessage = (msg: string) => Promise<void>
 
-  private channelQueue: QueueItem[] = []
-  private currentlyPlaying?: QueueItem
+interface SendMessageArgs {
+  msg: string,
+  message: Message
+}
 
-  constructor(private conn: VoiceConnection) {}
+const sendMessage = async ({ msg, message }: SendMessageArgs) => {
+  const embed = new MessageEmbed().setDescription(msg)
+  await message.channel.send(embed)
+}
 
-  async handleMessage(message: Message) {
+interface CmdHandlerArgs {
+  playlist: Playlist
+  message: Message
+  voice: VoiceState
+  voiceConn: VoiceConnection
+}
+
+class CmdHandler {
+  private voiceConn: VoiceConnection
+  private playlist: Playlist
+  private sendMessage: SendMessage
+
+  constructor({ playlist, message, voiceConn }: CmdHandlerArgs) {
+    this.playlist = playlist
+    this.voiceConn = voiceConn
+    this.sendMessage = async msg => sendMessage({ message, msg })
+    Player.init({
+      playlist,
+      sendMessage: this.sendMessage,
+      voiceConn,
+    })
+  }
+
+  async handle(message: Message) {
     const { content } = message
 
     if (content === '/disconnect') {
-      this.disconnect()
+      await this.disconnect()
     } else if (content.startsWith('/play')) {
       await this.play(message)
     } else if (content === '/queue') {
-      await this.printQueue(message)
+      await this.printQueue()
     } else if (content === '/skip') {
-      await this.skip(message)
+      this.skip()
     }
+  }
+
+  private async disconnect() {
+    this.voiceConn.disconnect()
   }
 
   private async play(message: Message) {
-    const itemToPlay = message.content.split(" ")[1]
-    const newEntry: QueueItem = {
-      name: '',
-      link: itemToPlay,
-      message,
+    const query = message.content.split('/play ')[1]
+    if (query.startsWith('http')) {
+      const videoIdMatch = query.match(new RegExp(/https:\/\/www.youtube.com\/watch\?.*?v=(\w+).*?/))
+      if (videoIdMatch) {
+        const [_, videoId] = videoIdMatch
+        const r = await yts.search({ videoId })
+        const newItem: QueueItem = {
+          link: query,
+          name: `${r.title} (${r.timestamp})`,
+          message,
+        }
+        await this.sendMessage(`[${newItem.name}](${query}) has been queued.`)
+        await this.playlist.addItemToQueue(newItem)
+      } else {
+        await this.sendMessage('Sorry, couldn\'t parse the video id...')
+      }
     }
-    if (this.currentlyPlaying) {
-      this.channelQueue.push(newEntry)
-      message.channel.send(`${newEntry.link} has been queued, there are now ${this.channelQueue.length} items queued.`)
-      return
-    }
-
-    this.currentlyPlaying = newEntry
-    const play = this.conn.play(ytdl(itemToPlay, { filter: 'audioonly', quality: 'highestaudio' }))
-    play.on('finish', () => {
-      this.finishedPlaying()
-    })
-    logger.info(`Playing: ${itemToPlay}`)
-    await message.channel.send(`Now playing: ${itemToPlay}`)
   }
 
-  private async finishedPlaying() {
-    const nextItem = this.channelQueue.pop()
-    if (!nextItem) {
-      this.currentlyPlaying?.message.channel.send(`There are no more songs left in the queue, disconnecting.`)
-      return this.disconnect()
-    }
-
-    this.currentlyPlaying = undefined
-    this.play(nextItem.message)
+  private async skip() {
+    await this.playlist.nextItemInQueue()
   }
 
-  private async printQueue(message: Message) {
-    await message.channel.send(`The queue: is: ${this.channelQueue}`)
-  }
-
-  private async skip(message: Message) {
-    await this.finishedPlaying()
-  }
-
-  private disconnect() {
-    connectionHandlerMapper.delete(this.conn.channel.id)
-    this.conn.disconnect()
+  private async printQueue() {
   }
 }
 
@@ -83,9 +98,13 @@ export const handleMessage = async (message: Message) => {
 
   if (channelId) {
     if (!connectionHandlerMapper.has(channelId)) {
-      const channelConn = await message.member?.voice.channel?.join()
-      if (channelConn) {
-        connectionHandlerMapper.set(channelId, new ConnectionHandler(channelConn))
+      const voice = message.member?.voice
+      const voiceConn = await voice?.channel?.join()
+      if (voiceConn && voice) {
+        connectionHandlerMapper.set(
+          channelId,
+          new CmdHandler({ voice, voiceConn, message, playlist: new Playlist() }),
+        )
         logger.info(`Joined: ${channelId}`)
       } else {
         logger.info('Failed to join channel...')
@@ -94,7 +113,7 @@ export const handleMessage = async (message: Message) => {
 
     const ch = connectionHandlerMapper.get(channelId)
     if (ch) {
-      await ch.handleMessage(message)
+      await ch.handle(message)
     }
   }
 }
