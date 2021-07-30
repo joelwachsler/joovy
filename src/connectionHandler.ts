@@ -1,8 +1,10 @@
 import { Message, MessageEmbed, VoiceConnection, VoiceState } from 'discord.js';
-import yts from 'yt-search';
+import { Pool, spawn } from 'threads';
 import { logger } from './logger';
 import { Player } from './player';
 import { Playlist } from './playlist';
+import { Worker } from 'threads'
+import { VideoMetadataResult } from 'yt-search';
 
 const connectionHandlerMapper = new Map<string, CmdHandler>()
 
@@ -29,17 +31,20 @@ interface CmdHandlerArgs {
   message: Message
   voice: VoiceState
   voiceConn: VoiceConnection
+  pool: Pool<any>
 }
 
 class CmdHandler {
   private voiceConn: VoiceConnection
   private playlist: Playlist
   private sendMessage: SendMessage
+  private pool: Pool<any>
 
-  constructor({ playlist, message, voiceConn }: CmdHandlerArgs) {
+  constructor({ playlist, message, voiceConn, pool }: CmdHandlerArgs) {
     this.playlist = playlist
     this.voiceConn = voiceConn
     this.sendMessage = async msg => sendMessage({ message, msg })
+    this.pool = pool
     Player.init({
       playlist,
       sendMessage: this.sendMessage,
@@ -66,32 +71,20 @@ class CmdHandler {
   }
 
   private async play(message: Message) {
-    const query = message.content.split('/play ')[1]
-    if (query.startsWith('http')) {
-      const videoIdMatch = query.match(new RegExp(/https:\/\/www.youtube.com\/watch\?.*?v=(\w+).*?/))
-      if (videoIdMatch) {
-        const [_, videoId] = videoIdMatch
-        const r = await yts.search({ videoId })
+    this.pool.queue(async worker => {
+      const query = message.content.split('/play ')[1]
+      const res = await worker.fetchInfo(query)
+      const info = JSON.parse(res) as VideoMetadataResult
+      if (info) {
         const newItem: QueueItem = {
-          link: query,
-          name: `${r.title} (${r.timestamp})`,
+          link: info.url,
+          name: `${info.title} (${info.timestamp})`,
           message,
         }
         await this.sendMessage(`[${newItem.name}](${newItem.link}) has been queued.`)
         await this.playlist.addItemToQueue(newItem)
-      } else {
-        await this.sendMessage('Sorry, couldn\'t parse the video id...')
       }
-    } else {
-      const { videos: [ match ] } = await yts.search(query)
-      const newItem: QueueItem = {
-        link: match.url,
-        name: `${match.title} (${match.timestamp})`,
-        message,
-      }
-      await this.sendMessage(`[${newItem.name}](${newItem.link}) has been queued.`)
-      await this.playlist.addItemToQueue(newItem)
-    }
+    })
   }
 
   private async skip() {
@@ -102,7 +95,7 @@ class CmdHandler {
   }
 }
 
-export const handleMessage = async (message: Message) => {
+export const handleMessage = async (message: Message, pool: Pool<any>) => {
   const channelId = message.member?.voice.channel?.id
 
   if (channelId) {
@@ -112,7 +105,13 @@ export const handleMessage = async (message: Message) => {
       if (voiceConn && voice) {
         connectionHandlerMapper.set(
           channelId,
-          new CmdHandler({ voice, voiceConn, message, playlist: new Playlist() }),
+          new CmdHandler({
+            voice,
+            voiceConn,
+            message,
+            playlist: new Playlist(),
+            pool
+          }),
         )
         logger.info(`Joined: ${channelId}`)
       } else {

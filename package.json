@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
+  "scripts": {
+    "start": "node --unhandled-rejections=strict -r ts-node/register/transpile-only src/main.ts"
+  },
   "devDependencies": {
     "@types/node": "^16.4.6",
     "@types/yt-search": "^2.3.2",
@@ -12,6 +15,7 @@
     "@discordjs/opus": "^0.5.3",
     "discord.js": "^12.5.3",
     "dotenv": "^10.0.0",
+    "threads": "^1.6.5",
     "ts-node": "^10.1.0",
     "winston": "^3.3.3",
     "yt-search": "^2.10.0",
