@@ -3,7 +3,6 @@ import { Pool, spawn } from 'threads';
 import { logger } from './logger';
 import { Player } from './player';
 import { Playlist } from './playlist';
-import { Worker } from 'threads'
 import { VideoMetadataResult } from 'yt-search';
 
 const connectionHandlerMapper = new Map<string, CmdHandler>()
@@ -14,16 +13,21 @@ export interface QueueItem {
   message: Message
 }
 
-export type SendMessage = (msg: string) => Promise<void>
+export type SendMessage = (msg: MsgType) => Promise<void>
 
+type MsgType = string | MessageEmbed
 interface SendMessageArgs {
-  msg: string,
+  msg: MsgType
   message: Message
 }
 
 const sendMessage = async ({ msg, message }: SendMessageArgs) => {
-  const embed = new MessageEmbed().setDescription(msg)
-  await message.channel.send(embed)
+  if (typeof msg === 'string') {
+    const embed = new MessageEmbed().setDescription(msg)
+    await message.channel.send(embed)
+  } else {
+    await message.channel.send(msg)
+  }
 }
 
 interface CmdHandlerArgs {
@@ -92,6 +96,11 @@ class CmdHandler {
   }
 
   private async printQueue() {
+    let counter = 0
+    const queue = this.playlist.currentPlaylist
+      .map(p => `[${counter++}] [${p.name}](${p.link})`)
+    queue[this.playlist.playlistIndex] = `${queue[this.playlist.playlistIndex]} <-- Playing`
+    this.sendMessage(queue.join('\n\n'))
   }
 }
 

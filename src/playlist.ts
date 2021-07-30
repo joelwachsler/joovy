@@ -52,4 +52,12 @@ export class Playlist {
       await handler(playlistItem)
     }
   }
+
+  get currentPlaylist() {
+    return this.playlist
+  }
+
+  get playlistIndex() {
+    return this.currentlyPlaying
+  }
 }
