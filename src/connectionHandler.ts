@@ -11,6 +11,7 @@ export interface QueueItem {
   name: string
   link: string
   message: Message
+  skipped?: boolean
 }
 
 export type SendMessage = (msg: MsgType) => Promise<void>
@@ -65,6 +66,8 @@ class CmdHandler {
       await this.play(message)
     } else if (content === '/queue') {
       await this.printQueue()
+    } else if (content.startsWith('/remove')) {
+      await this.remove(message)
     } else if (content === '/skip') {
       this.skip()
     }
@@ -82,10 +85,10 @@ class CmdHandler {
       if (info) {
         const newItem: QueueItem = {
           link: info.url,
-          name: `${info.title} (${info.timestamp})`,
+          name: `[${info.title} (${info.timestamp})](${info.url})`,
           message,
         }
-        await this.sendMessage(`[${newItem.name}](${newItem.link}) has been queued.`)
+        await this.sendMessage(`${newItem.name} has been queued.`)
         await this.playlist.addItemToQueue(newItem)
       }
     })
@@ -98,9 +101,23 @@ class CmdHandler {
   private async printQueue() {
     let counter = 0
     const queue = this.playlist.currentPlaylist
-      .map(p => `[${counter++}] [${p.name}](${p.link})`)
+      .map(p => p.skipped ? `[${counter++}] ~~${p.name}~~` : `[${counter++}] ${p.name}`)
     queue[this.playlist.playlistIndex] = `${queue[this.playlist.playlistIndex]} <-- Playing`
     this.sendMessage(queue.join('\n\n'))
+  }
+
+  private async remove(message: Message) {
+    const removeCmd = message.content.split('/remove ')[1]
+    const split = removeCmd.split(' ')
+    if (split.length > 1) {
+      const [ from, to ] = split
+      const removed = await this.playlist.removeItemInQueue(Number(from), Number(to))
+      this.sendMessage(`The following items has been removed:\n\n${removed.map(p => p.name).join('\n\n')}`)
+    } else {
+      const [ index ] = split
+      const removed = await this.playlist.removeItemInQueue(Number(index))
+      this.sendMessage(`The following items has been removed:\n\n${removed.map(p => p.name).join('\n\n')}`)
+    }
   }
 }
 
