@@ -1,7 +1,8 @@
-import { Client } from 'discord.js'
+import { Client, Message } from 'discord.js'
+import { fromEvent, map } from 'rxjs'
 import { Pool, spawn, Worker } from 'threads'
 import { initConfig } from './config'
-import { handleMessage } from './connectionHandler'
+import { initMsgHandler } from './connectionHandler'
 import { logger } from './logger'
 
 const main = async () => {
@@ -18,13 +19,17 @@ const main = async () => {
     logger.info('Client is ready!')
   })
 
-  client.on('message', async message => {
-    logger.info(`Got a new mesage: "${message}"`)
-    await handleMessage(message, pool)
-  })
+  const msgEvent = fromEvent(client, 'message')
+    .pipe(map(message => ({ message: message as Message, pool })))
+  initMsgHandler(msgEvent)
 
   client.login(config.token)
   logger.info('Done creating client!')
+}
+
+export interface MsgEvent {
+  message: Message
+  pool: Pool<any>
 }
 
 if (require.main === module) {

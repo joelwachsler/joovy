@@ -1,5 +1,7 @@
+import { Message } from 'discord.js'
 import { expose } from 'threads'
 import yts from 'yt-search'
+import { Player } from '../player'
 
 expose({
   async fetchInfo(query: string) {
@@ -14,5 +16,5 @@ expose({
       const { videos: [ match ] } = await yts.search(query)
       return JSON.stringify(match)
     }
-  }
+  },
 })

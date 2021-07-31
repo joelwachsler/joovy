@@ -1,33 +1,37 @@
-import { StreamDispatcher, VoiceConnection } from 'discord.js'
+import { Message, StreamDispatcher } from 'discord.js'
+import { spawn } from 'threads'
 import ytdl from 'ytdl-core'
-import { SendMessage } from './connectionHandler'
+import { Environment } from './connectionHandler'
 import { logger } from './logger'
-import { Playlist, PlaylistEvent } from './playlist'
 
 export namespace Player {
-  export const init = ({ voiceConn, playlist, sendMessage }: PlayerArgs) => {
-    let play: StreamDispatcher | null = null
-    playlist.on(PlaylistEvent.CHANGE, async item => {
-      play = voiceConn.play(ytdl(item.link, { filter: 'audioonly', quality: 'highestaudio' }))
-      play.on('finish', async () => {
-        await playlist.nextItemInQueue()
-      })
-      await sendMessage(`Now playing: [${item.name}](${item.link})`)
-    })
-
-    playlist.on(PlaylistEvent.FINISHED, async () => {
-      if (play) {
-        play.destroy()
-        play = null
-      }
-    })
-
-    logger.info('Player ready!')
+  export interface InitArgs {
+    message: Message
+    env: Environment
   }
 
-  export interface PlayerArgs {
-    voiceConn: VoiceConnection
-    playlist: Playlist
-    sendMessage: SendMessage
+  export const init = async ({ message, env }: InitArgs) => {
+    logger.info('Joining channel...')
+    const voiceConn = await message.member?.voice.channel?.join()
+    let streamDispatcher: StreamDispatcher | undefined = undefined
+    if (voiceConn) {
+      logger.info('Done joining channel!')
+      env.currentlyPlaying.subscribe({
+        next: item => {
+          if (streamDispatcher) {
+            streamDispatcher.destroy()
+          }
+
+          streamDispatcher = voiceConn
+            .play(ytdl(item.link, { filter: 'audioonly', quality: 'highestaudio' }))
+            .once('finish', () => {
+              env.nextItemInPlaylist.next(item)
+            })
+        },
+        complete: () => voiceConn.disconnect()
+      })
+    } else {
+      logger.error('Failed to join voice channel...')
+    }
   }
 }

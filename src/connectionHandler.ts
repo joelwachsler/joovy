@@ -1,11 +1,10 @@
-import { Message, MessageEmbed, VoiceConnection, VoiceState } from 'discord.js';
-import { Pool, spawn } from 'threads';
-import { logger } from './logger';
-import { Player } from './player';
-import { Playlist } from './playlist';
-import { VideoMetadataResult } from 'yt-search';
-
-const connectionHandlerMapper = new Map<string, CmdHandler>()
+import { Message, MessageEmbed } from 'discord.js'
+import { catchError, EMPTY, filter, map, Observable, share, Subject } from 'rxjs'
+import { logger } from './logger'
+import { MsgEvent } from './main'
+import { ObservablePlaylist } from './observablePlaylist'
+import { Player } from './player'
+import { QueryResolver } from './queryResolver'
 
 export interface QueueItem {
   name: string
@@ -31,123 +30,120 @@ const sendMessage = async ({ msg, message }: SendMessageArgs) => {
   }
 }
 
-interface CmdHandlerArgs {
-  playlist: Playlist
-  message: Message
-  voice: VoiceState
-  voiceConn: VoiceConnection
-  pool: Pool<any>
-}
-
-class CmdHandler {
-  private voiceConn: VoiceConnection
-  private playlist: Playlist
-  private sendMessage: SendMessage
-  private pool: Pool<any>
-
-  constructor({ playlist, message, voiceConn, pool }: CmdHandlerArgs) {
-    this.playlist = playlist
-    this.voiceConn = voiceConn
-    this.sendMessage = async msg => sendMessage({ message, msg })
-    this.pool = pool
-    Player.init({
-      playlist,
-      sendMessage: this.sendMessage,
-      voiceConn,
-    })
-  }
-
-  async handle(message: Message) {
-    const { content } = message
-
-    if (content === '/disconnect') {
-      await this.disconnect()
-    } else if (content.startsWith('/play')) {
-      await this.play(message)
-    } else if (content === '/queue') {
-      await this.printQueue()
-    } else if (content.startsWith('/remove')) {
-      await this.remove(message)
-    } else if (content === '/skip') {
-      this.skip()
-    }
-  }
-
-  private async disconnect() {
-    this.voiceConn.disconnect()
-  }
-
-  private async play(message: Message) {
-    this.pool.queue(async worker => {
-      const query = message.content.split('/play ')[1]
-      const res = await worker.fetchInfo(query)
-      const info = JSON.parse(res) as VideoMetadataResult
-      if (info) {
-        const newItem: QueueItem = {
-          link: info.url,
-          name: `[${info.title} (${info.timestamp})](${info.url})`,
-          message,
-        }
-        await this.sendMessage(`${newItem.name} has been queued.`)
-        await this.playlist.addItemToQueue(newItem)
+export const initMsgHandler = (msgObservable: Observable<MsgEvent>) => {
+  const msgObservers = new Map<string, Subject<MsgEvent>>()
+  msgObservable.pipe(
+    // Ignore bot messages
+    filter(v => !v.message.author.bot),
+    // Only process messages starting with a slash
+    filter(v => v.message.content.startsWith('/')),
+    map(v => {
+      const channelId = v.message.member?.voice.channel?.id
+      if (!channelId) {
+        throw new ErrorWithMessage('Could not determine channel id, are you joined to a voice channel?', v.message)
       }
-    })
-  }
-
-  private async skip() {
-    await this.playlist.nextItemInQueue()
-  }
-
-  private async printQueue() {
-    let counter = 0
-    const queue = this.playlist.currentPlaylist
-      .map(p => p.skipped ? `[${counter++}] ~~${p.name}~~` : `[${counter++}] ${p.name}`)
-    queue[this.playlist.playlistIndex] = `${queue[this.playlist.playlistIndex]} <-- Playing`
-    this.sendMessage(queue.join('\n\n'))
-  }
-
-  private async remove(message: Message) {
-    const removeCmd = message.content.split('/remove ')[1]
-    const split = removeCmd.split(' ')
-    if (split.length > 1) {
-      const [ from, to ] = split
-      const removed = await this.playlist.removeItemInQueue(Number(from), Number(to))
-      this.sendMessage(`The following items has been removed:\n\n${removed.map(p => p.name).join('\n\n')}`)
-    } else {
-      const [ index ] = split
-      const removed = await this.playlist.removeItemInQueue(Number(index))
-      this.sendMessage(`The following items has been removed:\n\n${removed.map(p => p.name).join('\n\n')}`)
-    }
-  }
-}
-
-export const handleMessage = async (message: Message, pool: Pool<any>) => {
-  const channelId = message.member?.voice.channel?.id
-
-  if (channelId) {
-    if (!connectionHandlerMapper.has(channelId)) {
-      const voice = message.member?.voice
-      const voiceConn = await voice?.channel?.join()
-      if (voiceConn && voice) {
-        connectionHandlerMapper.set(
-          channelId,
-          new CmdHandler({
-            voice,
-            voiceConn,
-            message,
-            playlist: new Playlist(),
-            pool
-          }),
-        )
-        logger.info(`Joined: ${channelId}`)
+      return {
+        ...v,
+        channelId,
+      }
+    }),
+    catchError(e => {
+      if (e instanceof ErrorWithMessage) {
+        sendMessage({
+          msg: e.errorMsg,
+          message: e.message,
+        })
       } else {
-        logger.info('Failed to join channel...')
+        logger.error(`Caught an error: "${e}"`)
       }
+      return EMPTY
+    }),
+    share(),
+  ).subscribe(async v => {
+    if (!msgObservers.has(v.channelId)) {
+      const subject = new Subject<MsgEvent>()
+      msgObservers.set(v.channelId, subject)
+      logger.info(`Initializing new observer for: ${v.channelId}`)
+      await initCmdObserver(v.message, subject, () => msgObservers.delete(v.channelId))
     }
 
-    const ch = connectionHandlerMapper.get(channelId)
-    if (ch) {
-      await ch.handle(message)
-    }
+    msgObservers.get(v.channelId)!.next(v)
+  },
+  )
+}
+
+export interface Environment {
+  sendMessage: Subject<string>
+  currentlyPlaying: Subject<ObservablePlaylist.Item>
+  nextItemInPlaylist: Subject<ObservablePlaylist.Item | null>
+  addItemToQueue: Subject<Omit<ObservablePlaylist.Item, 'index'>>
+  printQueueRequest: Subject<any>
+}
+
+const initCmdObserver = async (
+  message: Message,
+  channelObserver: Subject<MsgEvent>,
+  unsubscribe: () => void,
+) => {
+  const channelObserverWithMsg = channelObserver
+    .pipe(map(v => ({ ...v, content: v.message.content })))
+
+  const env: Environment = {
+    sendMessage: new Subject(),
+    currentlyPlaying: new Subject(),
+    nextItemInPlaylist: new Subject(),
+    addItemToQueue: new Subject(),
+    printQueueRequest: new Subject(),
   }
+
+  env.sendMessage.subscribe(msg => {
+    sendMessage({
+      message,
+      msg,
+    })
+  })
+
+  ObservablePlaylist.init(env)
+  await Player.init({ message, env })
+
+  env.addItemToQueue.subscribe(({ name }) => {
+    env.sendMessage.next(`${name} has been added to the queue.`)
+  })
+
+  env.currentlyPlaying.subscribe(({ name }) => {
+    env.sendMessage.next(`Now playing: ${name}`)
+  })
+
+  const observer = channelObserverWithMsg.subscribe({
+    next: async v => {
+      const { content, message, pool } = v
+      if (content.startsWith('/play')) {
+        const newItem = await QueryResolver.resolveQuery({ message, pool })
+        if (newItem) {
+          env.addItemToQueue.next(newItem)
+        } else {
+          env.sendMessage.next(`Unable to find result for: ${content}`)
+        }
+      } else if (content === '/skip') {
+        env.nextItemInPlaylist.next(null)
+      } else if (content === '/queue') {
+        env.printQueueRequest.next(null)
+      } else if (content === '/disconnect') {
+        env.sendMessage.next('Bye!')
+        Object.values(env).forEach(envValue => {
+          if (envValue instanceof Subject) {
+            envValue.complete()
+          }
+        })
+        observer.unsubscribe()
+        unsubscribe()
+      } else {
+        env.sendMessage.next(`Unknown command: "${content}"`)
+      }
+    },
+  })
+}
+
+class ErrorWithMessage {
+  constructor(public errorMsg: string, public message: Message) { }
 }
