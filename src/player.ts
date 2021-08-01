@@ -19,13 +19,8 @@ export namespace Player {
             return env.nextItemInPlaylist.next(null)
           }
 
-          if (dl) {
-            dl.destroy()
-          }
-
-          if (dispatcher) {
-            dispatcher.pause()
-          }
+          dl?.destroy()
+          dispatcher?.pause()
 
           dl = ytdl(item.link, { filter: 'audioonly', quality: 'highestaudio', highWaterMark: 1 << 25 })
           dispatcher = voiceConn
@@ -36,7 +31,11 @@ export namespace Player {
 
           env.sendMessage.next(`Now playing: ${item.name}`)
         },
-        complete: () => voiceConn.disconnect()
+        complete: () => {
+          dl?.destroy()
+          dispatcher?.destroy()
+          voiceConn.disconnect()
+        }
       })
     } else {
       logger.error('Failed to join voice channel...')
