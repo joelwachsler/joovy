@@ -1,5 +1,5 @@
 import { Message, MessageEmbed } from 'discord.js'
-import { catchError, EMPTY, filter, map, Observable, share, Subject } from 'rxjs'
+import { catchError, EMPTY, filter, map, Observable, share, Subject, switchMap } from 'rxjs'
 import { logger } from './logger'
 import { MsgEvent } from './main'
 import { ObservablePlaylist } from './observablePlaylist'
@@ -38,7 +38,7 @@ export const initMsgHandler = (msgObservable: Observable<MsgEvent>) => {
         channelId,
       }
     }),
-    catchError(e => {
+    catchError((e, caught) => {
       if (e instanceof ErrorWithMessage) {
         sendMessage({
           msg: e.errorMsg,
@@ -47,7 +47,7 @@ export const initMsgHandler = (msgObservable: Observable<MsgEvent>) => {
       } else {
         logger.error(`Caught an error: "${e}"`)
       }
-      return EMPTY
+      return caught
     }),
     share(),
   ).subscribe(async v => {
