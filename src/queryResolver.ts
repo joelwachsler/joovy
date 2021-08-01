@@ -4,12 +4,7 @@ import { VideoMetadataResult } from 'yt-search'
 import { ObservablePlaylist } from './observablePlaylist'
 
 export namespace QueryResolver {
-  export interface ParseQueryArgs {
-    message: Message
-    pool: Pool<any>
-  }
-
-  export const resolveQuery = async ({ message, pool }: ParseQueryArgs) => {
+  export const resolve = async ({ message, pool }: ParseQueryArgs) => {
     return await pool.queue(async worker => {
       const query = message.content.split('/play ')[1]
       const res = await worker.fetchInfo(query)
@@ -24,5 +19,10 @@ export namespace QueryResolver {
         return newItem
       }
     })
+  }
+
+  export interface ParseQueryArgs {
+    message: Message
+    pool: Pool<any>
   }
 }

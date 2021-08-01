@@ -1,9 +1,8 @@
-import { Message } from 'discord.js'
 import { expose } from 'threads'
 import yts from 'yt-search'
-import { Player } from '../player'
 
 expose({
+  // Using a seperate thread for this because, it's costly for some reason...
   async fetchInfo(query: string) {
     if (query.startsWith('http')) {
       const videoIdMatch = query.match(new RegExp(/https:\/\/www.youtube.com\/watch\?.*?v=(\w+).*?/))

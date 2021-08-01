@@ -3,29 +3,11 @@ import { Subject } from 'rxjs'
 import { Environment } from './connectionHandler'
 
 export namespace ObservablePlaylist {
-  export interface Item {
-    name: string
-    link: string
-    message: Message
-    skipped?: boolean
-    index: number
-  }
-
-  export interface Remove {
-    from: number
-    to?: number
-  }
-
-  export interface InitArgs {
-    currentlyPlaying: Subject<Item>
-    nextItemInPlaylist: Subject<Item | undefined>
-  }
-
   export const init = (env: Environment) => {
     const queue: Item[] = []
     const removeItemInQueue = new Subject<Remove>()
     removeItemInQueue.subscribe(removeItem => {
-      queue[removeItem.from].skipped = true
+      queue[removeItem.from].removed = true
     })
 
     let index = -1
@@ -33,7 +15,13 @@ export namespace ObservablePlaylist {
       if (current) {
         index = current.index
       }
-      env.currentlyPlaying.next(queue[++index])
+      const nextItem = queue[++index]
+      if (nextItem) {
+        env.currentlyPlaying.next(nextItem)
+      } else{
+        env.sendMessage.next('End of playlist, disconnecting...')
+        env.disconnect.next(null)
+      }
     })
 
     env.addItemToQueue.subscribe(newItem => {
@@ -48,15 +36,52 @@ export namespace ObservablePlaylist {
       }
     })
 
+    env.removeFromQueue.subscribe(({ from, to }) => {
+      let shouldEmitSkipEvent = false
+      for (let i = from; i <= to; i++) {
+        if (i === index) {
+          shouldEmitSkipEvent = true
+        }
+
+        const item = queue[i]
+        if (item) {
+          item.removed = true
+          env.sendMessage.next(`${item.name} has been removed.`)
+        }
+      }
+
+      if (shouldEmitSkipEvent) {
+        env.nextItemInPlaylist.next(null)
+      }
+    })
+
     env.printQueueRequest.subscribe(_ => {
       if (queue.length === 0) {
         env.sendMessage.next('The queue is empty...')
       } else {
         let counter = 0
-        const printedQueue = queue.map(p => p.skipped ? `[${counter++}] ~~${p.name}~~` : `[${counter++}] ${p.name}`)
-        printedQueue[index] = `${printedQueue[index]} <-- Playing`
+        const printedQueue = queue.map(p => p.removed ? `[${counter++}] ~~${p.name}~~` : `[${counter++}] ${p.name}`)
+        printedQueue[index] = `${printedQueue[index]} <-- Now playing`
         env.sendMessage.next(printedQueue.join('\n\n'))
       }
     })
+  }
+
+  export interface Item {
+    name: string
+    link: string
+    message: Message
+    removed?: boolean
+    index: number
+  }
+
+  export interface Remove {
+    from: number
+    to: number
+  }
+
+  export interface InitArgs {
+    currentlyPlaying: Subject<Item>
+    nextItemInPlaylist: Subject<Item | undefined>
   }
 }
