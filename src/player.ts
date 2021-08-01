@@ -1,4 +1,5 @@
 import { Message, StreamDispatcher } from 'discord.js'
+import { Readable } from 'stream'
 import ytdl from 'ytdl-core'
 import { Environment } from './connectionHandler'
 import { logger } from './logger'
@@ -10,6 +11,7 @@ export namespace Player {
     const voiceConn = await voiceChannel?.join()
     if (voiceConn) {
       logger.info(`Done joining channel: ${voiceChannel?.id}!`)
+      let dl: Readable | undefined
       let dispatcher: StreamDispatcher | undefined
       env.currentlyPlaying.subscribe({
         next: item => {
@@ -17,12 +19,17 @@ export namespace Player {
             return env.nextItemInPlaylist.next(null)
           }
 
-          if (dispatcher) {
-            dispatcher.destroy()
+          if (dl) {
+            dl.destroy()
           }
 
+          if (dispatcher) {
+            dispatcher.pause()
+          }
+
+          dl = ytdl(item.link, { filter: 'audioonly', quality: 'highestaudio', highWaterMark: 1 << 25 })
           dispatcher = voiceConn
-            .play(ytdl(item.link, { filter: 'audioonly', quality: 'highestaudio', highWaterMark: 1 << 25 }), { highWaterMark: 1 })
+            .play(dl, { highWaterMark: 1 })
             .once('finish', () => {
               env.nextItemInPlaylist.next(item)
             })
