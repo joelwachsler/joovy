@@ -5,4 +5,5 @@ build:
 
 deployment:
   namespace: joovy
-  files: deployment.yml.j2
+  files:
+    - deployment.yml.j2
