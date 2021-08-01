@@ -1,4 +1,4 @@
-import { Message } from 'discord.js'
+import { Message, StreamDispatcher } from 'discord.js'
 import ytdl from 'ytdl-core'
 import { Environment } from './connectionHandler'
 import { logger } from './logger'
@@ -10,13 +10,18 @@ export namespace Player {
     const voiceConn = await voiceChannel?.join()
     if (voiceConn) {
       logger.info(`Done joining channel: ${voiceChannel?.id}!`)
+      let dispatcher: StreamDispatcher | undefined
       env.currentlyPlaying.subscribe({
         next: item => {
           if (item.removed) {
             return env.nextItemInPlaylist.next(null)
           }
 
-          voiceConn
+          if (dispatcher) {
+            dispatcher.destroy()
+          }
+
+          dispatcher = voiceConn
             .play(ytdl(item.link, { filter: 'audioonly', quality: 'highestaudio', highWaterMark: 1 << 25 }), { highWaterMark: 1 })
             .once('finish', () => {
               env.nextItemInPlaylist.next(item)

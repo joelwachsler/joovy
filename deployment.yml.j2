@@ -22,7 +22,7 @@ spec:
             cpu: "10m"
           limits:
             memory: "512Mi"
-            cpu: "1000m"
+            cpu: "2000m"
         volumeMounts:
           - mountPath: /server/.env
             name: env-config
@@ -30,4 +30,4 @@ spec:
       volumes:
         - name: env-config
           secret:
-            name: env-config
+            secretName: env-config
