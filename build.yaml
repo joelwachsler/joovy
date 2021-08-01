@@ -1,0 +1,8 @@
+---
+
+build:
+  - tag: misc/joovy
+
+deployment:
+  namespace: joovy
+  files: deployment.yml.j2

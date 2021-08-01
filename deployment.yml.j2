@@ -1,0 +1,33 @@
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: indexer
+spec:
+  selector:
+    matchLabels:
+      app: indexer
+  template:
+    metadata:
+      labels:
+        app: indexer
+    spec:
+      containers:
+      - name: indexer
+        image: "{{ registry }}/misc/joovy:{{ version }}"
+        resources:
+          requests:
+            memory: "80Mi"
+            cpu: "10m"
+          limits:
+            memory: "512Mi"
+            cpu: "1000m"
+        volumeMounts:
+          - mountPath: /server/.env
+            name: env-config
+            subPath: .env
+      volumes:
+        - name: env-config
+          secret:
+            name: env-config
