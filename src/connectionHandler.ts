@@ -113,7 +113,7 @@ const initCmdObserver = async (
       },
     ]
     const help = new MessageEmbed()
-      .setTitle('joovy - available commands')
+      .setTitle('Available commands')
       .addFields(commands.map(cmd => ({
         name: cmd.name,
         value: cmd.help,

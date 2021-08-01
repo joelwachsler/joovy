@@ -12,7 +12,7 @@ export namespace QueryResolver {
       if (info) {
         const newItem: Omit<ObservablePlaylist.Item, 'index'> = {
           link: info.url,
-          name: `[${info.title} (${info.timestamp})](${info.url})`,
+          name: `[${info.title} (${info.timestamp})](${info.url}) [<@${message.author.id}>]`,
           message,
         }
 
