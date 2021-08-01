@@ -88,12 +88,20 @@ const initCmdObserver = async (
   const printHelp = () => {
     const commands = [
       {
-        name: '/play youtube url | query',
+        name: '/play url | query',
         help: 'Play a track or queue it if a track is already playing.',
       },
       {
         name: '/skip',
         help: 'Skip the current track.',
+      },
+      {
+        name: '/bass level',
+        help: 'Set the bass level of the current and the following songs.',
+      },
+      {
+        name: '/seek seconds | minutes:seconds',
+        help: 'Seek current playing song to the provided time.',
       },
       {
         name: '/queue',
@@ -133,8 +141,22 @@ const initCmdObserver = async (
         }
       } else if (content === '/help') {
         printHelp()
+      } else if (content.startsWith('/seek')) {
+        const seek = content.split('/seek ')[1]
+        if (seek) {
+          const splitSeek = seek.split(':')
+          if (splitSeek.length > 1) {
+            const minutes = Number(splitSeek[0] ?? 0)
+            const seconds = Number(splitSeek[1] ?? 0)
+            env.seek.next(minutes * 60 + seconds)
+          } else {
+            env.seek.next(Number(seek ?? 0))
+          }
+        }
       } else if (content === '/skip') {
         env.nextItemInPlaylist.next(null)
+      } else if (content.startsWith('/bass')) {
+        env.setBassLevel.next(Number(content.split(' ')[1]))
       } else if (content.startsWith('/remove')) {
         const removeCmd = content.split(' ')
         const from = Number(removeCmd[1])
@@ -145,7 +167,7 @@ const initCmdObserver = async (
       } else if (content === '/disconnect') {
         env.disconnect.next(null)
       } else {
-        env.sendMessage.next(`Unknown command: "${content}"`)
+        env.sendMessage.next(`Unknown command: \`${content}\`, type \`/help\` for available commands.`)
       }
     },
   })
@@ -170,6 +192,8 @@ export interface Environment {
   printQueueRequest: Subject<null>
   removeFromQueue: Subject<ObservablePlaylist.Remove>
   disconnect: Subject<null>
+  setBassLevel: Subject<number>
+  seek: Subject<number>
 }
 
 const initEnvironment = (): Environment => {
@@ -181,6 +205,8 @@ const initEnvironment = (): Environment => {
     printQueueRequest: new Subject(),
     removeFromQueue: new Subject(),
     disconnect: new Subject(),
+    setBassLevel: new Subject(),
+    seek: new Subject(),
   }
 }
 

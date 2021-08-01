@@ -19,7 +19,7 @@ export namespace ObservablePlaylist {
       if (nextItem) {
         env.currentlyPlaying.next(nextItem)
       } else{
-        env.sendMessage.next('End of playlist, disconnecting...')
+        env.sendMessage.next('End of playlist, disconnecting.')
         env.disconnect.next(null)
       }
     })
