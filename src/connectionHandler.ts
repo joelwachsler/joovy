@@ -138,7 +138,7 @@ const initCmdObserver = async (
       } else if (content.startsWith('/remove')) {
         const removeCmd = content.split(' ')
         const from = Number(removeCmd[1])
-        const to = Number(removeCmd[2] ?? from + 1)
+        const to = Number(removeCmd[2] ?? from)
         env.removeFromQueue.next({ from, to })
       } else if (content === '/queue') {
         env.printQueueRequest.next(null)

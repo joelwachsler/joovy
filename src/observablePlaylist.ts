@@ -59,9 +59,25 @@ export namespace ObservablePlaylist {
       if (queue.length === 0) {
         env.sendMessage.next('The queue is empty...')
       } else {
-        let counter = 0
-        const printedQueue = queue.map(p => p.removed ? `[${counter++}] ~~${p.name}~~` : `[${counter++}] ${p.name}`)
+        const printedQueue: string[] = []
+        const start = index
+        const end = index + 5
+        for (let i = start; i <= end; i++) {
+          const curr = queue[i]
+          if (curr) {
+            if (curr.removed) {
+              printedQueue[i] = `[${i}] ~~${curr.name}~~`
+            } else {
+              printedQueue[i] = `[${i}] ${curr.name}`
+            }
+          }
+        }
+
         printedQueue[index] = `${printedQueue[index]} <-- Now playing`
+        if (end < queue.length) {
+          printedQueue.push('...')
+        }
+
         env.sendMessage.next(printedQueue.join('\n\n'))
       }
     })
