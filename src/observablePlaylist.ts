@@ -11,7 +11,7 @@ export namespace ObservablePlaylist {
     })
 
     let timeoutHandle: NodeJS.Timeout | undefined
-    const timeout = 3000
+    const timeout = 1000 * 60 * 5
 
     let currentIndex = -1
     env.nextItemInPlaylist.subscribe(current => {
