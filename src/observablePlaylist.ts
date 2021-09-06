@@ -10,6 +10,9 @@ export namespace ObservablePlaylist {
       queue[removeItem.from].removed = true
     })
 
+    let timeoutHandle: NodeJS.Timeout | undefined
+    const timeout = 3000
+
     let currentIndex = -1
     env.nextItemInPlaylist.subscribe(current => {
       if (current) {
@@ -19,12 +22,18 @@ export namespace ObservablePlaylist {
       if (nextItem) {
         env.currentlyPlaying.next(nextItem)
       } else{
-        env.sendMessage.next('End of playlist, disconnecting.')
-        env.disconnect.next(null)
+        env.sendMessage.next(`End of playlist, will disconnect in ${timeout / 1000 / 60} minutes.`)
+        timeoutHandle = setTimeout(() => {
+          env.disconnect.next(null)
+        }, timeout)
       }
     })
 
     const addToQueue = (newItem: Omit<Item, 'index'>, index: number) => {
+      if (timeoutHandle) {
+        clearTimeout(timeoutHandle)
+        timeoutHandle = undefined
+      }
       queue.push({
         ...newItem,
         index,
