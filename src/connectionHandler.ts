@@ -153,7 +153,7 @@ const initCmdObserver = async (
 
       if (content.startsWith('/play')) {
         addItemToQueue(newItem => env.addItemToQueue.next(newItem))
-      } else if (content === '/playnext') {
+      } else if (content.startsWith('/playnext')) {
         addItemToQueue(newItem => env.addNextItemToQueue.next(newItem))
       } else if (content === '/help') {
         printHelp()
