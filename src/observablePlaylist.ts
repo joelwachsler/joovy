@@ -34,10 +34,14 @@ export namespace ObservablePlaylist {
         clearTimeout(timeoutHandle)
         timeoutHandle = undefined
       }
-      queue.push({
+      queue.splice(index, 0, {
         ...newItem,
         index,
       })
+
+      for(let i = 0; i < queue.length; i++) {
+        queue[i].index = i
+      }
 
       // Check if this is the first entry added in the playlist, if this is the case -> start the queue.
       if (queue.length === 1) {

@@ -85,6 +85,10 @@ const initCmdObserver = async (
     env.sendMessage.next(`${name} has been added to the queue.`)
   })
 
+  env.addNextItemToQueue.subscribe(({ name }) => {
+    env.sendMessage.next(`${name} will be played next.`)
+  })
+
   const printHelp = () => {
     const commands = [
       {
@@ -151,10 +155,10 @@ const initCmdObserver = async (
         }
       }
 
-      if (content.startsWith('/play')) {
-        addItemToQueue(newItem => env.addItemToQueue.next(newItem))
-      } else if (content.startsWith('/playnext')) {
+      if (content.startsWith('/playnext')) {
         addItemToQueue(newItem => env.addNextItemToQueue.next(newItem))
+      } else if (content.startsWith('/play')) {
+        addItemToQueue(newItem => env.addItemToQueue.next(newItem))
       } else if (content === '/help') {
         printHelp()
       } else if (content.startsWith('/seek')) {
