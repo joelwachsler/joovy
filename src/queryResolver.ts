@@ -1,13 +1,12 @@
 import { Message } from 'discord.js'
 import { Pool } from 'threads'
 import { VideoMetadataResult } from 'yt-search'
-import { logger } from './logger'
 import { ObservablePlaylist } from './observablePlaylist'
 
 export namespace QueryResolver {
   export const resolve = async ({ message, pool }: ParseQueryArgs) => {
     return await pool.queue(async worker => {
-      const query = message.content.split('/play ')[1]
+      const query = message.content.split(' ').splice(1).join(' ')
       const res = await worker.fetchInfo(query)
       const info = JSON.parse(res) as VideoMetadataResult
       if (info) {
