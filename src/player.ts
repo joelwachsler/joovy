@@ -17,7 +17,7 @@ export namespace Player {
       let bass = 1
       let currentlyPlaying: ObservablePlaylist.Item | undefined
       let baseStreamTime = 0
-      let volume = 0.25
+      let volume = 0.15
 
       const playMedia = (item: ObservablePlaylist.Item, begin?: number) => {
         try {
