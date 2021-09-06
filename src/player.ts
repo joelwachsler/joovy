@@ -17,6 +17,7 @@ export namespace Player {
       let bass = 1
       let currentlyPlaying: ObservablePlaylist.Item | undefined
       let baseStreamTime = 0
+      let volume = 0.5
 
       const playMedia = (item: ObservablePlaylist.Item, begin?: number) => {
         try {
@@ -37,7 +38,7 @@ export namespace Player {
             },
           )
           dispatcher = voiceConn
-            .play(dl, { highWaterMark: 1, type: 'opus' })
+            .play(dl, { highWaterMark: 1, type: 'opus', volume })
             .once('finish', () => {
               env.nextItemInPlaylist.next(item)
             })
