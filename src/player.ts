@@ -19,29 +19,34 @@ export namespace Player {
       let baseStreamTime = 0
 
       const playMedia = (item: ObservablePlaylist.Item, begin?: number) => {
-        dispatcher?.pause()
-        dl?.destroy()
+        try {
+          dispatcher?.pause()
+          dl?.destroy()
 
-        baseStreamTime = begin ?? 0
+          baseStreamTime = begin ?? 0
 
-        dl = ytdl(
-          item.link,
-          {
-            filter: 'audioonly',
-            quality: 'highestaudio',
-            highWaterMark: 1 << 25,
-            encoderArgs: ['-af', `bass=g=${bass}`],
-            opusEncoded: true,
-            seek: (begin ?? 0) / 1000,
-          },
-        )
-        dispatcher = voiceConn
-          .play(dl, { highWaterMark: 1, type: 'opus' })
-          .once('finish', () => {
-            env.nextItemInPlaylist.next(item)
-          })
+          dl = ytdl(
+            item.link,
+            {
+              filter: 'audioonly',
+              quality: 'highestaudio',
+              highWaterMark: 1 << 25,
+              encoderArgs: ['-af', `bass=g=${bass}`],
+              opusEncoded: true,
+              seek: (begin ?? 0) / 1000,
+            },
+          )
+          dispatcher = voiceConn
+            .play(dl, { highWaterMark: 1, type: 'opus' })
+            .once('finish', () => {
+              env.nextItemInPlaylist.next(item)
+            })
 
-        currentlyPlaying = item
+          currentlyPlaying = item
+        } catch(e) {
+          env.sendMessage.next(`Failed to play video: ${e}`)
+          env.nextItemInPlaylist.next(item)
+        }
       }
 
       env.setBassLevel.subscribe(level => {
