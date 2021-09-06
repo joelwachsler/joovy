@@ -44,6 +44,7 @@ export namespace Player {
 
           currentlyPlaying = item
         } catch(e) {
+          logger.error(e)
           env.sendMessage.next(`Failed to play video: ${e}`)
           env.nextItemInPlaylist.next(item)
         }

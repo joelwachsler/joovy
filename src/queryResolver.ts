@@ -1,6 +1,7 @@
 import { Message } from 'discord.js'
 import { Pool } from 'threads'
 import { VideoMetadataResult } from 'yt-search'
+import { logger } from './logger'
 import { ObservablePlaylist } from './observablePlaylist'
 
 export namespace QueryResolver {

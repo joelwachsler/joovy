@@ -133,11 +133,16 @@ const initCmdObserver = async (
     next: async v => {
       const { content, message, pool } = v
       if (content.startsWith('/play')) {
-        const newItem = await QueryResolver.resolve({ message, pool })
-        if (newItem) {
-          env.addItemToQueue.next(newItem)
-        } else {
-          env.sendMessage.next(`Unable to find result for: ${content}`)
+        try {
+          const newItem = await QueryResolver.resolve({ message, pool })
+          if (newItem) {
+            env.addItemToQueue.next(newItem)
+          } else {
+            env.sendMessage.next(`Unable to find result for: ${content}`)
+          }
+        } catch (e) {
+          logger.error(e)
+          env.sendMessage.next(`Unable to add song to playlist: ${e}`)
         }
       } else if (content === '/help') {
         printHelp()
