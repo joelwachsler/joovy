@@ -92,6 +92,10 @@ const initCmdObserver = async (
         help: 'Play a track or queue it if a track is already playing.',
       },
       {
+        name: '/playnext url | query',
+        help: 'Skips the queue and adds the track as the next song.',
+      },
+      {
         name: '/skip',
         help: 'Skip the current track.',
       },
