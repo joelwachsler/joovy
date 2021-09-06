@@ -132,11 +132,12 @@ const initCmdObserver = async (
   const observer = channelObserverWithMsg.subscribe({
     next: async v => {
       const { content, message, pool } = v
-      if (content.startsWith('/play')) {
+
+      const addItemToQueue = async (cb: (item: Omit<ObservablePlaylist.Item, 'index'>) => void) => {
         try {
           const newItem = await QueryResolver.resolve({ message, pool })
           if (newItem) {
-            env.addItemToQueue.next(newItem)
+            cb(newItem)
           } else {
             env.sendMessage.next(`Unable to find result for: ${content}`)
           }
@@ -144,6 +145,12 @@ const initCmdObserver = async (
           logger.error(e)
           env.sendMessage.next(`Unable to add song to playlist: ${e}`)
         }
+      }
+
+      if (content.startsWith('/play')) {
+        addItemToQueue(newItem => env.addItemToQueue.next(newItem))
+      } else if (content === '/playnext') {
+        addItemToQueue(newItem => env.addNextItemToQueue.next(newItem))
       } else if (content === '/help') {
         printHelp()
       } else if (content.startsWith('/seek')) {
@@ -194,6 +201,7 @@ export interface Environment {
   currentlyPlaying: Subject<ObservablePlaylist.Item>
   nextItemInPlaylist: Subject<ObservablePlaylist.Item | null>
   addItemToQueue: Subject<Omit<ObservablePlaylist.Item, 'index'>>
+  addNextItemToQueue: Subject<Omit<ObservablePlaylist.Item, 'index'>>
   printQueueRequest: Subject<null>
   removeFromQueue: Subject<ObservablePlaylist.Remove>
   disconnect: Subject<null>
@@ -207,6 +215,7 @@ const initEnvironment = (): Environment => {
     currentlyPlaying: new Subject(),
     nextItemInPlaylist: new Subject(),
     addItemToQueue: new Subject(),
+    addNextItemToQueue: new Subject(),
     printQueueRequest: new Subject(),
     removeFromQueue: new Subject(),
     disconnect: new Subject(),

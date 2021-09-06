@@ -10,12 +10,12 @@ export namespace ObservablePlaylist {
       queue[removeItem.from].removed = true
     })
 
-    let index = -1
+    let currentIndex = -1
     env.nextItemInPlaylist.subscribe(current => {
       if (current) {
-        index = current.index
+        currentIndex = current.index
       }
-      const nextItem = queue[++index]
+      const nextItem = queue[++currentIndex]
       if (nextItem) {
         env.currentlyPlaying.next(nextItem)
       } else{
@@ -24,22 +24,30 @@ export namespace ObservablePlaylist {
       }
     })
 
-    env.addItemToQueue.subscribe(newItem => {
+    const addToQueue = (newItem: Omit<Item, 'index'>, index: number) => {
       queue.push({
         ...newItem,
-        index: queue.length,
+        index,
       })
 
       // Check if this is the first entry added in the playlist, if this is the case -> start the queue.
       if (queue.length === 1) {
         env.nextItemInPlaylist.next(null)
       }
+    }
+
+    env.addItemToQueue.subscribe(newItem => {
+      addToQueue(newItem, queue.length)
+    })
+
+    env.addNextItemToQueue.subscribe(newItem => {
+      addToQueue(newItem, currentIndex + 1)
     })
 
     env.removeFromQueue.subscribe(({ from, to }) => {
       let shouldEmitSkipEvent = false
       for (let i = from; i <= to; i++) {
-        if (i === index) {
+        if (i === currentIndex) {
           shouldEmitSkipEvent = true
         }
 
@@ -60,8 +68,8 @@ export namespace ObservablePlaylist {
         env.sendMessage.next('The queue is empty...')
       } else {
         const printedQueue: string[] = []
-        const start = index
-        const end = index + 5
+        const start = currentIndex
+        const end = currentIndex + 5
         for (let i = start; i <= end; i++) {
           const curr = queue[i]
           if (curr) {
@@ -73,7 +81,7 @@ export namespace ObservablePlaylist {
           }
         }
 
-        printedQueue[index] = `${printedQueue[index]} <-- Now playing`
+        printedQueue[currentIndex] = `${printedQueue[currentIndex]} <-- Now playing`
         if (end < queue.length) {
           printedQueue.push('...')
         }
