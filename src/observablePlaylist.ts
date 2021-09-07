@@ -4,23 +4,23 @@ import { Environment } from './connectionHandler'
 
 export namespace ObservablePlaylist {
   export const init = (env: Environment) => {
-    const queue: Item[] = []
-    const removeItemInQueue = new Subject<Remove>()
-    removeItemInQueue.subscribe(removeItem => {
-      queue[removeItem.from].removed = true
+    const queue: Track[] = []
+    const removTrackInQueue = new Subject<Remove>()
+    removTrackInQueue.subscribe(removeTrack => {
+      queue[removeTrack.from].removed = true
     })
 
     let timeoutHandle: NodeJS.Timeout | undefined
     const timeout = 1000 * 60 * 5
 
     let currentQueueIndex = -1
-    env.nextItemInPlaylist.subscribe(current => {
-      if (current) {
-        currentQueueIndex = current.index
+    env.nextTrackInPlaylist.subscribe(trackToPlay => {
+      if (trackToPlay) {
+        currentQueueIndex = trackToPlay.index
       }
-      const nextItem = queue[++currentQueueIndex]
-      if (nextItem) {
-        env.currentlyPlaying.next(nextItem)
+      const nextTrack = queue[++currentQueueIndex]
+      if (nextTrack) {
+        env.currentlyPlaying.next(nextTrack)
       } else {
         if (timeoutHandle) {
           clearTimeout(timeoutHandle)
@@ -36,13 +36,13 @@ export namespace ObservablePlaylist {
       }
     })
 
-    const addToQueue = (newItem: Omit<Item, 'index'>, index: number) => {
+    const addToQueue = (newTrack: Omit<Track, 'index'>, index: number) => {
       if (timeoutHandle) {
         clearTimeout(timeoutHandle)
         timeoutHandle = undefined
       }
       queue.splice(index, 0, {
-        ...newItem,
+        ...newTrack,
         index,
       })
 
@@ -50,19 +50,15 @@ export namespace ObservablePlaylist {
         queue[i].index = i
       }
 
-      // Check if this is the first entry added in the playlist, if this is the case -> start the queue.
-      if (queue.length === 1 || queue.length === currentQueueIndex) {
-        env.nextItemInPlaylist.next(null)
+      if (currentQueueIndex > (queue.length - 2)) {
+        currentQueueIndex = queue.length - 2
       }
+
+      env.trackAddedToQueue.next(null)
     }
 
-    env.addItemToQueue.subscribe(newItem => {
-      addToQueue(newItem, queue.length)
-    })
-
-    env.addNextItemToQueue.subscribe(newItem => {
-      addToQueue(newItem, currentQueueIndex + 1)
-    })
+    env.addTrackToQueue.subscribe(newTrack => addToQueue(newTrack, queue.length))
+    env.addNextTrackToQueue.subscribe(newTrack => addToQueue(newTrack, currentQueueIndex + 1))
 
     env.removeFromQueue.subscribe(({ from, to }) => {
       let shouldEmitSkipEvent = false
@@ -71,19 +67,19 @@ export namespace ObservablePlaylist {
           shouldEmitSkipEvent = true
         }
 
-        const item = queue[i]
-        if (item) {
-          item.removed = true
-          env.sendMessage.next(`${item.name} has been removed.`)
+        const track = queue[i]
+        if (track) {
+          track.removed = true
+          env.sendMessage.next(`${track.name} has been removed.`)
         }
       }
 
       if (shouldEmitSkipEvent) {
-        env.nextItemInPlaylist.next(null)
+        env.nextTrackInPlaylist.next(null)
       }
     })
 
-    env.printQueueRequest.subscribe(_ => {
+    env.printQueueRequest.subscribe(() => {
       if (queue.length === 0 || queue.length <= currentQueueIndex) {
         env.sendMessage.next('The queue is empty...')
       } else {
@@ -111,7 +107,7 @@ export namespace ObservablePlaylist {
     })
   }
 
-  export interface Item {
+  export interface Track {
     name: string
     link: string
     message: Message
@@ -125,7 +121,7 @@ export namespace ObservablePlaylist {
   }
 
   export interface InitArgs {
-    currentlyPlaying: Subject<Item>
-    nextItemInPlaylist: Subject<Item | undefined>
+    currentlyPlaying: Subject<Track>
+    nextTrackInPlaylist: Subject<Track | undefined>
   }
 }

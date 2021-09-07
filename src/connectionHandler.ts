@@ -6,7 +6,7 @@ import { ObservablePlaylist } from './observablePlaylist'
 import { Player } from './player'
 import { QueryResolver } from './queryResolver'
 
-export interface QueueItem {
+export interface QueueTrack {
   name: string
   link: string
   message: Message
@@ -82,11 +82,11 @@ const initCmdObserver = async (
   ObservablePlaylist.init(env)
   await Player.init({ message, env })
 
-  env.addItemToQueue.subscribe(({ name }) => {
+  env.addTrackToQueue.subscribe(({ name }) => {
     env.sendMessage.next(`${name} has been added to the queue.`)
   })
 
-  env.addNextItemToQueue.subscribe(({ name }) => {
+  env.addNextTrackToQueue.subscribe(({ name }) => {
     env.sendMessage.next(`${name} will be played next.`)
   })
 
@@ -145,11 +145,11 @@ const initCmdObserver = async (
     next: async v => {
       const { content, message, pool } = v
 
-      const addItemToQueue = async (cb: (item: Omit<ObservablePlaylist.Item, 'index'>) => void) => {
+      const addTrackToQueue = async (cb: (track: Omit<ObservablePlaylist.Track, 'index'>) => void) => {
         try {
-          const newItem = await QueryResolver.resolve({ message, pool })
-          if (newItem) {
-            cb(newItem)
+          const newTrack = await QueryResolver.resolve({ message, pool })
+          if (newTrack) {
+            cb(newTrack)
           } else {
             env.sendMessage.next(`Unable to find result for: ${content}`)
           }
@@ -160,9 +160,9 @@ const initCmdObserver = async (
       }
 
       if (content.startsWith('/playnext')) {
-        addItemToQueue(newItem => env.addNextItemToQueue.next(newItem))
+        addTrackToQueue(newTrack => env.addNextTrackToQueue.next(newTrack))
       } else if (content.startsWith('/play')) {
-        addItemToQueue(newItem => env.addItemToQueue.next(newItem))
+        addTrackToQueue(newTrack => env.addTrackToQueue.next(newTrack))
       } else if (content === '/help') {
         printHelp()
       } else if (content.startsWith('/seek')) {
@@ -178,7 +178,7 @@ const initCmdObserver = async (
           }
         }
       } else if (content === '/skip') {
-        env.nextItemInPlaylist.next(null)
+        env.nextTrackInPlaylist.next(null)
       } else if (content.startsWith('/bass')) {
         env.setBassLevel.next(Number(content.split(' ')[1]))
       } else if (content.startsWith('/remove')) {
@@ -211,10 +211,11 @@ const initCmdObserver = async (
 
 export interface Environment {
   sendMessage: Subject<string>
-  currentlyPlaying: Subject<ObservablePlaylist.Item | null>
-  nextItemInPlaylist: Subject<ObservablePlaylist.Item | null>
-  addItemToQueue: Subject<Omit<ObservablePlaylist.Item, 'index'>>
-  addNextItemToQueue: Subject<Omit<ObservablePlaylist.Item, 'index'>>
+  currentlyPlaying: Subject<ObservablePlaylist.Track | null>
+  nextTrackInPlaylist: Subject<ObservablePlaylist.Track | null>
+  trackAddedToQueue: Subject<null>
+  addTrackToQueue: Subject<Omit<ObservablePlaylist.Track, 'index'>>
+  addNextTrackToQueue: Subject<Omit<ObservablePlaylist.Track, 'index'>>
   printQueueRequest: Subject<null>
   removeFromQueue: Subject<ObservablePlaylist.Remove>
   disconnect: Subject<null>
@@ -226,9 +227,10 @@ const initEnvironment = (): Environment => {
   return {
     sendMessage: new Subject(),
     currentlyPlaying: new Subject(),
-    nextItemInPlaylist: new Subject(),
-    addItemToQueue: new Subject(),
-    addNextItemToQueue: new Subject(),
+    nextTrackInPlaylist: new Subject(),
+    trackAddedToQueue: new Subject(),
+    addTrackToQueue: new Subject(),
+    addNextTrackToQueue: new Subject(),
     printQueueRequest: new Subject(),
     removeFromQueue: new Subject(),
     disconnect: new Subject(),

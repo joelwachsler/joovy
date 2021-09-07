@@ -49,24 +49,32 @@ export namespace Player {
     logger.info(`Done joining channel: ${voiceChannel?.id}!`)
     let dl: Readable | undefined
     let bass = 3
-    let currentlyPlaying: ObservablePlaylist.Item | undefined
+    let currentlyPlaying: ObservablePlaylist.Track | undefined
     let baseStreamTime = 0
     let volume = 0.25
     let resource: AudioResource
+    let playerIsIdle = true
 
     const stopPlayer = () => {
       player.stop()
       dl?.destroy()
+      playerIsIdle = true
     }
 
-    const playMedia = (item: ObservablePlaylist.Item, begin?: number) => {
+    env.trackAddedToQueue.subscribe(() => {
+      if (playerIsIdle) {
+        env.nextTrackInPlaylist.next(null)
+      }
+    })
+
+    const playMedia = (track: ObservablePlaylist.Track, begin?: number) => {
       try {
         stopPlayer()
 
         baseStreamTime = begin ?? 0
 
         dl = ytdl(
-          item.link,
+          track.link,
           {
             filter: 'audioonly',
             quality: 'highestaudio',
@@ -85,14 +93,14 @@ export namespace Player {
 
         player.once(AudioPlayerStatus.Idle, () => {
           player.stop()
-          env.nextItemInPlaylist.next(item)
+          env.nextTrackInPlaylist.next(track)
         })
 
-        currentlyPlaying = item
+        currentlyPlaying = track
       } catch (e) {
         logger.error(e)
         env.sendMessage.next(`Failed to play video: ${e}`)
-        env.nextItemInPlaylist.next(item)
+        env.nextTrackInPlaylist.next(track)
       }
     }
 
@@ -115,17 +123,17 @@ export namespace Player {
     })
 
     env.currentlyPlaying.subscribe({
-      next: item => {
-        if (!item) {
+      next: track => {
+        if (!track) {
           return stopPlayer()
         }
 
-        if (item.removed) {
-          return env.nextItemInPlaylist.next(null)
+        if (track.removed) {
+          return env.nextTrackInPlaylist.next(null)
         }
 
-        playMedia(item)
-        env.sendMessage.next(`Now playing: ${item.name}`)
+        playMedia(track)
+        env.sendMessage.next(`Now playing: ${track.name}`)
       },
       complete: () => {
         stopPlayer()

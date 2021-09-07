@@ -10,13 +10,13 @@ export namespace QueryResolver {
       const res = await worker.fetchInfo(query)
       const info = JSON.parse(res) as VideoMetadataResult
       if (info) {
-        const newItem: Omit<ObservablePlaylist.Item, 'index'> = {
+        const newTrack: Omit<ObservablePlaylist.Track, 'index'> = {
           link: info.url,
           name: `[${info.title} (${info.timestamp})](${info.url}) [<@${message.author.id}>]`,
           message,
         }
 
-        return newItem
+        return newTrack
       }
     })
   }
