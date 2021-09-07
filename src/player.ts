@@ -51,7 +51,7 @@ export namespace Player {
     let bass = 3
     let currentlyPlaying: ObservablePlaylist.Item | undefined
     let baseStreamTime = 0
-    let volume = 0.15
+    let volume = 0.25
     let resource: AudioResource
 
     const stopPlayer = () => {
