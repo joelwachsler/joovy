@@ -1,4 +1,4 @@
-import { Message, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js'
+import { Message, MessageEmbed } from 'discord.js'
 import { catchError, filter, map, Observable, share, Subject } from 'rxjs'
 import { logger } from './logger'
 import { MsgEvent } from './main'
@@ -59,8 +59,7 @@ export const initMsgHandler = (msgObservable: Observable<MsgEvent>) => {
     }
 
     msgObservers.get(v.channelId)!.next(v)
-  },
-  )
+  })
 }
 
 const initCmdObserver = async (
@@ -205,13 +204,14 @@ const initCmdObserver = async (
       }
     })
     observer.unsubscribe()
+    channelObserver.complete()
     unsubscribe()
   })
 }
 
 export interface Environment {
   sendMessage: Subject<string>
-  currentlyPlaying: Subject<ObservablePlaylist.Item>
+  currentlyPlaying: Subject<ObservablePlaylist.Item | null>
   nextItemInPlaylist: Subject<ObservablePlaylist.Item | null>
   addItemToQueue: Subject<Omit<ObservablePlaylist.Item, 'index'>>
   addNextItemToQueue: Subject<Omit<ObservablePlaylist.Item, 'index'>>

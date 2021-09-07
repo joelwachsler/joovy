@@ -13,19 +13,26 @@ export namespace ObservablePlaylist {
     let timeoutHandle: NodeJS.Timeout | undefined
     const timeout = 1000 * 60 * 5
 
-    let currentIndex = -1
+    let currentQueueIndex = -1
     env.nextItemInPlaylist.subscribe(current => {
       if (current) {
-        currentIndex = current.index
+        currentQueueIndex = current.index
       }
-      const nextItem = queue[++currentIndex]
+      const nextItem = queue[++currentQueueIndex]
       if (nextItem) {
         env.currentlyPlaying.next(nextItem)
-      } else{
+      } else {
+        if (timeoutHandle) {
+          clearTimeout(timeoutHandle)
+          timeoutHandle = undefined
+        }
+
         env.sendMessage.next(`End of playlist, will disconnect in ${timeout / 1000 / 60} minutes.`)
         timeoutHandle = setTimeout(() => {
           env.disconnect.next(null)
         }, timeout)
+
+        env.currentlyPlaying.next(null)
       }
     })
 
@@ -44,7 +51,7 @@ export namespace ObservablePlaylist {
       }
 
       // Check if this is the first entry added in the playlist, if this is the case -> start the queue.
-      if (queue.length === 1) {
+      if (queue.length === 1 || queue.length === currentQueueIndex) {
         env.nextItemInPlaylist.next(null)
       }
     }
@@ -54,13 +61,13 @@ export namespace ObservablePlaylist {
     })
 
     env.addNextItemToQueue.subscribe(newItem => {
-      addToQueue(newItem, currentIndex + 1)
+      addToQueue(newItem, currentQueueIndex + 1)
     })
 
     env.removeFromQueue.subscribe(({ from, to }) => {
       let shouldEmitSkipEvent = false
       for (let i = from; i <= to; i++) {
-        if (i === currentIndex) {
+        if (i === currentQueueIndex) {
           shouldEmitSkipEvent = true
         }
 
@@ -77,12 +84,12 @@ export namespace ObservablePlaylist {
     })
 
     env.printQueueRequest.subscribe(_ => {
-      if (queue.length === 0) {
+      if (queue.length === 0 || queue.length <= currentQueueIndex) {
         env.sendMessage.next('The queue is empty...')
       } else {
         const printedQueue: string[] = []
-        const start = currentIndex
-        const end = currentIndex + 5
+        const start = currentQueueIndex
+        const end = currentQueueIndex + 5
         for (let i = start; i <= end; i++) {
           const curr = queue[i]
           if (curr) {
@@ -94,7 +101,7 @@ export namespace ObservablePlaylist {
           }
         }
 
-        printedQueue[currentIndex] = `${printedQueue[currentIndex]} <-- Now playing`
+        printedQueue[currentQueueIndex] = `${printedQueue[currentQueueIndex]} <-- Now playing`
         if (end < queue.length) {
           printedQueue.push('...')
         }

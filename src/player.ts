@@ -54,10 +54,14 @@ export namespace Player {
     let volume = 0.15
     let resource: AudioResource
 
+    const stopPlayer = () => {
+      player.stop()
+      dl?.destroy()
+    }
+
     const playMedia = (item: ObservablePlaylist.Item, begin?: number) => {
       try {
-        player.stop()
-        dl?.destroy()
+        stopPlayer()
 
         baseStreamTime = begin ?? 0
 
@@ -80,7 +84,7 @@ export namespace Player {
         player.play(resource)
 
         player.once(AudioPlayerStatus.Idle, () => {
-          player.pause()
+          player.stop()
           env.nextItemInPlaylist.next(item)
         })
 
@@ -119,19 +123,21 @@ export namespace Player {
 
     env.currentlyPlaying.subscribe({
       next: item => {
+        if (!item) {
+          return stopPlayer()
+        }
+
         if (item.removed) {
           return env.nextItemInPlaylist.next(null)
         }
 
         playMedia(item)
-
         env.sendMessage.next(`Now playing: ${item.name}`)
       },
       complete: () => {
-        player.stop()
-        dl?.destroy()
+        stopPlayer()
         connection.disconnect()
-      }
+      },
     })
   }
   export interface InitArgs {
