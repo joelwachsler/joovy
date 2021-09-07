@@ -92,8 +92,10 @@ export namespace Player {
         player.play(resource)
 
         player.once(AudioPlayerStatus.Idle, () => {
-          player.stop()
-          env.nextTrackInPlaylist.next(track)
+          if (!playerIsIdle) {
+            player.stop()
+            env.nextTrackInPlaylist.next(track)
+          }
         })
 
         currentlyPlaying = track
