@@ -88,13 +88,6 @@ export namespace Player {
           env.nextItemInPlaylist.next(item)
         })
 
-        player.once('error', err => {
-          logger.error(err)
-          player.stop()
-          env.sendMessage.next('Something went wrong with the current track, skipping it.')
-          env.nextItemInPlaylist.next(item)
-        })
-
         currentlyPlaying = item
       } catch (e) {
         logger.error(e)
