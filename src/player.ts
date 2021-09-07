@@ -24,7 +24,7 @@ export namespace Player {
     const player = createAudioPlayer()
     connection.subscribe(player)
 
-    connection.on(VoiceConnectionStatus.Ready, () => {
+    connection.once(VoiceConnectionStatus.Ready, () => {
       logger.info('Connection is ready')
 
       if (voiceChannel instanceof VoiceChannel) {

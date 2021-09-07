@@ -20,6 +20,11 @@ const main = async () => {
     logger.info('Client is ready!')
   })
 
+  client.on('interactionCreate', msg => {
+    logger.info('New interaction!')
+    logger.info(msg)
+  })
+
   const msgEvent = fromEvent(client, 'messageCreate')
     .pipe(map(message => ({ message: message as Message, pool })))
   initMsgHandler(msgEvent)
