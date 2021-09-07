@@ -7,21 +7,26 @@
     "start": "node --unhandled-rejections=strict -r ts-node/register/transpile-only src/main.ts"
   },
   "dependencies": {
-    "@discordjs/opus": "^0.5.3",
+    "@discordjs/builders": "^0.6.0",
+    "@discordjs/opus": "^0.6.0",
+    "@discordjs/rest": "^0.1.0-canary.0",
+    "@discordjs/voice": "^0.6.0",
+    "discord-api-types": "^0.22.0",
     "discord-ytdl-core": "^5.0.4",
-    "discord.js": "^12.5.3",
+    "discord.js": "^13.1.0",
     "dotenv": "^10.0.0",
     "rxjs": "^7.3.0",
+    "sodium": "^3.0.2",
     "threads": "^1.6.5",
-    "ts-node": "^10.1.0",
+    "ts-node": "^10.2.1",
     "winston": "^3.3.3",
-    "yt-search": "^2.10.0",
-    "ytdl-core": "^4.9.0"
+    "yt-search": "^2.10.1",
+    "ytdl-core": "^4.9.1"
   },
   "devDependencies": {
-    "@types/node": "^16.4.6",
+    "@types/node": "^16.7.11",
     "@types/yt-search": "^2.3.2",
-    "ts-essentials": "^7.0.2",
-    "typescript": "^4.3.5"
+    "ts-essentials": "^8.1.0",
+    "typescript": "^4.4.2"
   }
 }

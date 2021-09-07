@@ -1,4 +1,4 @@
-import { Client, Message } from 'discord.js'
+import { Client, Intents, Message } from 'discord.js'
 import { fromEvent, map } from 'rxjs'
 import { Pool, spawn, Worker } from 'threads'
 import { initConfig } from './config'
@@ -11,15 +11,16 @@ const main = async () => {
   logger.info('Done initializing pool!')
 
   const config = initConfig()
-
   logger.info('Creating client...')
-  const client = new Client()
+  const client = new Client({
+    intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_VOICE_STATES],
+  })
 
-  client.on('ready', () => {
+  client.once('ready', () => {
     logger.info('Client is ready!')
   })
 
-  const msgEvent = fromEvent(client, 'message')
+  const msgEvent = fromEvent(client, 'messageCreate')
     .pipe(map(message => ({ message: message as Message, pool })))
   initMsgHandler(msgEvent)
 

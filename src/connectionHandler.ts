@@ -1,5 +1,5 @@
-import { Message, MessageEmbed } from 'discord.js'
-import { catchError, EMPTY, filter, map, Observable, share, Subject, switchMap } from 'rxjs'
+import { Message, MessageActionRow, MessageButton, MessageEmbed } from 'discord.js'
+import { catchError, filter, map, Observable, share, Subject } from 'rxjs'
 import { logger } from './logger'
 import { MsgEvent } from './main'
 import { ObservablePlaylist } from './observablePlaylist'
@@ -75,7 +75,9 @@ const initCmdObserver = async (
 
   env.sendMessage.subscribe(msg => {
     const embed = new MessageEmbed().setDescription(msg)
-    message.channel.send(embed)
+    message.channel.send({
+      embeds: [embed]
+    })
   })
 
   ObservablePlaylist.init(env)
@@ -134,7 +136,10 @@ const initCmdObserver = async (
         name: cmd.name,
         value: cmd.help,
       })))
-    message.channel.send(help)
+
+    message.channel.send({
+      embeds: [help],
+    })
   }
 
   const observer = channelObserverWithMsg.subscribe({
@@ -239,8 +244,12 @@ class ErrorWithMessage {
 const sendMessage = async ({ msg, message }: SendMessageArgs) => {
   if (typeof msg === 'string') {
     const embed = new MessageEmbed().setDescription(msg)
-    await message.channel.send(embed)
+    await message.channel.send({
+      embeds: [embed]
+    })
   } else {
-    await message.channel.send(msg)
+    await message.channel.send({
+      embeds: [msg]
+    })
   }
 }
