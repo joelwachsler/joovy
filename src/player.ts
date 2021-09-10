@@ -70,6 +70,7 @@ export namespace Player {
     const playMedia = (track: ObservablePlaylist.Track, begin?: number) => {
       try {
         stopPlayer()
+        playerIsIdle = false
 
         baseStreamTime = begin ?? 0
 
