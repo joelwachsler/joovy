@@ -15,7 +15,7 @@ export interface QueueTrack {
 
 export type SendMessage = (msg: MsgType) => Promise<void>
 
-type MsgType = string | MessageEmbed
+type MsgType = string | MessageEmbed | MessageWithReactions
 interface SendMessageArgs {
   msg: MsgType
   message: Message
@@ -72,11 +72,24 @@ const initCmdObserver = async (
 
   const env = initEnvironment()
 
-  env.sendMessage.subscribe(msg => {
-    const embed = new MessageEmbed().setDescription(msg)
-    message.channel.send({
-      embeds: [embed]
-    })
+  env.sendMessage.subscribe(async msg => {
+    if (typeof msg === 'string') {
+      const embed = new MessageEmbed().setDescription(msg)
+      message.channel.send({
+        embeds: [embed]
+      })
+    } else if (msg instanceof MessageWithReactions) {
+      const embed = new MessageEmbed().setDescription(msg.message)
+      const sentMsg = await message.channel.send({
+        embeds: [embed]
+      })
+      const react = sentMsg.react(msg.reactions[0])
+      msg.reactions.slice(1).forEach(r => react.then(() => sentMsg.react(r)))
+    } else {
+      message.channel.send({
+        embeds: [msg]
+      })
+    }
   })
 
   ObservablePlaylist.init(env)
@@ -210,7 +223,7 @@ const initCmdObserver = async (
 }
 
 export interface Environment {
-  sendMessage: Subject<string>
+  sendMessage: Subject<MsgType>
   currentlyPlaying: Subject<ObservablePlaylist.Track | null>
   nextTrackInPlaylist: Subject<ObservablePlaylist.Track | null>
   trackAddedToQueue: Subject<null>
@@ -243,12 +256,23 @@ class ErrorWithMessage {
   constructor(public errorMsg: string, public message: Message) { }
 }
 
+export class MessageWithReactions {
+  constructor(public message: string, public reactions: string[]) { }
+}
+
 const sendMessage = async ({ msg, message }: SendMessageArgs) => {
   if (typeof msg === 'string') {
     const embed = new MessageEmbed().setDescription(msg)
     await message.channel.send({
       embeds: [embed]
     })
+  } else if (msg instanceof MessageWithReactions) {
+    const embed = new MessageEmbed().setDescription(msg.message)
+    const sentMsg = await message.channel.send({
+      embeds: [embed]
+    })
+    const react = sentMsg.react(msg.reactions[0])
+    msg.reactions.slice(1).forEach(r => react.then(() => sentMsg.react(r)))
   } else {
     await message.channel.send({
       embeds: [msg]
