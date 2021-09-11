@@ -252,12 +252,12 @@ const initEnvironment = (): Environment => {
   }
 }
 
-class ErrorWithMessage {
-  constructor(public errorMsg: string, public message: Message) { }
-}
-
 export class MessageWithReactions {
   constructor(public message: string, public reactions: string[]) { }
+}
+
+class ErrorWithMessage {
+  constructor(public errorMsg: string, public message: Message) { }
 }
 
 const sendMessage = async ({ msg, message }: SendMessageArgs) => {
