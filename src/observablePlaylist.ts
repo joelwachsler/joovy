@@ -1,6 +1,6 @@
 import { Message, MessageEmbed } from 'discord.js'
 import { Subject } from 'rxjs'
-import { Environment, MessageWithReactions } from './connectionHandler'
+import { EditedMessage, Environment, MessageWithReactions } from './connectionHandler'
 
 const pageSize = 5
 export namespace ObservablePlaylist {
@@ -89,6 +89,42 @@ export namespace ObservablePlaylist {
         var message: MessageWithReactions = printQueue(start, queue, currentQueueIndex, currentPage)
         env.sendMessage.next(message)
       }
+    })
+
+    env.reprintQueueOnReaction.subscribe(prevMsg => {
+      prevMsg.awaitReactions({
+        filter: (reaction, user) => {
+          const emojiName = reaction.emoji.name
+          return emojiName != null ? ['⏪', '◀', '▶', '⏩'].includes(emojiName) : false;
+        },
+        max: 1,
+        time: 60000,
+        errors: ['time']
+      })
+        .then(async collected => {
+          const reaction = collected.first();
+          if (reaction?.emoji.name === '▶') {
+            const start = currentQueueIndex + pageSize * ++currentPage
+            const newMessage: MessageWithReactions = printQueue(start, queue, currentQueueIndex, currentPage)
+            env.editMessage.next(new EditedMessage(prevMsg, newMessage))
+          } else if (reaction?.emoji.name === '◀') {
+            const start = currentQueueIndex + pageSize * --currentPage
+            const newMessage: MessageWithReactions = printQueue(start, queue, currentQueueIndex, currentPage)
+            env.editMessage.next(new EditedMessage(prevMsg, newMessage))
+          } else if (reaction?.emoji.name === '⏪') {
+            const start = currentQueueIndex + pageSize * --currentPage * 2
+            const newMessage: MessageWithReactions = printQueue(start, queue, currentQueueIndex, currentPage)
+            env.editMessage.next(new EditedMessage(prevMsg, newMessage))
+          } else if (reaction?.emoji.name === '⏩') {
+            const start = currentQueueIndex + pageSize * ++currentPage * 2
+            const newMessage: MessageWithReactions = printQueue(start, queue, currentQueueIndex, currentPage)
+            env.editMessage.next(new EditedMessage(prevMsg, newMessage))
+          }
+        })
+        .catch(collected => {
+          const reaction = collected.first();
+          prevMsg.reply('Unexpected reaction: ' + reaction);
+        });
     })
   }
 

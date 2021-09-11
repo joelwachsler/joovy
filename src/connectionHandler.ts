@@ -72,7 +72,11 @@ const initCmdObserver = async (
 
   const env = initEnvironment()
 
-  env.sendMessage.subscribe(async msg => sendMessage({ msg, message }))
+  env.sendMessage.subscribe(async msg => {
+    sendMessage({ msg, message })
+  })
+
+  env.editMessage.subscribe(async editedMessage => editMessage(editedMessage))
 
   ObservablePlaylist.init(env)
   await Player.init({ message, env })
@@ -206,6 +210,7 @@ const initCmdObserver = async (
 
 export interface Environment {
   sendMessage: Subject<MsgType>
+  editMessage: Subject<EditedMessage>
   currentlyPlaying: Subject<ObservablePlaylist.Track | null>
   nextTrackInPlaylist: Subject<ObservablePlaylist.Track | null>
   trackAddedToQueue: Subject<null>
@@ -222,6 +227,7 @@ export interface Environment {
 const initEnvironment = (): Environment => {
   return {
     sendMessage: new Subject(),
+    editMessage: new Subject(),
     currentlyPlaying: new Subject(),
     nextTrackInPlaylist: new Subject(),
     trackAddedToQueue: new Subject(),
@@ -234,6 +240,10 @@ const initEnvironment = (): Environment => {
     setBassLevel: new Subject(),
     seek: new Subject(),
   }
+}
+
+export class EditedMessage {
+  constructor(public prevMessage: Message, public newMessage: MessageWithReactions) { }
 }
 
 export class MessageWithReactions {
@@ -266,3 +276,19 @@ const sendMessage = async ({ msg, message }: SendMessageArgs) => {
     })
   }
 }
+
+const editMessage = async (editedMessage: EditedMessage) => {
+  const newMsg = editedMessage.newMessage
+  const editedMsg = await editedMessage.prevMessage.edit({
+    embeds: [newMsg.embeded]
+  })
+
+  editedMsg.reactions.removeAll()
+    .catch(error => console.error('Failed to clear reactions:', error))
+
+  if (newMsg.reactions.length > 0) {
+    const react = editedMsg.react(newMsg.reactions[0])
+    newMsg.reactions.slice(1).forEach(r => react.then(() => editedMsg.react(r)))
+  }
+}
+
