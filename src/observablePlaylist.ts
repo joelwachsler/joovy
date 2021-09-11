@@ -1,7 +1,8 @@
-import { Message } from 'discord.js'
+import { Message, MessageEmbed } from 'discord.js'
 import { Subject } from 'rxjs'
 import { Environment, MessageWithReactions } from './connectionHandler'
 
+const pageSize = 5
 export namespace ObservablePlaylist {
   export const init = (env: Environment) => {
     const queue: Track[] = []
@@ -14,6 +15,7 @@ export namespace ObservablePlaylist {
     const timeout = 1000 * 60 * 5
 
     let currentQueueIndex = -1
+    let currentPage = 0
     env.nextTrackInPlaylist.subscribe(trackToPlay => {
       if (trackToPlay) {
         currentQueueIndex = trackToPlay.index
@@ -83,32 +85,9 @@ export namespace ObservablePlaylist {
       if (queue.length === 0 || queue.length <= currentQueueIndex) {
         env.sendMessage.next('The queue is empty 👀')
       } else {
-        const printedQueue: string[] = []
         const start = currentQueueIndex
-        const end = currentQueueIndex + 5
-        for (let i = start; i <= end; i++) {
-          const curr = queue[i]
-          if (curr) {
-            if (curr.removed) {
-              printedQueue[i] = `\`${i})\` ~~${curr.name}~~`
-            } else {
-              printedQueue[i] = `\`${i})\` ${curr.name}`
-            }
-          }
-        }
-        printedQueue[currentQueueIndex] = `${printedQueue[currentQueueIndex]} ← Currently playing`
-
-        let reactions: string[] = []
-        if (end < queue.length) {
-          printedQueue.push('\n' + (queue.length - end) + ' more track(s) in queue.')
-          reactions.push('◀', '▶')
-
-          if (end < queue.length * 2) {
-            reactions.push('⏩')
-          }
-        }
-
-        env.sendMessage.next(new MessageWithReactions(printedQueue.join('\n'), reactions))
+        var message: MessageWithReactions = printQueue(start, queue, currentQueueIndex, currentPage)
+        env.sendMessage.next(message)
       }
     })
   }
@@ -131,3 +110,44 @@ export namespace ObservablePlaylist {
     nextTrackInPlaylist: Subject<Track | undefined>
   }
 }
+
+function printQueue(start: number, queue: ObservablePlaylist.Track[], currentQueueIndex: number, currentPage: number) {
+  const printedQueue: string[] = []
+  const end = start + pageSize
+  let j = 0
+  for (let i = start; i <= end; i++) {
+    const curr = queue[i]
+    if (curr) {
+      if (curr.removed) {
+        printedQueue[j++] = `\`${i})\` ~~${curr.name}~~`
+      } else if (i == currentQueueIndex) {
+        printedQueue[j++] = `\`${i})\` ${curr.name} ← Currently playing`
+      } else {
+        printedQueue[j++] = `\`${i})\` ${curr.name}`
+      }
+    }
+  }
+
+  let embed = new MessageEmbed()
+    .setColor('#ffb81f')
+    .setTitle('Queue')
+    .setDescription(printedQueue.join('\n'))
+    .setTimestamp()
+  let reactions: string[] = []
+
+  if (pageSize < queue.length) {
+    embed.addField('\n' + (queue.length - end) + ' more track(s) in queue.', 'During the current session ' + queue.length + ' tracks have been added to the queue in total')
+    reactions.push('◀', '▶')
+
+    if (pageSize * 2 < queue.length - currentQueueIndex) {
+      reactions.push('⏩')
+    }
+
+    if (currentPage > 1) {
+      reactions.push('⏪')
+    }
+  }
+
+  return new MessageWithReactions(embed, reactions)
+}
+

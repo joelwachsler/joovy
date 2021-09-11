@@ -212,6 +212,7 @@ export interface Environment {
   addTrackToQueue: Subject<Omit<ObservablePlaylist.Track, 'index'>>
   addNextTrackToQueue: Subject<Omit<ObservablePlaylist.Track, 'index'>>
   printQueueRequest: Subject<null>
+  reprintQueueOnReaction: Subject<Message>
   removeFromQueue: Subject<ObservablePlaylist.Remove>
   disconnect: Subject<null>
   setBassLevel: Subject<number>
@@ -227,6 +228,7 @@ const initEnvironment = (): Environment => {
     addTrackToQueue: new Subject(),
     addNextTrackToQueue: new Subject(),
     printQueueRequest: new Subject(),
+    reprintQueueOnReaction: new Subject(),
     removeFromQueue: new Subject(),
     disconnect: new Subject(),
     setBassLevel: new Subject(),
@@ -235,7 +237,7 @@ const initEnvironment = (): Environment => {
 }
 
 export class MessageWithReactions {
-  constructor(public message: string, public reactions: string[]) { }
+  constructor(public embeded: MessageEmbed, public reactions: string[]) { }
 }
 
 class ErrorWithMessage {
@@ -245,26 +247,22 @@ class ErrorWithMessage {
 const sendMessage = async ({ msg, message }: SendMessageArgs) => {
   if (typeof msg === 'string') {
     const embed = new MessageEmbed().setDescription(msg)
-    await message.channel.send({
+    return await message.channel.send({
       embeds: [embed]
     })
   } else if (msg instanceof MessageWithReactions) {
-    await sendMessageWithReactions(msg, message)
+    const sentMsg = await message.channel.send({
+      embeds: [msg.embeded]
+    })
+    if (msg.reactions.length > 0) {
+      const react = sentMsg.react(msg.reactions[0])
+      msg.reactions.slice(1).forEach(r => react.then(() => sentMsg.react(r)))
+    }
+
+    return sentMsg
   } else {
-    await message.channel.send({
+    return await message.channel.send({
       embeds: [msg]
     })
   }
 }
-
-async function sendMessageWithReactions(msg: MessageWithReactions, message: Message) {
-  const embed = new MessageEmbed().setDescription(msg.message)
-  const sentMsg = await message.channel.send({
-    embeds: [embed]
-  })
-  if (msg.reactions.length > 0) {
-    const react = sentMsg.react(msg.reactions[0])
-    msg.reactions.slice(1).forEach(r => react.then(() => sentMsg.react(r)))
-  }
-}
-
