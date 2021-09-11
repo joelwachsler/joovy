@@ -1,6 +1,6 @@
 import { Message } from 'discord.js'
 import { Subject } from 'rxjs'
-import { Environment } from './connectionHandler'
+import { Environment, MessageWithReactions } from './connectionHandler'
 
 export namespace ObservablePlaylist {
   export const init = (env: Environment) => {
@@ -46,7 +46,7 @@ export namespace ObservablePlaylist {
         index,
       })
 
-      for(let i = 0; i < queue.length; i++) {
+      for (let i = 0; i < queue.length; i++) {
         queue[i].index = i
       }
 
@@ -81,7 +81,7 @@ export namespace ObservablePlaylist {
 
     env.printQueueRequest.subscribe(() => {
       if (queue.length === 0 || queue.length <= currentQueueIndex) {
-        env.sendMessage.next('The queue is empty...')
+        env.sendMessage.next('The queue is empty 👀')
       } else {
         const printedQueue: string[] = []
         const start = currentQueueIndex
@@ -90,19 +90,25 @@ export namespace ObservablePlaylist {
           const curr = queue[i]
           if (curr) {
             if (curr.removed) {
-              printedQueue[i] = `[${i}] ~~${curr.name}~~`
+              printedQueue[i] = `\`${i})\` ~~${curr.name}~~`
             } else {
-              printedQueue[i] = `[${i}] ${curr.name}`
+              printedQueue[i] = `\`${i})\` ${curr.name}`
             }
           }
         }
+        printedQueue[currentQueueIndex] = `${printedQueue[currentQueueIndex]} ← Currently playing`
 
-        printedQueue[currentQueueIndex] = `${printedQueue[currentQueueIndex]} <-- Now playing`
+        let reactions: string[] = []
         if (end < queue.length) {
-          printedQueue.push('...')
+          printedQueue.push('\n' + (queue.length - end) + ' more track(s) in queue.')
+          reactions.push('◀', '▶')
+
+          if (end < queue.length * 2) {
+            reactions.push('⏩')
+          }
         }
 
-        env.sendMessage.next(printedQueue.join('\n\n'))
+        env.sendMessage.next(new MessageWithReactions(printedQueue.join('\n'), reactions))
       }
     })
   }

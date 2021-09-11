@@ -72,25 +72,7 @@ const initCmdObserver = async (
 
   const env = initEnvironment()
 
-  env.sendMessage.subscribe(async msg => {
-    if (typeof msg === 'string') {
-      const embed = new MessageEmbed().setDescription(msg)
-      message.channel.send({
-        embeds: [embed]
-      })
-    } else if (msg instanceof MessageWithReactions) {
-      const embed = new MessageEmbed().setDescription(msg.message)
-      const sentMsg = await message.channel.send({
-        embeds: [embed]
-      })
-      const react = sentMsg.react(msg.reactions[0])
-      msg.reactions.slice(1).forEach(r => react.then(() => sentMsg.react(r)))
-    } else {
-      message.channel.send({
-        embeds: [msg]
-      })
-    }
-  })
+  env.sendMessage.subscribe(async msg => sendMessage({ msg, message }))
 
   ObservablePlaylist.init(env)
   await Player.init({ message, env })
@@ -267,15 +249,22 @@ const sendMessage = async ({ msg, message }: SendMessageArgs) => {
       embeds: [embed]
     })
   } else if (msg instanceof MessageWithReactions) {
-    const embed = new MessageEmbed().setDescription(msg.message)
-    const sentMsg = await message.channel.send({
-      embeds: [embed]
-    })
-    const react = sentMsg.react(msg.reactions[0])
-    msg.reactions.slice(1).forEach(r => react.then(() => sentMsg.react(r)))
+    await sendMessageWithReactions(msg, message)
   } else {
     await message.channel.send({
       embeds: [msg]
     })
   }
 }
+
+async function sendMessageWithReactions(msg: MessageWithReactions, message: Message) {
+  const embed = new MessageEmbed().setDescription(msg.message)
+  const sentMsg = await message.channel.send({
+    embeds: [embed]
+  })
+  if (msg.reactions.length > 0) {
+    const react = sentMsg.react(msg.reactions[0])
+    msg.reactions.slice(1).forEach(r => react.then(() => sentMsg.react(r)))
+  }
+}
+
