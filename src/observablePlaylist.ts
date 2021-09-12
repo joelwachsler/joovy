@@ -95,11 +95,11 @@ export namespace ObservablePlaylist {
       if (!prevMsg.embeds[0].title?.startsWith('Queue')) {
         return
       }
-      
+
       prevMsg.awaitReactions({
         filter: (reaction, user) => {
           const emojiName = reaction.emoji.name
-          return emojiName != null ? ['⏪', '◀', '▶', '⏩'].includes(emojiName) : false;
+          return emojiName != null ? ['⏪', '◀', '▶', '⏩'].includes(emojiName) && !user.bot : false;
         },
         max: 1,
         time: 60000,

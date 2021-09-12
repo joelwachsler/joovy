@@ -271,7 +271,6 @@ const sendMessage = async ({ msg, message }: SendMessageArgs) => {
       const react = sentMsg.react(msg.reactions[0])
       msg.reactions.slice(1).forEach(r => react.then(() => sentMsg.react(r)))
     }
-
     return sentMsg
   } else {
     return await message.channel.send({
