@@ -73,14 +73,14 @@ const initCmdObserver = async (
   const env = initEnvironment()
 
   env.sendMessage.subscribe(async msg => sendMessage({ msg, message })
-    .then(sentMsg => {
+    .then(async sentMsg => {
       if (sentMsg.embeds[0].title?.startsWith('Queue')) {
         env.reprintQueueOnReaction.next(sentMsg)
       }
     }))
 
   env.editMessage.subscribe(async editedMessage => editMessage(editedMessage)
-    .then(editedMsg => {
+    .then(async editedMsg => {
       if (editedMsg.embeds[0].title?.startsWith('Queue')) {
         env.reprintQueueOnReaction.next(editedMsg)
       }

@@ -1,6 +1,7 @@
 import { Message, MessageEmbed } from 'discord.js'
 import { Subject } from 'rxjs'
 import { EditedMessage, Environment, MessageWithReactions } from './connectionHandler'
+import { logger } from './logger'
 
 const pageSize = 5
 export namespace ObservablePlaylist {
@@ -86,12 +87,12 @@ export namespace ObservablePlaylist {
         env.sendMessage.next('The queue is empty 👀')
       } else {
         const start = currentQueueIndex
-        var message: MessageWithReactions = printQueue(start, queue, currentQueueIndex, currentPage)
+        const message: MessageWithReactions = printQueue(start, queue, currentQueueIndex, currentPage)
         env.sendMessage.next(message)
       }
     })
 
-    env.reprintQueueOnReaction.subscribe(prevMsg => {
+    env.reprintQueueOnReaction.subscribe(async prevMsg => {
       prevMsg.awaitReactions({
         filter: (reaction, user) => {
           const emojiName = reaction.emoji.name
@@ -122,6 +123,7 @@ export namespace ObservablePlaylist {
           }
         })
         .catch(() => {
+          logger.error(e)
           prevMsg.reactions.removeAll()
         });
     })
@@ -187,8 +189,7 @@ function printQueue(start: number, queue: ObservablePlaylist.Track[], currentQue
   }
 
   if (reactions.length > 0) {
-
-    embed.addField('\n' + nrOfTracksLeftString(queue, end) + ' more track(s) in queue.', 'During the current session ' + queue.length + ' tracks have been added to the queue in total')
+    embed.addField(`\n${nrOfTracksLeftString(queue, end)} more track(s) in queue.`, `During the current session ${queue.length} tracks have been added to the queue in total`)
   }
 
   return new MessageWithReactions(embed, reactions)
