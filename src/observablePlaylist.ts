@@ -92,10 +92,6 @@ export namespace ObservablePlaylist {
     })
 
     env.reprintQueueOnReaction.subscribe(prevMsg => {
-      if (!prevMsg.embeds[0].title?.startsWith('Queue')) {
-        return
-      }
-
       prevMsg.awaitReactions({
         filter: (reaction, user) => {
           const emojiName = reaction.emoji.name
@@ -116,18 +112,19 @@ export namespace ObservablePlaylist {
             const newMessage: MessageWithReactions = printQueue(start, queue, currentQueueIndex, currentPage)
             env.editMessage.next(new EditedMessage(prevMsg, newMessage))
           } else if (reaction?.emoji.name === '⏪') {
-            const start = currentQueueIndex + pageSize * --currentPage * 2
+            currentPage = currentPage - 2
+            const start = currentQueueIndex + pageSize * currentPage
             const newMessage: MessageWithReactions = printQueue(start, queue, currentQueueIndex, currentPage)
             env.editMessage.next(new EditedMessage(prevMsg, newMessage))
           } else if (reaction?.emoji.name === '⏩') {
-            const start = currentQueueIndex + pageSize * ++currentPage * 2
+            currentPage = currentPage + 2
+            const start = currentQueueIndex + pageSize * currentPage
             const newMessage: MessageWithReactions = printQueue(start, queue, currentQueueIndex, currentPage)
             env.editMessage.next(new EditedMessage(prevMsg, newMessage))
           }
         })
-        .catch(collected => {
-          const reaction = collected.first();
-          prevMsg.reply('Unexpected reaction: ' + reaction);
+        .catch(() => {
+          prevMsg.reactions.removeAll()
         });
     })
   }
@@ -175,19 +172,40 @@ function printQueue(start: number, queue: ObservablePlaylist.Track[], currentQue
     .setTimestamp()
   let reactions: string[] = []
 
-  if (pageSize < queue.length) {
-    embed.addField('\n' + (queue.length - end) + ' more track(s) in queue.', 'During the current session ' + queue.length + ' tracks have been added to the queue in total')
-    reactions.push('◀', '▶')
-
-    if (pageSize * 2 < queue.length - currentQueueIndex) {
-      reactions.push('⏩')
-    }
-
+  try {
     if (currentPage > 1) {
       reactions.push('⏪')
     }
+
+    if (currentPage > 0) {
+      reactions.push('◀')
+    }
+
+    if (end < queue.length) {
+      reactions.push('▶')
+    }
+
+    if (pageSize * 2 < queue.length - start) {
+      reactions.push('⏩')
+    }
+  } catch (error) {
+    console.error('Failure during pushing of emotes:', error);
+  }
+
+  if (reactions.length > 0) {
+    
+    embed.addField('\n' + nrOfTracksLeftString(queue, end) + ' more track(s) in queue.', 'During the current session ' + queue.length + ' tracks have been added to the queue in total')
   }
 
   return new MessageWithReactions(embed, reactions)
+}
+
+function nrOfTracksLeftString(queue: ObservablePlaylist.Track[], end: number) : string {
+  const nrOfTracksLeft = queue.length - end
+    if (nrOfTracksLeft <= 0) {
+      return 'No'
+    } else {
+      return nrOfTracksLeft.toString()
+    }
 }
 

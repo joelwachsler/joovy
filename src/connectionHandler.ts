@@ -72,14 +72,19 @@ const initCmdObserver = async (
 
   const env = initEnvironment()
 
-  env.sendMessage.subscribe(async msg => {
-    sendMessage({ msg, message })
-      .then(sentMsg => {
+  env.sendMessage.subscribe(async msg => sendMessage({ msg, message })
+    .then(sentMsg => {
+      if (sentMsg.embeds[0].title?.startsWith('Queue')) {
         env.reprintQueueOnReaction.next(sentMsg)
-      })
-  })
+      }
+    }))
 
-  env.editMessage.subscribe(async editedMessage => editMessage(editedMessage))
+  env.editMessage.subscribe(async editedMessage => editMessage(editedMessage)
+    .then(editedMsg => {
+      if (editedMsg.embeds[0].title?.startsWith('Queue')) {
+        env.reprintQueueOnReaction.next(editedMsg)
+      }
+    }))
 
   ObservablePlaylist.init(env)
   await Player.init({ message, env })
@@ -292,5 +297,7 @@ const editMessage = async (editedMessage: EditedMessage) => {
     const react = editedMsg.react(newMsg.reactions[0])
     newMsg.reactions.slice(1).forEach(r => react.then(() => editedMsg.react(r)))
   }
+
+  return editedMsg
 }
 
