@@ -70,11 +70,7 @@ export namespace ObservablePlaylist {
           shouldEmitSkipEvent = true
         }
 
-        const track = queue[i]
-        if (track) {
-          track.removed = true
-          env.sendMessage.next(`${track.name} has been removed.`)
-        }
+        removeTrack(queue, i, env)
       }
 
       if (shouldEmitSkipEvent) {
@@ -84,11 +80,7 @@ export namespace ObservablePlaylist {
 
     env.removeLatestFromQueue.subscribe(() => {
       const trackToRemove = queue.length - 1
-      const track = queue[trackToRemove]
-      if (track) {
-        track.removed = true
-        env.sendMessage.next(`${track.name} has been removed.`)
-      }
+      removeTrack(queue, trackToRemove, env)
 
       if (trackToRemove === currentQueueIndex) {
         env.nextTrackInPlaylist.next(null)
@@ -166,6 +158,14 @@ export namespace ObservablePlaylist {
   export interface InitArgs {
     currentlyPlaying: Subject<Track>
     nextTrackInPlaylist: Subject<Track | undefined>
+  }
+
+  function removeTrack(queue: Track[], indexToRemove: number, env: Environment) {
+    const track = queue[indexToRemove]
+    if (track) {
+      track.removed = true
+      env.sendMessage.next(`${track.name} has been removed.`)
+    }
   }
 }
 
