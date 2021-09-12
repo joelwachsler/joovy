@@ -15,7 +15,7 @@ export interface QueueTrack {
 
 export type SendMessage = (msg: MsgType) => Promise<void>
 
-type MsgType = string | MessageEmbed
+type MsgType = string | MessageEmbed | MessageWithReactions
 interface SendMessageArgs {
   msg: MsgType
   message: Message
@@ -72,12 +72,19 @@ const initCmdObserver = async (
 
   const env = initEnvironment()
 
-  env.sendMessage.subscribe(msg => {
-    const embed = new MessageEmbed().setDescription(msg)
-    message.channel.send({
-      embeds: [embed]
-    })
-  })
+  env.sendMessage.subscribe(async msg => sendMessage({ msg, message })
+    .then(async sentMsg => {
+      if (sentMsg.embeds[0].title?.startsWith('Queue')) {
+        env.reprintQueueOnReaction.next(sentMsg)
+      }
+    }))
+
+  env.editMessage.subscribe(async editedMessage => editMessage(editedMessage)
+    .then(async editedMsg => {
+      if (editedMsg.embeds[0].title?.startsWith('Queue')) {
+        env.reprintQueueOnReaction.next(editedMsg)
+      }
+    }))
 
   ObservablePlaylist.init(env)
   await Player.init({ message, env })
@@ -210,13 +217,15 @@ const initCmdObserver = async (
 }
 
 export interface Environment {
-  sendMessage: Subject<string>
+  sendMessage: Subject<MsgType>
+  editMessage: Subject<EditedMessage>
   currentlyPlaying: Subject<ObservablePlaylist.Track | null>
   nextTrackInPlaylist: Subject<ObservablePlaylist.Track | null>
   trackAddedToQueue: Subject<null>
   addTrackToQueue: Subject<Omit<ObservablePlaylist.Track, 'index'>>
   addNextTrackToQueue: Subject<Omit<ObservablePlaylist.Track, 'index'>>
   printQueueRequest: Subject<null>
+  reprintQueueOnReaction: Subject<Message>
   removeFromQueue: Subject<ObservablePlaylist.Remove>
   disconnect: Subject<null>
   setBassLevel: Subject<number>
@@ -226,17 +235,27 @@ export interface Environment {
 const initEnvironment = (): Environment => {
   return {
     sendMessage: new Subject(),
+    editMessage: new Subject(),
     currentlyPlaying: new Subject(),
     nextTrackInPlaylist: new Subject(),
     trackAddedToQueue: new Subject(),
     addTrackToQueue: new Subject(),
     addNextTrackToQueue: new Subject(),
     printQueueRequest: new Subject(),
+    reprintQueueOnReaction: new Subject(),
     removeFromQueue: new Subject(),
     disconnect: new Subject(),
     setBassLevel: new Subject(),
     seek: new Subject(),
   }
+}
+
+export class EditedMessage {
+  constructor(public prevMessage: Message, public newMessage: MessageWithReactions) { }
+}
+
+export class MessageWithReactions {
+  constructor(public embeded: MessageEmbed, public reactions: string[]) { }
 }
 
 class ErrorWithMessage {
@@ -246,12 +265,40 @@ class ErrorWithMessage {
 const sendMessage = async ({ msg, message }: SendMessageArgs) => {
   if (typeof msg === 'string') {
     const embed = new MessageEmbed().setDescription(msg)
-    await message.channel.send({
+    return await message.channel.send({
       embeds: [embed]
     })
+  } else if (msg instanceof MessageWithReactions) {
+    const sentMsg = await message.channel.send({
+      embeds: [msg.embeded]
+    })
+    if (msg.reactions.length > 0) {
+      const react = sentMsg.react(msg.reactions[0])
+      msg.reactions.slice(1).forEach(r => react.then(() => sentMsg.react(r)))
+    }
+    return sentMsg
   } else {
-    await message.channel.send({
+    return await message.channel.send({
       embeds: [msg]
     })
   }
 }
+
+const editMessage = async (editedMessage: EditedMessage) => {
+  const newMsg = editedMessage.newMessage
+  const editedMsg = await editedMessage.prevMessage.edit({
+    embeds: [newMsg.embeded]
+  })
+
+  editedMsg.reactions.removeAll()
+    .catch(error => console.error('Failed to clear reactions:', error))
+
+  if (newMsg.reactions.length > 0) {
+    for (const reaction of newMsg.reactions) {
+      await editedMsg.react(reaction)
+    }
+  }
+
+  return editedMsg
+}
+
