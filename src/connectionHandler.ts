@@ -128,6 +128,10 @@ const initCmdObserver = async (
         help: 'Remove specified track(s).',
       },
       {
+        name: '/removenext',
+        help: 'Removes the most recently added track from the queue.',
+      },
+      {
         name: '/disconnect',
         help: 'Disconnects the bot from the current channel.',
       },
