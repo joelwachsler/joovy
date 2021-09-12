@@ -122,7 +122,7 @@ export namespace ObservablePlaylist {
             printQueueAndEdit(currentQueueIndex + pageSize * currentPage)
           }
         })
-        .catch(() => {
+        .catch((e) => {
           logger.error(e)
           prevMsg.reactions.removeAll()
         });
