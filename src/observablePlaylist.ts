@@ -1,7 +1,7 @@
-import { Message, MessageEmbed } from 'discord.js'
+import { DiscordAPIError, Message, MessageEmbed } from 'discord.js'
 import { Subject } from 'rxjs'
 import { EditedMessage, Environment, MessageWithReactions } from './connectionHandler'
-import { logger } from './logger'
+import { customErrorHandling, logger } from './logger'
 
 const pageSize = 5
 export namespace ObservablePlaylist {
@@ -129,13 +129,9 @@ export namespace ObservablePlaylist {
               return await prevMsg.reactions.removeAll()
             }
 
-            const originalError = JSON.stringify(e)
-            logger.error(originalError)
-            env.sendMessage.next(`An error has occurred: ${originalError}`)
+            customErrorHandling(env, e)
           } catch(removeReactionError) {
-            const removeReactionErrorAsString = JSON.stringify(removeReactionError)
-            logger.error(removeReactionErrorAsString)
-            env.sendMessage.next(`An error has occured while trying to remove reactions: ${removeReactionErrorAsString}`)
+            customErrorHandling(env, removeReactionError)
           }
         })
     })
