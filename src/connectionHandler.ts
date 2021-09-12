@@ -31,7 +31,7 @@ export const initMsgHandler = (msgObservable: Observable<MsgEvent>) => {
     map(v => {
       const channelId = v.message.member?.voice.channel?.id
       if (!channelId) {
-        throw new ErrorWithMessage('Could not determine channel id, are you joined to a voice channel?', v.message)
+        throw new ErrorWithMessage('Could not determine which channel you are in, have you joined one?', v.message)
       }
       return {
         ...v,
@@ -125,7 +125,11 @@ const initCmdObserver = async (
       },
       {
         name: '/remove fromIndex [toIndex]',
-        help: 'Skip the current track.',
+        help: 'Remove specified track(s).',
+      },
+      {
+        name: '/removenext',
+        help: 'Removes the most recently added track from the queue.',
       },
       {
         name: '/disconnect',
@@ -188,6 +192,8 @@ const initCmdObserver = async (
         env.nextTrackInPlaylist.next(null)
       } else if (content.startsWith('/bass')) {
         env.setBassLevel.next(Number(content.split(' ')[1]))
+      } else if (content.startsWith('/removelatest')) {
+        env.removeLatestFromQueue.next(null)
       } else if (content.startsWith('/remove')) {
         const removeCmd = content.split(' ')
         const from = Number(removeCmd[1])
@@ -227,6 +233,7 @@ export interface Environment {
   printQueueRequest: Subject<null>
   reprintQueueOnReaction: Subject<Message>
   removeFromQueue: Subject<ObservablePlaylist.Remove>
+  removeLatestFromQueue: Subject<null>
   disconnect: Subject<null>
   setBassLevel: Subject<number>
   seek: Subject<number>
@@ -244,6 +251,7 @@ const initEnvironment = (): Environment => {
     printQueueRequest: new Subject(),
     reprintQueueOnReaction: new Subject(),
     removeFromQueue: new Subject(),
+    removeLatestFromQueue: new Subject(),
     disconnect: new Subject(),
     setBassLevel: new Subject(),
     seek: new Subject(),
