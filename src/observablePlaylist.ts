@@ -1,7 +1,9 @@
-import { Message } from 'discord.js'
+import { Message, MessageEmbed } from 'discord.js'
 import { Subject } from 'rxjs'
-import { Environment } from './connectionHandler'
+import { EditedMessage, Environment, MessageWithReactions } from './connectionHandler'
+import { logger } from './logger'
 
+const pageSize = 5
 export namespace ObservablePlaylist {
   export const init = (env: Environment) => {
     const queue: Track[] = []
@@ -14,6 +16,7 @@ export namespace ObservablePlaylist {
     const timeout = 1000 * 60 * 5
 
     let currentQueueIndex = -1
+    let currentPage = 0
     env.nextTrackInPlaylist.subscribe(trackToPlay => {
       if (trackToPlay) {
         currentQueueIndex = trackToPlay.index
@@ -46,7 +49,7 @@ export namespace ObservablePlaylist {
         index,
       })
 
-      for(let i = 0; i < queue.length; i++) {
+      for (let i = 0; i < queue.length; i++) {
         queue[i].index = i
       }
 
@@ -81,29 +84,48 @@ export namespace ObservablePlaylist {
 
     env.printQueueRequest.subscribe(() => {
       if (queue.length === 0 || queue.length <= currentQueueIndex) {
-        env.sendMessage.next('The queue is empty...')
+        env.sendMessage.next('The queue is empty 👀')
       } else {
-        const printedQueue: string[] = []
         const start = currentQueueIndex
-        const end = currentQueueIndex + 5
-        for (let i = start; i <= end; i++) {
-          const curr = queue[i]
-          if (curr) {
-            if (curr.removed) {
-              printedQueue[i] = `[${i}] ~~${curr.name}~~`
-            } else {
-              printedQueue[i] = `[${i}] ${curr.name}`
-            }
-          }
-        }
-
-        printedQueue[currentQueueIndex] = `${printedQueue[currentQueueIndex]} <-- Now playing`
-        if (end < queue.length) {
-          printedQueue.push('...')
-        }
-
-        env.sendMessage.next(printedQueue.join('\n\n'))
+        const message: MessageWithReactions = printQueue(start, queue, currentQueueIndex, currentPage)
+        env.sendMessage.next(message)
       }
+    })
+
+    env.reprintQueueOnReaction.subscribe(async prevMsg => {
+      prevMsg.awaitReactions({
+        filter: (reaction, user) => {
+          const emojiName = reaction.emoji.name
+          return emojiName != null ? ['⏪', '◀', '▶', '⏩'].includes(emojiName) && !user.bot : false;
+        },
+        max: 1,
+        time: 60000,
+        errors: ['time']
+      })
+        .then(async collected => {
+          const reaction = collected.first();
+
+          function printQueueAndEdit(start: number) {
+            const newMessage: MessageWithReactions = printQueue(start, queue, currentQueueIndex, currentPage)
+            env.editMessage.next(new EditedMessage(prevMsg, newMessage))
+          }
+
+          if (reaction?.emoji.name === '▶') {
+            printQueueAndEdit(currentQueueIndex + pageSize * ++currentPage)
+          } else if (reaction?.emoji.name === '◀') {
+            printQueueAndEdit(currentQueueIndex + pageSize * --currentPage)
+          } else if (reaction?.emoji.name === '⏪') {
+            currentPage -= 2
+            printQueueAndEdit(currentQueueIndex + pageSize * currentPage)
+          } else if (reaction?.emoji.name === '⏩') {
+            currentPage += 2
+            printQueueAndEdit(currentQueueIndex + pageSize * currentPage)
+          }
+        })
+        .catch(() => {
+          logger.error(e)
+          prevMsg.reactions.removeAll()
+        });
     })
   }
 
@@ -125,3 +147,60 @@ export namespace ObservablePlaylist {
     nextTrackInPlaylist: Subject<Track | undefined>
   }
 }
+
+function printQueue(start: number, queue: ObservablePlaylist.Track[], currentQueueIndex: number, currentPage: number) {
+  const printedQueue: string[] = []
+  const end = start + pageSize
+  let j = 0
+  for (let i = start; i <= end; i++) {
+    const curr = queue[i]
+    if (curr) {
+      if (curr.removed) {
+        printedQueue[j++] = `\`${i})\` ~~${curr.name}~~`
+      } else if (i == currentQueueIndex) {
+        printedQueue[j++] = `\`${i})\` ${curr.name} ← Currently playing`
+      } else {
+        printedQueue[j++] = `\`${i})\` ${curr.name}`
+      }
+    }
+  }
+
+  let embed = new MessageEmbed()
+    .setColor('#ffb81f')
+    .setTitle('Queue')
+    .setDescription(printedQueue.join('\n'))
+    .setTimestamp()
+  let reactions: string[] = []
+
+  if (currentPage > 1) {
+    reactions.push('⏪')
+  }
+
+  if (currentPage > 0) {
+    reactions.push('◀')
+  }
+
+  if (end < queue.length) {
+    reactions.push('▶')
+  }
+
+  if (pageSize * 2 < queue.length - start) {
+    reactions.push('⏩')
+  }
+
+  if (reactions.length > 0) {
+    embed.addField(`\n${nrOfTracksLeftString(queue, end)} more track(s) in queue.`, `During the current session ${queue.length} tracks have been added to the queue in total`)
+  }
+
+  return new MessageWithReactions(embed, reactions)
+}
+
+function nrOfTracksLeftString(queue: ObservablePlaylist.Track[], end: number): string {
+  const nrOfTracksLeft = queue.length - end
+  if (nrOfTracksLeft <= 0) {
+    return 'No'
+  } else {
+    return nrOfTracksLeft.toString()
+  }
+}
+
