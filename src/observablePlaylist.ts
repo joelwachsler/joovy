@@ -122,10 +122,22 @@ export namespace ObservablePlaylist {
             printQueueAndEdit(currentQueueIndex + pageSize * currentPage)
           }
         })
-        .catch((e) => {
-          logger.error(e)
-          prevMsg.reactions.removeAll()
-        });
+        .catch(async (e) => {
+          try {
+            if (e instanceof Map) {
+              // this is probably a timeout error -> ignore it
+              return await prevMsg.reactions.removeAll()
+            }
+
+            const originalError = JSON.stringify(e)
+            logger.error(originalError)
+            env.sendMessage.next(`An error has occurred: ${originalError}`)
+          } catch(removeReactionError) {
+            const removeReactionErrorAsString = JSON.stringify(removeReactionError)
+            logger.error(removeReactionErrorAsString)
+            env.sendMessage.next(`An error has occured while trying to remove reactions: ${removeReactionErrorAsString}`)
+          }
+        })
     })
   }
 
