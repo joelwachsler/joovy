@@ -82,6 +82,19 @@ export namespace ObservablePlaylist {
       }
     })
 
+    env.removeLatestFromQueue.subscribe(() => {
+      const trackToRemove = queue.length - 1
+      const track = queue[trackToRemove]
+      if (track) {
+        track.removed = true
+        env.sendMessage.next(`${track.name} has been removed.`)
+      }
+
+      if (trackToRemove === currentQueueIndex) {
+        env.nextTrackInPlaylist.next(null)
+      }
+    })
+
     env.printQueueRequest.subscribe(() => {
       if (queue.length === 0 || queue.length <= currentQueueIndex) {
         env.sendMessage.next('The queue is empty 👀')
@@ -130,7 +143,7 @@ export namespace ObservablePlaylist {
             }
 
             customErrorHandling(env, e)
-          } catch(removeReactionError) {
+          } catch (removeReactionError) {
             customErrorHandling(env, removeReactionError)
           }
         })
