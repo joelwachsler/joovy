@@ -103,24 +103,22 @@ export namespace ObservablePlaylist {
       })
         .then(async collected => {
           const reaction = collected.first();
+
+          function printQueueAndEdit(start: number) {
+            const newMessage: MessageWithReactions = printQueue(start, queue, currentQueueIndex, currentPage)
+            env.editMessage.next(new EditedMessage(prevMsg, newMessage))
+          }
+
           if (reaction?.emoji.name === '▶') {
-            const start = currentQueueIndex + pageSize * ++currentPage
-            const newMessage: MessageWithReactions = printQueue(start, queue, currentQueueIndex, currentPage)
-            env.editMessage.next(new EditedMessage(prevMsg, newMessage))
+            printQueueAndEdit(currentQueueIndex + pageSize * ++currentPage)
           } else if (reaction?.emoji.name === '◀') {
-            const start = currentQueueIndex + pageSize * --currentPage
-            const newMessage: MessageWithReactions = printQueue(start, queue, currentQueueIndex, currentPage)
-            env.editMessage.next(new EditedMessage(prevMsg, newMessage))
+            printQueueAndEdit(currentQueueIndex + pageSize * --currentPage)
           } else if (reaction?.emoji.name === '⏪') {
-            currentPage = currentPage - 2
-            const start = currentQueueIndex + pageSize * currentPage
-            const newMessage: MessageWithReactions = printQueue(start, queue, currentQueueIndex, currentPage)
-            env.editMessage.next(new EditedMessage(prevMsg, newMessage))
+            currentPage -= 2
+            printQueueAndEdit(currentQueueIndex + pageSize * currentPage)
           } else if (reaction?.emoji.name === '⏩') {
-            currentPage = currentPage + 2
-            const start = currentQueueIndex + pageSize * currentPage
-            const newMessage: MessageWithReactions = printQueue(start, queue, currentQueueIndex, currentPage)
-            env.editMessage.next(new EditedMessage(prevMsg, newMessage))
+            currentPage += 2
+            printQueueAndEdit(currentQueueIndex + pageSize * currentPage)
           }
         })
         .catch(() => {

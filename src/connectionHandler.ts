@@ -294,7 +294,9 @@ const editMessage = async (editedMessage: EditedMessage) => {
     .catch(error => console.error('Failed to clear reactions:', error))
 
   if (newMsg.reactions.length > 0) {
-    await Promise.all(newMsg.reactions.map(r => editedMsg.react(r)))
+    for (const reaction of newMsg.reactions) {
+      await editedMsg.react(reaction)
+    }
   }
 
   return editedMsg
