@@ -172,40 +172,36 @@ function printQueue(start: number, queue: ObservablePlaylist.Track[], currentQue
     .setTimestamp()
   let reactions: string[] = []
 
-  try {
-    if (currentPage > 1) {
-      reactions.push('⏪')
-    }
+  if (currentPage > 1) {
+    reactions.push('⏪')
+  }
 
-    if (currentPage > 0) {
-      reactions.push('◀')
-    }
+  if (currentPage > 0) {
+    reactions.push('◀')
+  }
 
-    if (end < queue.length) {
-      reactions.push('▶')
-    }
+  if (end < queue.length) {
+    reactions.push('▶')
+  }
 
-    if (pageSize * 2 < queue.length - start) {
-      reactions.push('⏩')
-    }
-  } catch (error) {
-    console.error('Failure during pushing of emotes:', error);
+  if (pageSize * 2 < queue.length - start) {
+    reactions.push('⏩')
   }
 
   if (reactions.length > 0) {
-    
+
     embed.addField('\n' + nrOfTracksLeftString(queue, end) + ' more track(s) in queue.', 'During the current session ' + queue.length + ' tracks have been added to the queue in total')
   }
 
   return new MessageWithReactions(embed, reactions)
 }
 
-function nrOfTracksLeftString(queue: ObservablePlaylist.Track[], end: number) : string {
+function nrOfTracksLeftString(queue: ObservablePlaylist.Track[], end: number): string {
   const nrOfTracksLeft = queue.length - end
-    if (nrOfTracksLeft <= 0) {
-      return 'No'
-    } else {
-      return nrOfTracksLeft.toString()
-    }
+  if (nrOfTracksLeft <= 0) {
+    return 'No'
+  } else {
+    return nrOfTracksLeft.toString()
+  }
 }
 
