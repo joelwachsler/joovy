@@ -92,6 +92,10 @@ export namespace ObservablePlaylist {
     })
 
     env.reprintQueueOnReaction.subscribe(prevMsg => {
+      if (!prevMsg.embeds[0].title?.startsWith('Queue')) {
+        return
+      }
+      
       prevMsg.awaitReactions({
         filter: (reaction, user) => {
           const emojiName = reaction.emoji.name
