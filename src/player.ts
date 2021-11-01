@@ -67,6 +67,14 @@ export namespace Player {
       }
     })
 
+    const handleError = (err: any, currentTrack?: ObservablePlaylist.Track) => {
+        logger.error(err)
+        env.sendMessage.next(`Failed to play video: ${err}`)
+        if (currentTrack) {
+          env.nextTrackInPlaylist.next(currentTrack)
+        }
+    }
+
     const playMedia = (track: ObservablePlaylist.Track, begin?: number) => {
       try {
         stopPlayer()
@@ -86,6 +94,8 @@ export namespace Player {
           },
         )
 
+        dl.on('error', err => handleError(err, track))
+
         resource = createAudioResource(dl, {
           inputType: StreamType.Opus,
         })
@@ -101,9 +111,7 @@ export namespace Player {
 
         currentlyPlaying = track
       } catch (e) {
-        logger.error(e)
-        env.sendMessage.next(`Failed to play video: ${e}`)
-        env.nextTrackInPlaylist.next(track)
+        handleError(e, track)
       }
     }
 
