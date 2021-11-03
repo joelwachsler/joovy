@@ -9,12 +9,12 @@ import {
   VoiceConnection,
   VoiceConnectionStatus
 } from '@discordjs/voice'
-import ytdl from 'discord-ytdl-core'
 import { Message, VoiceChannel } from 'discord.js'
 import { Readable } from 'stream'
 import { Environment } from './connectionHandler'
 import { logger } from './logger'
 import { ObservablePlaylist } from './observablePlaylist'
+import { Ytdl } from './ytdl'
 
 export namespace Player {
   export const init = async ({ message, env }: InitArgs) => {
@@ -85,24 +85,26 @@ export namespace Player {
       }
     }
 
-    const playMedia = (track: ObservablePlaylist.Track, begin?: number) => {
+    const playMedia = async (track: ObservablePlaylist.Track, begin?: number) => {
       try {
         stopPlayer()
         playerIsIdle = false
 
         baseStreamTime = begin ?? 0
 
-        dl = ytdl(
-          track.link,
-          {
-            filter: 'audioonly',
-            quality: 'highestaudio',
-            highWaterMark: 1 << 25,
+        dl = await Ytdl.createStream({
+          url: track.link,
+          options: {
             encoderArgs: ['-af', `bass=g=${bass},dynaudnorm=f=200,volume=${volume}`],
             opusEncoded: true,
             seek: (begin ?? 0) / 1000,
           },
-        )
+          ytdlOptions: {
+            filter: 'audioonly',
+            quality: 'highestaudio',
+            highWaterMark: 1 << 25,
+          },
+        })
 
         dl.on('error', err => handleError(err, track))
 
@@ -112,6 +114,9 @@ export namespace Player {
 
         player.play(resource)
 
+        player.on('debug', msg => {
+          logger.info(`Debug msg: ${msg}`)
+        })
         player.once(AudioPlayerStatus.Idle, () => {
           if (!playerIsIdle) {
             player.stop()
@@ -125,18 +130,18 @@ export namespace Player {
       }
     }
 
-    env.setBassLevel.subscribe(level => {
+    env.setBassLevel.subscribe(async level => {
       env.sendMessage.next(`Bass level changed: \`${bass}\` -> \`${level}\``)
       bass = level
       if (currentlyPlaying) {
         player.state.status
-        playMedia(currentlyPlaying, (resource?.playbackDuration ?? 0) + baseStreamTime)
+        await playMedia(currentlyPlaying, (resource?.playbackDuration ?? 0) + baseStreamTime)
       }
     })
 
-    env.seek.subscribe(seekTime => {
+    env.seek.subscribe(async seekTime => {
       if (currentlyPlaying) {
-        playMedia(currentlyPlaying, seekTime * 1000)
+        await playMedia(currentlyPlaying, seekTime * 1000)
         const minutes = Math.floor(seekTime / 60)
         const seconds = Math.floor(seekTime - minutes * 60)
         env.sendMessage.next(`Skipped to: \`${minutes}:${seconds}\``)
@@ -144,7 +149,7 @@ export namespace Player {
     })
 
     env.currentlyPlaying.subscribe({
-      next: track => {
+      next: async track => {
         if (!track) {
           return stopPlayer()
         }
@@ -153,7 +158,7 @@ export namespace Player {
           return env.nextTrackInPlaylist.next(null)
         }
 
-        playMedia(track)
+        await playMedia(track)
         env.sendMessage.next(`Now playing: ${track.name}`)
       },
       complete: () => {
