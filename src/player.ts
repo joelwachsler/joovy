@@ -68,11 +68,11 @@ export namespace Player {
     })
 
     const handleError = (err: any, currentTrack?: ObservablePlaylist.Track) => {
-        logger.error(err)
-        env.sendMessage.next(`Failed to play video: ${err}`)
-        if (currentTrack) {
-          env.nextTrackInPlaylist.next(currentTrack)
-        }
+      logger.error(err)
+      env.sendMessage.next(`Failed to play video: ${err}`)
+      if (currentTrack) {
+        env.nextTrackInPlaylist.next(currentTrack)
+      }
     }
 
     const playMedia = (track: ObservablePlaylist.Track, begin?: number) => {
