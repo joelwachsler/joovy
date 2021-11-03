@@ -114,9 +114,6 @@ export namespace Player {
 
         player.play(resource)
 
-        player.on('debug', msg => {
-          logger.info(`Debug msg: ${msg}`)
-        })
         player.once(AudioPlayerStatus.Idle, () => {
           if (!playerIsIdle) {
             player.stop()

@@ -1,23 +1,32 @@
 import { FFmpeg, opus as Opus } from 'prism-media'
-import { Readable } from 'stream'
 import ytdl, { downloadOptions as DownloadOptions } from 'ytdl-core'
 import { logger } from './logger'
 
 export namespace Ytdl {
 
-  export const createStream = async (args: CreateStreamArgs): Promise<FFmpeg> => {
+  export const createStream = async (args: CreateStreamArgs): Promise<Opus.Encoder> => {
     const transcoder = new FFmpeg({ args: createFfmpegArgs(args) })
     const inputStream = await createYtdlStream(args.url, args.ytdlOptions)
     const output = inputStream.pipe(transcoder)
 
-    if (args.options?.opusEncoded) {
-      return createOpusStream(output, inputStream, transcoder)
-    }
+    const opus = new Opus.Encoder({
+      rate: 48000,
+      channels: 2,
+      frameSize: 960,
+    })
 
-    // otherwise create a normal stream
-    inputStream.on('error', () => transcoder.destroy())
-    output.on('close', () => transcoder.destroy())
-    return output
+    const outputStream = output.pipe(opus)
+    output.on('error', e => outputStream.emit('error', e))
+
+    ytdlEvents.forEach(event => inputStream.on(event, (...args) => outputStream.emit(event, args)))
+
+    outputStream.on('close', () => {
+      logger.info('Output stream closed')
+      transcoder.destroy()
+      opus.destroy()
+    })
+
+    return outputStream
   }
 
   const createYtdlStream = async (url: string, options?: DownloadOptions) => {
@@ -54,27 +63,6 @@ export namespace Ytdl {
     encoderArgs?: string[]
     fmt?: string
     opusEncoded?: boolean
-  }
-
-  const createOpusStream = (output: FFmpeg, inputStream: Readable, transcoder: FFmpeg) => {
-    const opus = new Opus.Encoder({
-      rate: 48000,
-      channels: 2,
-      frameSize: 960,
-    })
-
-    const outputStream = output.pipe(opus)
-    output.on('error', e => outputStream.emit('error', e))
-
-    ytdlEvents.forEach(event => inputStream.on(event, (...args) => outputStream.emit(event, args)))
-
-    outputStream.on('close', () => {
-      logger.info('Output stream closed')
-      transcoder.destroy()
-      opus.destroy()
-    })
-
-    return output
   }
 
   const createFfmpegArgs = ({ options }: CreateStreamArgs) => {
