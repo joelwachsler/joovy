@@ -1,4 +1,14 @@
-import { AudioPlayer, AudioPlayerStatus, AudioResource, createAudioPlayer, createAudioResource, joinVoiceChannel, StreamType, VoiceConnection, VoiceConnectionStatus } from '@discordjs/voice'
+import {
+  AudioPlayer,
+  AudioPlayerStatus,
+  AudioResource,
+  createAudioPlayer,
+  createAudioResource,
+  joinVoiceChannel,
+  StreamType,
+  VoiceConnection,
+  VoiceConnectionStatus
+} from '@discordjs/voice'
 import ytdl from 'discord-ytdl-core'
 import { Message, VoiceChannel } from 'discord.js'
 import { Readable } from 'stream'
