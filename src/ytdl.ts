@@ -31,7 +31,7 @@ export namespace Ytdl {
 
   const createYtdlStream = async (url: string, options?: DownloadOptions) => {
     try {
-      // add &bpctr=9999999999 to prevent age restriction
+      // add &bpctr=9999999999 to prevent age restriction errors
       const info = await ytdl.getInfo(`${url}&bpctr=9999999999`)
       return ytdl.downloadFromInfo(info, options)
     } catch(e) {
