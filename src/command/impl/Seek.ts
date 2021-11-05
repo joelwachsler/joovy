@@ -1,18 +1,15 @@
 import { Message } from 'discord.js'
 import { Environment } from '../../connectionHandler'
-import { Command } from '../command'
+import { Command, ArgParser } from '../command'
 
 export class Seek implements Command {
-  command = '/seek seconds | minutes:seconds'
+  argument = ArgParser.create('seek')
+    .withArg('seconds', arg => arg.or('minutes:seconds'))
   helpText = 'Seek current playing song to the provided time.'
 
   constructor(private env: Environment) {}
 
-  async handleMessage(message: Message): Promise<boolean> {
-    if (!message.content.startsWith('/seek')) {
-      return false
-    }
-
+  async handleMessage(message: Message) {
     const seek = message.content.split('/seek ')[1]
     if (seek) {
       const splitSeek = seek.split(':')
@@ -24,7 +21,5 @@ export class Seek implements Command {
         this.env.seek.next(Number(seek ?? 0))
       }
     }
-
-    return true
   }
 }

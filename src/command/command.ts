@@ -14,9 +14,9 @@ import { Disconnect } from './impl/Disconnect'
 
 export interface Command {
   /**
-   * Example query - for example /play url | query.
+   * Defines when the current command should be run, its arguments when and a description of it.
    */
-  command: string
+  argument: ArgParser
 
   /**
    * Describe what the command does.
@@ -24,9 +24,9 @@ export interface Command {
   helpText: string
 
   /**
-   * Will call command methods until one returns true, or there are no commands left.
+   * Will be called if the message sent starts with the one defined in command.
    */
-  handleMessage(message: Message): Promise<boolean>
+  handleMessage(message: Message): Promise<void>
 }
 
 export const init = (env: Environment, pool: Pool<any>) => {
@@ -44,20 +44,74 @@ export const init = (env: Environment, pool: Pool<any>) => {
 
   const help = new Help(cmds)
 
-  return new CommandHolder(env, [...cmds, help])
+  return new Holder(env, [...cmds, help], help)
 }
 
-class CommandHolder {
+export class ArgParser {
 
-  constructor(private env: Environment, private cmds: Command[]) {}
+  private constructor(public command: string, private args: string[]) {}
+
+  is(potentialCmd: string) {
+    return potentialCmd.startsWith(this.command)
+  }
+
+  get help() {
+    return `${this.command} ${this.args.join(' ')}`
+  }
+
+  withArg(arg: string, builder?: (arg: ArgBuilder) => ArgBuilder) {
+    let argBuilder = ArgBuilder.create(arg)
+    if (builder) {
+      argBuilder = builder(argBuilder)
+    }
+    this.args.push(argBuilder.build())
+    return this
+  }
+
+  withOptionalArg(arg: string, builder?: (arg: ArgBuilder) => ArgBuilder) {
+    let argBuilder = ArgBuilder.create(arg)
+    if (builder) {
+      argBuilder = builder(argBuilder)
+    }
+    this.args.push(`[${argBuilder.build()}]`)
+    return this
+  }
+
+  static create(command: string) {
+    return new ArgParser(`/${command}`, [])
+  }
+}
+
+class ArgBuilder {
+
+  private constructor(private args: string[]) {}
+
+  or(arg: string) {
+    this.args.push(`${arg}`)
+    return this
+  }
+
+  build() {
+    return this.args.join(' | ')
+  }
+
+  static create(arg: string) {
+    return new ArgBuilder([arg])
+  }
+}
+
+class Holder {
+
+  constructor(private env: Environment, private cmds: Command[], private helpCmd: Help) {}
 
   async handleMessage(message: Message): Promise<void> {
+    const { content } = message
     for (const cmd of this.cmds) {
-      if (await cmd.handleMessage(message)) {
-        return
+      if (cmd.argument.is(content)) {
+        return await cmd.handleMessage(message)
       }
     }
 
-    this.env.sendMessage.next(`Unknown command: \`${message.content}\`, type \`/help\` for available commands.`)
+    this.env.sendMessage.next(`Unknown command: \`${message.content}\`, type \`${this.helpCmd.argument.command}\` for available commands.`)
   }
 }
