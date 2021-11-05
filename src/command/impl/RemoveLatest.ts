@@ -1,20 +1,14 @@
 import { Message } from 'discord.js'
 import { Environment } from '../../connectionHandler'
-import { Command } from '../command'
+import { Command, ArgParser } from '../command'
 
 export class RemoveLatest implements Command {
-  command = '/removelatest'
+  argument = ArgParser.create('removelatest')
   helpText = 'Removes the last added track.'
 
   constructor(private env: Environment) {}
 
-  async handleMessage(message: Message): Promise<boolean> {
-    if (!message.content.startsWith('/removelatest')) {
-      return false
-    }
-
+  async handleMessage(_: Message) {
     this.env.removeLatestFromQueue.next(null)
-
-    return true
   }
 }

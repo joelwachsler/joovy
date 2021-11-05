@@ -1,20 +1,14 @@
 import { Message } from 'discord.js'
 import { Environment } from '../../connectionHandler'
-import { Command } from '../command'
+import { Command, ArgParser } from '../command'
 
 export class Disconnect implements Command {
-  command = '/disconnect'
+  argument = ArgParser.create('disconnect')
   helpText = 'Disconnects the bot from the current channel.'
 
   constructor(private env: Environment) {}
 
-  async handleMessage(message: Message): Promise<boolean> {
-    if (!message.content.startsWith('/disconnect')) {
-      return false
-    }
-
+  async handleMessage(_: Message) {
     this.env.disconnect.next(null)
-
-    return true
   }
 }

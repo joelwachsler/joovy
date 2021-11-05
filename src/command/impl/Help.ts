@@ -1,30 +1,24 @@
 import { Message, MessageEmbed } from 'discord.js'
-import { Command } from '../command'
+import { Command, ArgParser } from '../command'
 
 export class Help implements Command {
-  command = '/help'
+  argument = ArgParser.create('help')
   helpText = 'Print this message'
 
   constructor(private cmds: Command[]) {}
 
-  async handleMessage(message: Message): Promise<boolean> {
-    if (!message.content.startsWith('/help')) {
-      return false
-    }
-
+  async handleMessage(message: Message) {
     const commands: Command[] = [...this.cmds, this]
 
     const help = new MessageEmbed()
       .setTitle('Available commands')
       .addFields(commands.map(cmd => ({
-        name: cmd.command,
+        name: cmd.argument.help,
         value: cmd.helpText,
       })))
 
     message.channel.send({
       embeds: [help],
     })
-
-    return true
   }
 }

@@ -1,20 +1,14 @@
 import { Message } from 'discord.js'
 import { Environment } from '../../connectionHandler'
-import { Command } from '../command'
+import { Command, ArgParser } from '../command'
 
 export class Queue implements Command {
-  command = '/queue'
+  argument = ArgParser.create('queue')
   helpText = 'Print the current queue.'
 
   constructor(private env: Environment) {}
 
-  async handleMessage(message: Message): Promise<boolean> {
-    if (!message.content.startsWith('/queue')) {
-      return false
-    }
-
+  async handleMessage(_: Message) {
     this.env.printQueueRequest.next(null)
-
-    return true
   }
 }
