@@ -44,7 +44,7 @@ export const init = (env: Environment, pool: Pool<any>) => {
 
   const help = new Help(cmds)
 
-  return new Holder(env, [...cmds, help], help)
+  return new Handler(env, [...cmds, help], help)
 }
 
 export class ArgParser {
@@ -100,7 +100,7 @@ class ArgBuilder {
   }
 }
 
-class Holder {
+class Handler {
 
   constructor(private env: Environment, private cmds: Command[], private helpCmd: Help) {}
 
