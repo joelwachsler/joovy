@@ -2,7 +2,7 @@ import { Message } from 'discord.js'
 import { Environment } from '../../connectionHandler'
 import { Command } from '../command'
 
-export class Bass implements Command.Command {
+export class Bass implements Command {
   command = '/bass level'
   helpText = 'Set the bass level of the current and the following songs.'
 

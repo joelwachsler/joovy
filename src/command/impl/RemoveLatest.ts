@@ -2,7 +2,7 @@ import { Message } from 'discord.js'
 import { Environment } from '../../connectionHandler'
 import { Command } from '../command'
 
-export class RemoveLatest implements Command.Command {
+export class RemoveLatest implements Command {
   command = '/removelatest'
   helpText = 'Removes the last added track.'
 

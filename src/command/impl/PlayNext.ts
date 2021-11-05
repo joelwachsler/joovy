@@ -4,7 +4,7 @@ import { Environment } from '../../connectionHandler'
 import { Command } from '../command'
 import { TrackUtil } from './TrackUtil'
 
-export class PlayNext implements Command.Command {
+export class PlayNext implements Command {
   command = '/playnext url | query'
   helpText = 'Skips the queue and adds the track as the next song.'
 

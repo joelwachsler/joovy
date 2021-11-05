@@ -2,7 +2,7 @@ import { Message } from 'discord.js'
 import { Environment } from '../../connectionHandler'
 import { Command } from '../command'
 
-export class Queue implements Command.Command {
+export class Queue implements Command {
   command = '/queue'
   helpText = 'Print the current queue.'
 
