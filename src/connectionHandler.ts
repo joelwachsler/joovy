@@ -5,7 +5,7 @@ import { Command } from './command/command'
 import { logger } from './logger'
 import { MsgEvent } from './main'
 import { ObservablePlaylist } from './observablePlaylist'
-import { Player } from './player'
+import { Player } from './player/player'
 
 export interface QueueTrack {
   name: string
