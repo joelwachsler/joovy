@@ -2,7 +2,7 @@ import { Message } from 'discord.js'
 import { Environment } from '../../connectionHandler'
 import { Command } from '../command'
 
-export class Seek implements Command.Command {
+export class Seek implements Command {
   command = '/seek seconds | minutes:seconds'
   helpText = 'Seek current playing song to the provided time.'
 

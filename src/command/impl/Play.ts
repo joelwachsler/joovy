@@ -4,7 +4,7 @@ import { Environment } from '../../connectionHandler'
 import { Command } from '../command'
 import { TrackUtil } from './TrackUtil'
 
-export class Play implements Command.Command {
+export class Play implements Command {
   command = '/play url | query'
   helpText = 'Play a track or queue it if a track is already playing.'
 

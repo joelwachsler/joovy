@@ -2,7 +2,7 @@ import { Message } from 'discord.js'
 import { Environment } from '../../connectionHandler'
 import { Command } from '../command'
 
-export class Disconnect implements Command.Command {
+export class Disconnect implements Command {
   command = '/disconnect'
   helpText = 'Disconnects the bot from the current channel.'
 

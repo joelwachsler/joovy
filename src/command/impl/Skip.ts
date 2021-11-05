@@ -2,7 +2,7 @@ import { Message } from 'discord.js'
 import { Environment } from '../../connectionHandler'
 import { Command } from '../command'
 
-export class Skip implements Command.Command {
+export class Skip implements Command {
   command = '/skip'
   helpText = 'Skip the current track.'
 

@@ -2,7 +2,7 @@ import { Message } from 'discord.js'
 import { Environment } from '../../connectionHandler'
 import { Command } from '../command'
 
-export class Remove implements Command.Command {
+export class Remove implements Command {
   command = '/remove fromIndex [toIndex]'
   helpText = 'Remove specified track(s).'
 
