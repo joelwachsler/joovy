@@ -1,7 +1,8 @@
-import { DiscordAPIError, Message, MessageEmbed } from 'discord.js'
+import { Message, MessageEmbed } from 'discord.js'
 import { Subject } from 'rxjs'
-import { EditedMessage, Environment, MessageWithReactions } from './connectionHandler'
-import { customErrorHandling, logger } from './logger'
+import { EditedMessage, MessageWithReactions } from './connectionHandler'
+import { Environment } from './environment'
+import { customErrorHandling } from './logger'
 
 const pageSize = 5
 export namespace ObservablePlaylist {

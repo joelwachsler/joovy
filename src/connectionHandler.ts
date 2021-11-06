@@ -2,6 +2,7 @@ import { Message, MessageEmbed } from 'discord.js'
 import { catchError, filter, map, Observable, share, Subject } from 'rxjs'
 import { Pool } from 'threads'
 import * as Command from './command/command'
+import { initEnvironment } from './environment'
 import { logger } from './logger'
 import { MsgEvent } from './main'
 import { ObservablePlaylist } from './observablePlaylist'
@@ -16,7 +17,7 @@ export interface QueueTrack {
 
 export type SendMessage = (msg: MsgType) => Promise<void>
 
-type MsgType = string | MessageEmbed | MessageWithReactions
+export type MsgType = string | MessageEmbed | MessageWithReactions
 interface SendMessageArgs {
   msg: MsgType
   message: Message
@@ -118,42 +119,6 @@ const initCmdObserver = async (
     channelObserver.complete()
     unsubscribe()
   })
-}
-
-export interface Environment {
-  sendMessage: Subject<MsgType>
-  editMessage: Subject<EditedMessage>
-  currentlyPlaying: Subject<ObservablePlaylist.Track | null>
-  nextTrackInPlaylist: Subject<ObservablePlaylist.Track | null>
-  trackAddedToQueue: Subject<null>
-  addTrackToQueue: Subject<Omit<ObservablePlaylist.Track, 'index'>>
-  addNextTrackToQueue: Subject<Omit<ObservablePlaylist.Track, 'index'>>
-  printQueueRequest: Subject<null>
-  reprintQueueOnReaction: Subject<Message>
-  removeFromQueue: Subject<ObservablePlaylist.Remove>
-  removeLatestFromQueue: Subject<null>
-  disconnect: Subject<null>
-  setBassLevel: Subject<number>
-  seek: Subject<number>
-}
-
-const initEnvironment = (): Environment => {
-  return {
-    sendMessage: new Subject(),
-    editMessage: new Subject(),
-    currentlyPlaying: new Subject(),
-    nextTrackInPlaylist: new Subject(),
-    trackAddedToQueue: new Subject(),
-    addTrackToQueue: new Subject(),
-    addNextTrackToQueue: new Subject(),
-    printQueueRequest: new Subject(),
-    reprintQueueOnReaction: new Subject(),
-    removeFromQueue: new Subject(),
-    removeLatestFromQueue: new Subject(),
-    disconnect: new Subject(),
-    setBassLevel: new Subject(),
-    seek: new Subject(),
-  }
 }
 
 export class EditedMessage {

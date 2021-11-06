@@ -1,6 +1,6 @@
 import { Message } from 'discord.js'
 import { Pool } from 'threads'
-import { Environment } from '../../connectionHandler'
+import { Environment } from '../../environment'
 import { Command, ArgParser } from '../command'
 import { TrackUtil } from './TrackUtil'
 

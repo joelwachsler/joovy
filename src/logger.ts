@@ -1,6 +1,6 @@
 import { DiscordAPIError } from 'discord.js'
 import winston from 'winston'
-import { Environment } from './connectionHandler'
+import { Environment } from './environment'
 
 const initLogger = () => {
   return winston.createLogger({

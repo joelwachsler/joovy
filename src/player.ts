@@ -11,7 +11,7 @@ import {
 } from '@discordjs/voice'
 import { Message, VoiceChannel } from 'discord.js'
 import { Readable } from 'stream'
-import { Environment } from './connectionHandler'
+import { Environment } from './environment'
 import { logger } from './logger'
 import { ObservablePlaylist } from './observablePlaylist'
 import { Ytdl } from './ytdl'
