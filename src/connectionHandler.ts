@@ -1,10 +1,11 @@
 import { Message, MessageEmbed } from 'discord.js'
 import { catchError, filter, map, Observable, share, Subject } from 'rxjs'
+import { Pool } from 'threads'
+import * as Command from './command/command'
 import { logger } from './logger'
 import { MsgEvent } from './main'
 import { ObservablePlaylist } from './observablePlaylist'
 import { Player } from './player'
-import { QueryResolver } from './queryResolver'
 
 export interface QueueTrack {
   name: string
@@ -55,7 +56,7 @@ export const initMsgHandler = (msgObservable: Observable<MsgEvent>) => {
       const subject = new Subject<MsgEvent>()
       msgObservers.set(v.channelId, subject)
       logger.info(`Initializing new observer for: ${v.channelId}`)
-      await initCmdObserver(v.message, subject, () => msgObservers.delete(v.channelId))
+      await initCmdObserver(v.message, v.pool, subject, () => msgObservers.delete(v.channelId))
     }
 
     msgObservers.get(v.channelId)!.next(v)
@@ -64,6 +65,7 @@ export const initMsgHandler = (msgObservable: Observable<MsgEvent>) => {
 
 const initCmdObserver = async (
   message: Message,
+  pool: Pool<any>,
   channelObserver: Subject<MsgEvent>,
   unsubscribe: () => void,
 ) => {
@@ -97,115 +99,11 @@ const initCmdObserver = async (
     env.sendMessage.next(`${name} will be played next.`)
   })
 
-  const printHelp = () => {
-    const commands = [
-      {
-        name: '/play url | query',
-        help: 'Play a track or queue it if a track is already playing.',
-      },
-      {
-        name: '/playnext url | query',
-        help: 'Skips the queue and adds the track as the next song.',
-      },
-      {
-        name: '/skip',
-        help: 'Skip the current track.',
-      },
-      {
-        name: '/bass level',
-        help: 'Set the bass level of the current and the following songs.',
-      },
-      {
-        name: '/seek seconds | minutes:seconds',
-        help: 'Seek current playing song to the provided time.',
-      },
-      {
-        name: '/queue',
-        help: 'Print the current queue.',
-      },
-      {
-        name: '/remove fromIndex [toIndex]',
-        help: 'Remove specified track(s).',
-      },
-      {
-        name: '/removenext',
-        help: 'Removes the most recently added track from the queue.',
-      },
-      {
-        name: '/disconnect',
-        help: 'Disconnects the bot from the current channel.',
-      },
-      {
-        name: '/help',
-        help: 'Print this message.',
-      },
-    ]
-    const help = new MessageEmbed()
-      .setTitle('Available commands')
-      .addFields(commands.map(cmd => ({
-        name: cmd.name,
-        value: cmd.help,
-      })))
-
-    message.channel.send({
-      embeds: [help],
-    })
-  }
+  const commands = Command.init(env, pool)
 
   const observer = channelObserverWithMsg.subscribe({
     next: async v => {
-      const { content, message, pool } = v
-
-      const addTrackToQueue = async (cb: (track: Omit<ObservablePlaylist.Track, 'index'>) => void) => {
-        try {
-          const newTrack = await QueryResolver.resolve({ message, pool })
-          if (newTrack) {
-            cb(newTrack)
-          } else {
-            env.sendMessage.next(`Unable to find result for: ${content}`)
-          }
-        } catch (e) {
-          logger.error(e)
-          env.sendMessage.next(`Unable to add song to playlist: ${e}`)
-        }
-      }
-
-      if (content.startsWith('/playnext')) {
-        addTrackToQueue(newTrack => env.addNextTrackToQueue.next(newTrack))
-      } else if (content.startsWith('/play')) {
-        addTrackToQueue(newTrack => env.addTrackToQueue.next(newTrack))
-      } else if (content === '/help') {
-        printHelp()
-      } else if (content.startsWith('/seek')) {
-        const seek = content.split('/seek ')[1]
-        if (seek) {
-          const splitSeek = seek.split(':')
-          if (splitSeek.length > 1) {
-            const minutes = Number(splitSeek[0] ?? 0)
-            const seconds = Number(splitSeek[1] ?? 0)
-            env.seek.next(minutes * 60 + seconds)
-          } else {
-            env.seek.next(Number(seek ?? 0))
-          }
-        }
-      } else if (content === '/skip') {
-        env.nextTrackInPlaylist.next(null)
-      } else if (content.startsWith('/bass')) {
-        env.setBassLevel.next(Number(content.split(' ')[1]))
-      } else if (content.startsWith('/removelatest')) {
-        env.removeLatestFromQueue.next(null)
-      } else if (content.startsWith('/remove')) {
-        const removeCmd = content.split(' ')
-        const from = Number(removeCmd[1])
-        const to = Number(removeCmd[2] ?? from)
-        env.removeFromQueue.next({ from, to })
-      } else if (content === '/queue') {
-        env.printQueueRequest.next(null)
-      } else if (content === '/disconnect') {
-        env.disconnect.next(null)
-      } else {
-        env.sendMessage.next(`Unknown command: \`${content}\`, type \`/help\` for available commands.`)
-      }
+      await commands.handleMessage(v.message)
     },
   })
 
