@@ -1,9 +1,9 @@
 import { Message } from 'discord.js'
 import { Environment } from '../../environment'
-import { Command, ArgParser } from '../command'
+import { Command } from '../command'
 
 export class Seek implements Command {
-  argument = ArgParser.create('seek')
+  argument = Command.ArgParser.create('seek')
     .withArg('seconds', arg => arg.or('minutes:seconds'))
   helpText = 'Seek current playing song to the provided time.'
 

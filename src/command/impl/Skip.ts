@@ -1,9 +1,9 @@
 import { Message } from 'discord.js'
 import { Environment } from '../../environment'
-import { Command, ArgParser } from '../command'
+import { Command } from '../command'
 
 export class Skip implements Command {
-  argument = ArgParser.create('skip')
+  argument = Command.ArgParser.create('skip')
   helpText = 'Skip the current track.'
 
   constructor(private env: Environment) {}

@@ -1,9 +1,9 @@
 import { Message } from 'discord.js'
 import { Environment } from '../../environment'
-import { Command, ArgParser } from '../command'
+import { Command } from '../command'
 
 export class RemoveLatest implements Command {
-  argument = ArgParser.create('removelatest')
+  argument = Command.ArgParser.create('removelatest')
   helpText = 'Removes the last added track.'
 
   constructor(private env: Environment) {}

@@ -1,11 +1,11 @@
 import { Message } from 'discord.js'
 import { Pool } from 'threads'
 import { Environment } from '../../environment'
-import { Command, ArgParser } from '../command'
+import { Command } from '../command'
 import { TrackUtil } from './TrackUtil'
 
 export class Play implements Command {
-  argument = ArgParser.create('play')
+  argument = Command.ArgParser.create('play')
     .withArg('url', arg => arg.or('query'))
   helpText = 'Play a track or queue it if a track is already playing.'
 

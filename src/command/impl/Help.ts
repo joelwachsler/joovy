@@ -1,8 +1,8 @@
 import { Message, MessageEmbed } from 'discord.js'
-import { Command, ArgParser } from '../command'
+import { Command } from '../command'
 
 export class Help implements Command {
-  argument = ArgParser.create('help')
+  argument = Command.ArgParser.create('help')
   helpText = 'Print this message'
 
   constructor(private cmds: Command[]) {}
