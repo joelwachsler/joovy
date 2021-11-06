@@ -14,7 +14,7 @@ import { Disconnect } from './impl/Disconnect'
 
 export interface Command {
   /**
-   * Defines when the current command should be run, its arguments when and a description of it.
+   * Defines when the current command should be run, its arguments and a description of it.
    */
   argument: ArgParser
 
