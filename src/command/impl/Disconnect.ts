@@ -1,9 +1,9 @@
 import { Message } from 'discord.js'
 import { Environment } from '../../environment'
-import { Command, ArgParser } from '../command'
+import { Command } from '../command'
 
 export class Disconnect implements Command {
-  argument = ArgParser.create('disconnect')
+  argument = Command.ArgParser.create('disconnect')
   helpText = 'Disconnects the bot from the current channel.'
 
   constructor(private env: Environment) {}

@@ -1,7 +1,7 @@
 import { Message, MessageEmbed } from 'discord.js'
 import { catchError, filter, map, Observable, share, Subject } from 'rxjs'
 import { Pool } from 'threads'
-import * as Command from './command/command'
+import { Command } from './command/command'
 import { initEnvironment } from './environment'
 import { logger } from './logger'
 import { MsgEvent } from './main'

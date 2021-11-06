@@ -1,11 +1,11 @@
 import { Message } from 'discord.js'
 import { Pool } from 'threads'
 import { Environment } from '../../environment'
-import { Command, ArgParser } from '../command'
+import { Command } from '../command'
 import { TrackUtil } from './TrackUtil'
 
 export class PlayNext implements Command {
-  argument = ArgParser.create('playnext')
+  argument = Command.ArgParser.create('playnext')
     .withArg('url', arg => arg.or('query'))
   helpText = 'Skips the queue and adds the track as the next song.'
 

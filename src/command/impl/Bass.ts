@@ -1,9 +1,9 @@
 import { Message } from 'discord.js'
 import { Environment } from '../../environment'
-import { Command, ArgParser } from '../command'
+import { Command } from '../command'
 
 export class Bass implements Command {
-  argument = ArgParser.create('bass')
+  argument = Command.ArgParser.create('bass')
     .withArg('level')
   helpText = 'Set the bass level of the current and the following songs.'
 

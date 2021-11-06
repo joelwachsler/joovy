@@ -1,9 +1,9 @@
 import { Message } from 'discord.js'
 import { Environment } from '../../environment'
-import { Command, ArgParser } from '../command'
+import { Command } from '../command'
 
 export class Remove implements Command {
-  argument = ArgParser.create('remove')
+  argument = Command.ArgParser.create('remove')
     .withArg('fromIndex')
     .withOptionalArg('toIndex')
   helpText = 'Remove specified track(s).'

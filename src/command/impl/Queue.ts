@@ -1,9 +1,9 @@
 import { Message } from 'discord.js'
 import { Environment } from '../../environment'
-import { Command, ArgParser } from '../command'
+import { Command } from '../command'
 
 export class Queue implements Command {
-  argument = ArgParser.create('queue')
+  argument = Command.ArgParser.create('queue')
   helpText = 'Print the current queue.'
 
   constructor(private env: Environment) {}
