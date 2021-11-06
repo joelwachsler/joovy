@@ -4,7 +4,8 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "start": "node --unhandled-rejections=strict -r ts-node/register/transpile-only src/main.ts"
+    "start": "node --unhandled-rejections=strict -r ts-node/register/transpile-only src/main.ts",
+    "test": "jest"
   },
   "dependencies": {
     "@discordjs/builders": "^0.6.0",
@@ -24,9 +25,12 @@
     "ytdl-core": "^4.9.1"
   },
   "devDependencies": {
+    "@types/jest": "^27.0.2",
     "@types/node": "^16.7.11",
     "@types/yt-search": "^2.3.2",
+    "jest": "^27.3.1",
     "ts-essentials": "^8.1.0",
+    "ts-jest": "^27.0.7",
     "typescript": "^4.4.2"
   }
 }
