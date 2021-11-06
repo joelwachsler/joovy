@@ -1,6 +1,5 @@
 import { Message } from 'discord.js'
 import { Pool } from 'threads'
-import { Environment } from '../connectionHandler'
 import { Bass } from './impl/Bass'
 import { Help } from './impl/Help'
 import { Play } from './impl/Play'
@@ -11,6 +10,7 @@ import { RemoveLatest } from './impl/RemoveLatest'
 import { Remove } from './impl/Remove'
 import { Queue } from './impl/Queue'
 import { Disconnect } from './impl/Disconnect'
+import { Environment } from '../environment'
 
 export interface Command {
   /**

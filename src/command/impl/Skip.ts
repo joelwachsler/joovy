@@ -1,5 +1,5 @@
 import { Message } from 'discord.js'
-import { Environment } from '../../connectionHandler'
+import { Environment } from '../../environment'
 import { Command, ArgParser } from '../command'
 
 export class Skip implements Command {
