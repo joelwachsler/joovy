@@ -11,6 +11,7 @@ import { Remove } from './impl/Remove'
 import { Queue } from './impl/Queue'
 import { Disconnect } from './impl/Disconnect'
 import { Environment } from '../environment'
+import { TrackUtil } from './TrackUtil'
 
 export interface Command {
   /**
@@ -31,9 +32,11 @@ export interface Command {
 
 export namespace Command {
   export const init = (env: Environment, pool: Pool<any>) => {
+    const trackUtil = new TrackUtil(env, pool)
+
     const cmds = [
-      new PlayNext(env, pool),
-      new Play(env, pool),
+      new PlayNext(env, trackUtil),
+      new Play(env, trackUtil),
       new Seek(env),
       new Skip(env),
       new Bass(env),
