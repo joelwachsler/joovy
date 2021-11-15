@@ -21,9 +21,36 @@ interface SendMessageArgs {
   message: Message
 }
 
-export const initMsgHandler = (msgObservable: Observable<Message>) => {
+export interface ErrorMessageArgs {
+  description: string
+  message: Message
+}
+
+export const initMsgHandler = (message$: Observable<Message>) => {
   const msgObservers = new Map<string, Subject<Message>>()
-  msgObservable.pipe(
+
+  const sendErrorMessage = new Subject<ErrorMessageArgs>()
+  sendErrorMessage.subscribe(async ({ description, message }) => {
+    await sendMessage({
+      msg: description,
+      message,
+    })
+  })
+
+  messageHandler(message$, sendErrorMessage).subscribe(({ message, channelId }) => {
+    if (!msgObservers.has(channelId)) {
+      const subject = new Subject<Message>()
+      msgObservers.set(channelId, subject)
+      logger.info(`Initializing new observer for: ${channelId}`)
+      initCmdObserver(message, subject, () => msgObservers.delete(channelId))
+    }
+
+    msgObservers.get(channelId)!.next(message)
+  })
+}
+
+export const messageHandler = (message$: Observable<Message>, sendErrorMessage: Subject<ErrorMessageArgs>) => {
+  return message$.pipe(
     // Ignore bot messages
     filter(message => !message.author.bot),
     // Only process messages starting with a slash
@@ -41,8 +68,8 @@ export const initMsgHandler = (msgObservable: Observable<Message>) => {
     }),
     catchError((e, caught) => {
       if (e instanceof ErrorWithMessage) {
-        sendMessage({
-          msg: e.errorMsg,
+        sendErrorMessage.next({
+          description: e.errorMsg,
           message: e.message,
         })
       } else {
@@ -51,16 +78,7 @@ export const initMsgHandler = (msgObservable: Observable<Message>) => {
       return caught
     }),
     share(),
-  ).subscribe(({ message, channelId }) => {
-    if (!msgObservers.has(channelId)) {
-      const subject = new Subject<Message>()
-      msgObservers.set(channelId, subject)
-      logger.info(`Initializing new observer for: ${channelId}`)
-      initCmdObserver(message, subject, () => msgObservers.delete(channelId))
-    }
-
-    msgObservers.get(channelId)!.next(message)
-  })
+  )
 }
 
 const initCmdObserver = (
