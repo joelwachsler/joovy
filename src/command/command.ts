@@ -1,16 +1,16 @@
 import { Message } from 'discord.js'
-import { Pool } from 'threads'
+import { Observable } from 'rxjs'
+import { Environment } from '../environment'
 import { Bass } from './impl/Bass'
+import { Disconnect } from './impl/Disconnect'
 import { Help } from './impl/Help'
 import { Play } from './impl/Play'
 import { PlayNext } from './impl/PlayNext'
+import { Queue } from './impl/Queue'
+import { Remove } from './impl/Remove'
+import { RemoveLatest } from './impl/RemoveLatest'
 import { Seek } from './impl/Seek'
 import { Skip } from './impl/Skip'
-import { RemoveLatest } from './impl/RemoveLatest'
-import { Remove } from './impl/Remove'
-import { Queue } from './impl/Queue'
-import { Disconnect } from './impl/Disconnect'
-import { Environment } from '../environment'
 import { TrackUtil } from './TrackUtil'
 
 export interface Command {
@@ -27,12 +27,12 @@ export interface Command {
   /**
    * Will be called if the message sent starts with the one defined in command.
    */
-  handleMessage(message: Message): Promise<void>
+  handleMessage(message: Message): void
 }
 
 export namespace Command {
-  export const init = (env: Environment, pool: Pool<any>) => {
-    const trackUtil = new TrackUtil(env, pool)
+  export const init = (env: Environment, message$: Observable<Message>) => {
+    const trackUtil = new TrackUtil(env)
 
     const cmds = [
       new PlayNext(env, trackUtil),
@@ -47,8 +47,18 @@ export namespace Command {
     ]
 
     const help = new Help(cmds)
+    const cmdsWithHelp = [...cmds, help]
 
-    return new Command.Handler(env, [...cmds, help], help)
+    return message$.forEach(message => {
+      const { content } = message
+      for (const cmd of cmdsWithHelp) {
+        if (cmd.argument.is(content)) {
+          cmd.handleMessage(message)
+          return
+        }
+      }
+      env.sendMessage.next(`Unknown command: \`${message.content}\`, type \`${help.argument.command}\` for available commands.`)
+    })
   }
 
   export class ArgParser {
@@ -103,22 +113,6 @@ export namespace Command {
       static create(arg: string) {
         return new Builder([arg])
       }
-    }
-  }
-
-  export class Handler {
-
-    constructor(private env: Environment, private cmds: Command[], private helpCmd: Help) {}
-
-    async handleMessage(message: Message): Promise<void> {
-      const { content } = message
-      for (const cmd of this.cmds) {
-        if (cmd.argument.is(content)) {
-          return await cmd.handleMessage(message)
-        }
-      }
-
-      this.env.sendMessage.next(`Unknown command: \`${message.content}\`, type \`${this.helpCmd.argument.command}\` for available commands.`)
     }
   }
 }

@@ -9,7 +9,7 @@ export class Seek implements Command {
 
   constructor(private env: Environment) {}
 
-  async handleMessage(message: Message) {
+  handleMessage(message: Message) {
     const seek = message.content.split('/seek ')[1]
     if (seek) {
       const splitSeek = seek.split(':')

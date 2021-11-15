@@ -9,7 +9,7 @@ export class Bass implements Command {
 
   constructor(private env: Environment) {}
 
-  async handleMessage(message: Message) {
+  handleMessage(message: Message) {
     this.env.setBassLevel.next(Number(message.content.split(' ')[1]))
   }
 }

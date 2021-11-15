@@ -23,3 +23,11 @@ export const initEnvironment = () => {
     seek: new Subject<number>(),
   }
 }
+
+export const destroyEnv = (env: Environment) => {
+  Object.values(env).forEach(envValue => {
+    if (envValue instanceof Subject) {
+      envValue.complete()
+    }
+  })
+}
