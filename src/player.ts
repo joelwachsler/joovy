@@ -17,12 +17,12 @@ import { ObservablePlaylist } from './observablePlaylist'
 import { Ytdl } from './ytdl'
 
 export namespace Player {
-  export const init = ({ message, env }: InitArgs) => {
+  export const init = ({ initialMessage, env }: InitArgs) => {
     const throwError = (err: string) => {
       throw Error(`Unable to join voice channel: ${err}`)
     }
 
-    const voiceChannel = message.member?.voice.channel ?? throwError('Could not determine voice channel')
+    const voiceChannel = initialMessage.member?.voice.channel ?? throwError('Could not determine voice channel')
     logger.info(`Joining channel: ${voiceChannel?.id}...`)
 
     const connection = joinVoiceChannel({
@@ -163,7 +163,7 @@ export namespace Player {
     })
   }
   export interface InitArgs {
-    message: Message
+    initialMessage: Message
     env: Environment
   }
 }
