@@ -8,7 +8,7 @@ export class Disconnect implements Command {
 
   constructor(private env: Environment) {}
 
-  async handleMessage(_: Message) {
+  handleMessage(_: Message) {
     this.env.disconnect.next(null)
   }
 }

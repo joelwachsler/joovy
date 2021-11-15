@@ -8,7 +8,7 @@ export class Queue implements Command {
 
   constructor(private env: Environment) {}
 
-  async handleMessage(_: Message) {
+  handleMessage(_: Message) {
     this.env.printQueueRequest.next(null)
   }
 }

@@ -17,7 +17,7 @@ import { ObservablePlaylist } from './observablePlaylist'
 import { Ytdl } from './ytdl'
 
 export namespace Player {
-  export const init = async ({ message, env }: InitArgs) => {
+  export const init = ({ message, env }: InitArgs) => {
     const throwError = (err: string) => {
       throw Error(`Unable to join voice channel: ${err}`)
     }

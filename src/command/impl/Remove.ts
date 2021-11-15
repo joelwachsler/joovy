@@ -10,7 +10,7 @@ export class Remove implements Command {
 
   constructor(private env: Environment) {}
 
-  async handleMessage(message: Message) {
+  handleMessage(message: Message) {
     const removeCmd = message.content.split(' ')
     const from = Number(removeCmd[1])
     const to = Number(removeCmd[2] ?? from)

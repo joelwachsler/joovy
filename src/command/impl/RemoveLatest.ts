@@ -8,7 +8,7 @@ export class RemoveLatest implements Command {
 
   constructor(private env: Environment) {}
 
-  async handleMessage(_: Message) {
+  handleMessage(_: Message) {
     this.env.removeLatestFromQueue.next(null)
   }
 }

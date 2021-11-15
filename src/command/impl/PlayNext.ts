@@ -10,10 +10,8 @@ export class PlayNext implements Command {
 
   constructor(private env: Environment, private trackUtil: TrackUtil) {}
 
-  async handleMessage(message: Message) {
-    const track = await this.trackUtil.addTrackToQueue(message)
-    if (track) {
-      this.env.addNextTrackToQueue.next(track)
-    }
+  handleMessage(message: Message) {
+    this.trackUtil.addTrackToQueue(message)
+      .forEach(track => this.env.addNextTrackToQueue.next(track))
   }
 }

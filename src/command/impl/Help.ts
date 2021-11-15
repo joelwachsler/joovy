@@ -7,7 +7,7 @@ export class Help implements Command {
 
   constructor(private cmds: Command[]) {}
 
-  async handleMessage(message: Message) {
+  handleMessage(message: Message) {
     const commands: Command[] = [...this.cmds, this]
 
     const help = new MessageEmbed()

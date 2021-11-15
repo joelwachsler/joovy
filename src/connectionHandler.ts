@@ -1,10 +1,8 @@
 import { Message, MessageEmbed } from 'discord.js'
 import { catchError, filter, map, Observable, share, Subject } from 'rxjs'
-import { Pool } from 'threads'
 import { Command } from './command/command'
-import { initEnvironment } from './environment'
+import { destroyEnv, initEnvironment } from './environment'
 import { logger } from './logger'
-import { MsgEvent } from './main'
 import { ObservablePlaylist } from './observablePlaylist'
 import { Player } from './player'
 
@@ -23,20 +21,21 @@ interface SendMessageArgs {
   message: Message
 }
 
-export const initMsgHandler = (msgObservable: Observable<MsgEvent>) => {
-  const msgObservers = new Map<string, Subject<MsgEvent>>()
+export const initMsgHandler = (msgObservable: Observable<Message>) => {
+  const msgObservers = new Map<string, Subject<Message>>()
   msgObservable.pipe(
     // Ignore bot messages
-    filter(v => !v.message.author.bot),
+    filter(message => !message.author.bot),
     // Only process messages starting with a slash
-    filter(v => v.message.content.startsWith('/')),
-    map(v => {
-      const channelId = v.message.member?.voice.channel?.id
+    filter(message => message.content.startsWith('/')),
+    map(message => {
+      const channelId = message.member?.voice.channel?.id
       if (!channelId) {
-        throw new ErrorWithMessage('Could not determine which channel you are in, have you joined one?', v.message)
+        throw new ErrorWithMessage('Could not determine which channel you are in, have you joined one?', message)
       }
+
       return {
-        ...v,
+        message,
         channelId,
       }
     }),
@@ -52,30 +51,26 @@ export const initMsgHandler = (msgObservable: Observable<MsgEvent>) => {
       return caught
     }),
     share(),
-  ).subscribe(async v => {
-    if (!msgObservers.has(v.channelId)) {
-      const subject = new Subject<MsgEvent>()
-      msgObservers.set(v.channelId, subject)
-      logger.info(`Initializing new observer for: ${v.channelId}`)
-      await initCmdObserver(v.message, v.pool, subject, () => msgObservers.delete(v.channelId))
+  ).subscribe(({ message, channelId }) => {
+    if (!msgObservers.has(channelId)) {
+      const subject = new Subject<Message>()
+      msgObservers.set(channelId, subject)
+      logger.info(`Initializing new observer for: ${channelId}`)
+      initCmdObserver(message, subject, () => msgObservers.delete(channelId))
     }
 
-    msgObservers.get(v.channelId)!.next(v)
+    msgObservers.get(message.channelId)!.next(message)
   })
 }
 
-const initCmdObserver = async (
-  message: Message,
-  pool: Pool<any>,
-  channelObserver: Subject<MsgEvent>,
+const initCmdObserver = (
+  initialMessage: Message,
+  channelObserver$: Subject<Message>,
   unsubscribe: () => void,
 ) => {
-  const channelObserverWithMsg = channelObserver
-    .pipe(map(v => ({ ...v, content: v.message.content })))
-
   const env = initEnvironment()
 
-  env.sendMessage.subscribe(async msg => sendMessage({ msg, message })
+  env.sendMessage.subscribe(async msg => sendMessage({ msg, message: initialMessage })
     .then(async sentMsg => {
       if (sentMsg.embeds[0].title?.startsWith('Queue')) {
         env.reprintQueueOnReaction.next(sentMsg)
@@ -90,7 +85,7 @@ const initCmdObserver = async (
     }))
 
   ObservablePlaylist.init(env)
-  await Player.init({ message, env })
+  Player.init({ message: initialMessage, env })
 
   env.addTrackToQueue.subscribe(({ name }) => {
     env.sendMessage.next(`${name} has been added to the queue.`)
@@ -100,23 +95,12 @@ const initCmdObserver = async (
     env.sendMessage.next(`${name} will be played next.`)
   })
 
-  const commands = Command.init(env, pool)
-
-  const observer = channelObserverWithMsg.subscribe({
-    next: async v => {
-      await commands.handleMessage(v.message)
-    },
-  })
+  Command.init(env, channelObserver$)
 
   env.disconnect.subscribe(_ => {
     env.sendMessage.next('Bye!')
-    Object.values(env).forEach(envValue => {
-      if (envValue instanceof Subject) {
-        envValue.complete()
-      }
-    })
-    observer.unsubscribe()
-    channelObserver.complete()
+    destroyEnv(env)
+    channelObserver$.complete()
     unsubscribe()
   })
 }

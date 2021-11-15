@@ -8,7 +8,7 @@ export class Skip implements Command {
 
   constructor(private env: Environment) {}
 
-  async handleMessage(_: Message) {
+  handleMessage(_: Message) {
     this.env.nextTrackInPlaylist.next(null)
   }
 }
