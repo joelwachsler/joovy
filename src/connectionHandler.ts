@@ -59,7 +59,7 @@ export const initMsgHandler = (msgObservable: Observable<Message>) => {
       initCmdObserver(message, subject, () => msgObservers.delete(channelId))
     }
 
-    msgObservers.get(message.channelId)!.next(message)
+    msgObservers.get(channelId)!.next(message)
   })
 }
 
@@ -84,9 +84,6 @@ const initCmdObserver = (
       }
     }))
 
-  ObservablePlaylist.init(env)
-  Player.init({ message: initialMessage, env })
-
   env.addTrackToQueue.subscribe(({ name }) => {
     env.sendMessage.next(`${name} has been added to the queue.`)
   })
@@ -95,14 +92,16 @@ const initCmdObserver = (
     env.sendMessage.next(`${name} will be played next.`)
   })
 
-  Command.init(env, channelObserver$)
-
   env.disconnect.subscribe(_ => {
     env.sendMessage.next('Bye!')
     destroyEnv(env)
     channelObserver$.complete()
     unsubscribe()
   })
+
+  ObservablePlaylist.init(env)
+  Player.init({ initialMessage, env })
+  Command.init(env, channelObserver$)
 }
 
 export class EditedMessage {
