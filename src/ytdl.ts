@@ -1,19 +1,16 @@
 import { FFmpeg, opus as Opus } from 'prism-media'
+import { Readable } from 'stream'
 import ytdl, { downloadOptions as DownloadOptions } from 'ytdl-core'
 import { logger } from './logger'
 
 export namespace Ytdl {
 
-  export const createStream = async (args: CreateStreamArgs): Promise<Opus.Encoder> => {
+  export const createStream = async (args: CreateStreamArgs): Promise<Readable> => {
     const transcoder = new FFmpeg({ args: createFfmpegArgs(args) })
     const inputStream = await createYtdlStream(args.url, args.ytdlOptions)
     const output = inputStream.pipe(transcoder)
 
-    const opus = new Opus.Encoder({
-      rate: 48000,
-      channels: 2,
-      frameSize: 960,
-    })
+    const opus = new Opus.OggDemuxer()
 
     const outputStream = output.pipe(opus)
     output.on('error', e => outputStream.emit('error', e))
@@ -71,8 +68,10 @@ export namespace Ytdl {
       '0',
       '-loglevel',
       '0',
+      '-acodec',
+      'libopus',
       '-f',
-      's16le',
+      'opus',
       '-ar',
       '48000',
       '-ac',

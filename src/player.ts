@@ -108,9 +108,7 @@ export namespace Player {
 
         dl.on('error', err => handleError(err, track))
 
-        resource = createAudioResource(dl, {
-          inputType: StreamType.Opus,
-        })
+        resource = createAudioResource(dl)
 
         player.play(resource)
 
