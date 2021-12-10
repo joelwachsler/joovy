@@ -48,10 +48,6 @@ test('should ignore bot messages', () =>  {
 test('should ignore messages not starting with a slash', () =>  {
   scheduler.run(({ expectObservable, hot }) => {
     const event = createTestEvent({
-      author: {
-        bot: false,
-        id: 'testAuthorId',
-      },
       content: 'test',
     })
 
@@ -63,10 +59,6 @@ test('should ignore messages not starting with a slash', () =>  {
 test('should join channel if not previously joined', () =>  {
   scheduler.run(({ expectObservable, hot }) => {
     const event = createTestEvent({
-      author: {
-        bot: false,
-        id: 'testAuthorId',
-      },
       content: '/play test'
     })
 
