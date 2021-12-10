@@ -7,7 +7,7 @@ jobs:
       - name: Setup build tools
         run: |
           sudo apt-get update
-          sudo apt-get install build-essential -y
+          sudo apt-get install build-essential autoconf automake g++ libtool -y
 
       - name: Checkout
         uses: actions/checkout@v2
