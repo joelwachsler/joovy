@@ -2,7 +2,7 @@ import { forkJoin, map, mergeMap, Observable } from 'rxjs';
 import { JMessage } from './JMessage';
 import { ObjectStore, Store, StringStore } from './Store';
 
-export interface Environment {
+export interface Event {
   store: {
     string: StringStore
     object: ObjectStore
@@ -10,8 +10,8 @@ export interface Environment {
   message: JMessage
 }
 
-export namespace Environment {
-  export const from = (message$: Observable<JMessage>): Observable<Environment> => {
+export namespace Event {
+  export const from = (message$: Observable<JMessage>): Observable<Event> => {
     return message$.pipe(
       mergeMap(message => {
         return forkJoin({
