@@ -5,8 +5,10 @@ import { handleMessage } from './messageHandler'
 import { Store } from './Store'
 
 export const createScheduler = () => {
-  return new TestScheduler((actual, expected) => expect(actual).toEqual(expected))
+  return new TestScheduler((actual, expected) => expect(actual).toMatchObject(expected))
 }
+
+const scheduler = createScheduler()
 
 const createTestEvent = (input?: Partial<JMessage>): Event => {
   const message: JMessage = {
@@ -29,46 +31,46 @@ const createTestEvent = (input?: Partial<JMessage>): Event => {
 }
 
 test('should ignore bot messages', () =>  {
-  const scheduler = createScheduler()
   scheduler.run(({ expectObservable, hot }) => {
     const event = createTestEvent({
       author: {
         bot: true,
-        id: '/test',
+        id: 'testAuthorId',
       },
+      content: '/test'
     })
 
-    const source$ = hot<Event>('a-', { a: event })
-    expectObservable(handleMessage(source$)).toBe('--')
+    const source$ = hot<Event>('a', { a: event })
+    expectObservable(handleMessage(source$)).toBe('r', { r: { result: { ignored: '/test was sent by a bot' } } })
   })
 })
 
 test('should ignore messages not starting with a slash', () =>  {
-  const scheduler = createScheduler()
   scheduler.run(({ expectObservable, hot }) => {
     const event = createTestEvent({
       author: {
         bot: false,
-        id: 'test',
+        id: 'testAuthorId',
       },
+      content: 'test',
     })
 
-    const source$ = hot<Event>('a-', { a: event })
-    expectObservable(handleMessage(source$)).toBe('--')
+    const source$ = hot<Event>('a', { a: event })
+    expectObservable(handleMessage(source$)).toBe('r', { r: { result: { ignored: 'test does not start with a slash' } } })
   })
 })
 
 test('should join channel if not previously joined', () =>  {
-  const scheduler = createScheduler()
   scheduler.run(({ expectObservable, hot }) => {
     const event = createTestEvent({
       author: {
         bot: false,
-        id: '/play test',
+        id: 'testAuthorId',
       },
+      content: '/play test'
     })
 
-    const source$ = hot<Event>('a-----', { a: event })
-    expectObservable(handleMessage(source$)).toBe('a-----', { a: { player: { joined: 'testChannelId' } } })
+    const source$ = hot<Event>('a', { a: event })
+    expectObservable(handleMessage(source$)).toBe('r', { r: { result: { player: { joined: 'testing' } } } })
   })
 })
