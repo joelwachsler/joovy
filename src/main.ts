@@ -1,7 +1,7 @@
 import { Client, Intents, Message } from 'discord.js'
 import { fromEvent, map, Observable } from 'rxjs'
 import { Config } from './config'
-import { Environment } from './Environment'
+import { Event } from './Event'
 import { logger } from './logger'
 import { handleMessage } from './messageHandler'
 
@@ -21,9 +21,9 @@ const main = async () => {
   })
 
   const msgEvent$ = fromEvent(client, 'messageCreate') as Observable<Message>
-  handleMessage(msgEvent$.pipe(Environment.from))
-    .subscribe(result => {
-      logger.info(`${result.message.content} by ${result.message.author} has been handled with result: ${result}!`)
+  handleMessage(msgEvent$.pipe(Event.from))
+    .subscribe(({ message, result }) => {
+      logger.info(`${message.content} by ${message.author} has been handled with result: ${result}!`)
     })
 
   client.login(Config.init().token)
