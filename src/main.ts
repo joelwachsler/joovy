@@ -22,8 +22,8 @@ const main = async () => {
 
   const msgEvent$ = fromEvent(client, 'messageCreate') as Observable<Message>
   handleMessage(msgEvent$.pipe(Event.from))
-    .subscribe(({ message, result }) => {
-      logger.info(`${message.content} by ${message.author} has been handled with result: ${result}!`)
+    .subscribe(({ event, result }) => {
+      logger.info(`${event.message.content} by ${event.message.author} has been handled with result: ${result ? JSON.stringify(result) : result}!`)
     })
 
   client.login(Config.init().token)
