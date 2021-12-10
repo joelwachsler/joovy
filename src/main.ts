@@ -22,20 +22,9 @@ const main = async () => {
 
   const msgEvent$ = fromEvent(client, 'messageCreate') as Observable<Message>
   handleMessage(msgEvent$.pipe(Environment.from))
-    .subscribe(event => {
-      logger.info(`${event.message.content} by ${event.message.author} has been handled!`)
+    .subscribe(result => {
+      logger.info(`${result.message.content} by ${result.message.author} has been handled with result: ${result}!`)
     })
-  // msgEvent$
-  //   .pipe(
-  //     map(Environment.from),
-  //     filter(({ message }) => !message.author.bot),
-  //     filter(({ message }) => message.content.startsWith('/')),
-  //   )
-  //   .subscribe(msg => {
-  //     logger.info(`Got a new message: ${msg}`)
-  //   })
-
-  // initMsgHandler(fromEvent(client, 'messageCreate') as Observable<Message>)
 
   client.login(Config.init().token)
   logger.info('Done creating client!')

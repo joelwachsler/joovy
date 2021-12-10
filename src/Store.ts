@@ -1,19 +1,18 @@
 import { defer, Observable, of } from 'rxjs'
 import { JMessage } from './JMessage'
 
-interface BaseStore<T> {
+interface Store<T> {
   set(key: string, value: T): Observable<void>
   get(key: string): Observable<T | undefined>
   remove(key: string): Observable<void>
 }
 
-export interface Store extends BaseStore<string> { }
-
-export interface ObjectStore extends BaseStore<any> { }
+export type StringStore = Store<string>
+export type ObjectStore = Store<any>
 
 export namespace Store {
 
-  class InMemoryStore implements BaseStore<any> {
+  class InMemoryStore implements Store<any> {
     private storage = new Map<string, any>()
 
     set(key: string, value: any) {
@@ -35,13 +34,17 @@ export namespace Store {
     }
   }
 
-  const storeStore = new Map<string, Store>()
+  const storeStore = new Map<string, StringStore>()
 
-  export const getOrCreateStore = (msg: JMessage): Observable<Store> => {
+  export const getOrCreateStringStore = (msg: JMessage): Observable<StringStore> => {
     return of(getOrCreateInMemoryStore(msg))
   }
 
-  export const getOrCreateInMemoryStore = (msg: JMessage): Store => {
+  export const getOrCreateObjectStore = (msg: JMessage): Observable<ObjectStore> => {
+    return of(getOrCreateInMemoryStore(msg))
+  }
+
+  export const getOrCreateInMemoryStore = (msg: JMessage): Store<any> => {
     if (!storeStore.has(msg.channelId)) {
       storeStore.set(msg.channelId, new InMemoryStore())
     }
