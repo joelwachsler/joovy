@@ -21,7 +21,10 @@ const createTestMessage = (input?: Partial<JMessage>): Environment => {
 
   return {
     message,
-    store: Store.getOrCreateInMemoryStore(message),
+    store: {
+      string: Store.getOrCreateInMemoryStore(message),
+      object: Store.getOrCreateInMemoryStore(message),
+    }
   }
 }
 
@@ -54,5 +57,21 @@ test('should ignore messages not starting with a slash', () =>  {
 
     const source$ = hot<Environment>('a-', { a: message })
     expectObservable(handleMessage(source$)).toBe('--')
+  })
+})
+
+test('should join channel if not previously joined', () =>  {
+  const scheduler = createScheduler()
+  scheduler.run(({ expectObservable, hot }) => {
+
+    const message = createTestMessage({
+      author: {
+        bot: false,
+        id: '/play test',
+      },
+    })
+
+    const source$ = hot<Environment>('a-', { a: message })
+    expectObservable(handleMessage(source$)).toBe('-a', { a: { player: { joined: 'testChannelId' } } })
   })
 })
