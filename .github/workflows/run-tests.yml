@@ -4,6 +4,11 @@ jobs:
   Run-tests:
     runs-on: self-hosted
     steps:
+      - name: Setup build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install build-essential -y
+
       - name: Checkout
         uses: actions/checkout@v2
 
