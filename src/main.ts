@@ -20,7 +20,7 @@ const main = async () => {
     logger.info('Client is ready!')
 
     const msgEvent$ = fromEvent(client, 'messageCreate') as Observable<Message>
-    handleMessage(msgEvent$.pipe(mergeMap(Event.from)))
+    handleMessage(msgEvent$.pipe(Event.from))
       .subscribe(event => {
         const result = event.result
         logger.info(`${event.message.content} by ${event.message.author} has been handled with result: ${result ? JSON.stringify(result) : result}!`)

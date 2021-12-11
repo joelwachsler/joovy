@@ -1,10 +1,9 @@
-import { defer, Observable, of } from 'rxjs'
+import { Observable, of } from 'rxjs'
 import { TestScheduler } from 'rxjs/testing'
 import { Event } from './Event'
 import { JMessage } from './JMessage'
 import { handleMessage } from './messageHandler'
 import { Player } from './player/Player'
-import { Store } from './Store'
 
 export const createScheduler = () => {
   return new TestScheduler((actual, expected) => expect(actual).toMatchObject(expected))
@@ -12,18 +11,17 @@ export const createScheduler = () => {
 
 const scheduler = createScheduler()
 
-class PlayerFake implements Player {
-
-  play(track: Player.Track): Observable<void> {
-    throw new Error('Method not implemented.')
-  }
-
-  disconnect(): void {
-    throw new Error('Method not implemented.')
-  }
-}
-
 const createTestEvent = (input?: Partial<JMessage>): Event => {
+  class PlayerFake implements Player {
+
+    play(track: Player.Track): Observable<void> {
+      throw new Error('Method not implemented.')
+    }
+
+    disconnect(): void {
+      throw new Error('Method not implemented.')
+    }
+  }
 
   class EventFakeBase {
     get message() {
@@ -38,13 +36,6 @@ const createTestEvent = (input?: Partial<JMessage>): Event => {
       }
     }
 
-    get store() {
-      return {
-        string: Store.getOrCreateInMemoryStore(this.message),
-        object: Store.getOrCreateInMemoryStore(this.message),
-      }
-    }
-
     get factory() {
       return {
         player: of(new PlayerFake())
@@ -52,9 +43,7 @@ const createTestEvent = (input?: Partial<JMessage>): Event => {
     }
   }
 
-  return new class EventFake
-    extends Event.WithResult(EventFakeBase)
-    implements Event { }
+  return new class EventFake extends Event.WithStore(Event.WithResult(EventFakeBase)) { }
 }
 
 test('should ignore bot messages', () =>  {
