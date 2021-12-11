@@ -1,7 +1,9 @@
+import { defer, Observable, of } from 'rxjs'
 import { TestScheduler } from 'rxjs/testing'
 import { Event } from './Event'
 import { JMessage } from './JMessage'
 import { handleMessage } from './messageHandler'
+import { Player } from './player/Player'
 import { Store } from './Store'
 
 export const createScheduler = () => {
@@ -9,6 +11,17 @@ export const createScheduler = () => {
 }
 
 const scheduler = createScheduler()
+
+class PlayerFake implements Player {
+
+  play(track: Player.Track): Observable<void> {
+    throw new Error('Method not implemented.')
+  }
+
+  disconnect(): void {
+    throw new Error('Method not implemented.')
+  }
+}
 
 const createTestEvent = (input?: Partial<JMessage>): Event => {
   const message: JMessage = {
@@ -21,13 +34,16 @@ const createTestEvent = (input?: Partial<JMessage>): Event => {
     ...input,
   }
 
-  return {
+  return Event.withResult({
     message,
+    factory:  {
+      player: of(new PlayerFake()),
+    },
     store: {
       string: Store.getOrCreateInMemoryStore(message),
       object: Store.getOrCreateInMemoryStore(message),
     }
-  }
+  })
 }
 
 test('should ignore bot messages', () =>  {

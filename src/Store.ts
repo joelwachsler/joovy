@@ -2,7 +2,7 @@ import { defer, Observable, of } from 'rxjs'
 import { JMessage } from './JMessage'
 
 interface Store<T> {
-  set(key: string, value: T): Observable<void>
+  put(key: string, value: T): Observable<T>
   get(key: string): Observable<T | undefined>
   remove(key: string): Observable<void>
 }
@@ -15,10 +15,10 @@ export namespace Store {
   class InMemoryStore implements Store<any> {
     private storage = new Map<string, any>()
 
-    set(key: string, value: any) {
+    put(key: string, value: any) {
       return defer(() => {
         this.storage.set(key, value)
-        return of(undefined)
+        return of(value)
       })
     }
 
