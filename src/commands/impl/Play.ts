@@ -16,18 +16,20 @@ export class Play implements Command {
 
   private getOrCreatePlayer(event: Event): Observable<Player> {
     const playerKey = 'player'
-    const objectStore = event.store.object
+    return event.store.object.pipe(
+      mergeMap(objectStore => {
+        const createPlayer = (): Observable<Player> => {
+          return event.factory.player.pipe(
+            mergeMap(newPlayer => objectStore.put(playerKey, newPlayer)),
+          )
+        }
 
-    const createPlayer = (): Observable<Player> => {
-      return event.factory.player.pipe(
-        mergeMap(newPlayer => objectStore.put(playerKey, newPlayer)),
-      )
-    }
-
-    return objectStore.get(playerKey).pipe(
-      map(result => of(result as Player)),
-      defaultIfEmpty(createPlayer()),
-      mergeMap(p => p),
+        return objectStore.get(playerKey).pipe(
+          map(result => of(result as Player)),
+          defaultIfEmpty(createPlayer()),
+          mergeMap(p => p),
+        )
+      })
     )
   }
 
