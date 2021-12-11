@@ -18,10 +18,8 @@ export interface Command {
   /**
    * Will be called if the message sent matches the one defined in argument.
    */
-  handleMessage(event: Event): Observable<EventWithResult>
+  handleMessage(event: Event): Observable<Event>
 }
-
-export type EventWithResult = { event: Event, result?: any }
 
 export namespace Command {
   const cmds = [
@@ -30,7 +28,7 @@ export namespace Command {
 
   const help = new Help()
 
-  export const handle = (event: Event): Observable<EventWithResult> => {
+  export const handle = (event: Event): Observable<Event> => {
     for (const cmd of cmds) {
       if (cmd.argument.is(event.message.content)) {
         return cmd.handleMessage(event)

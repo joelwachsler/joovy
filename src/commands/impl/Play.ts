@@ -2,7 +2,7 @@ import { defaultIfEmpty, map, mapTo, mergeMap, Observable, of } from 'rxjs';
 import { Event } from '../../Event';
 import { Player } from '../../player/Player';
 import { ArgParser } from '../ArgParser';
-import { Command, EventWithResult } from '../command';
+import { Command } from '../command';
 
 export class Play implements Command {
   argument = ArgParser.create('play')
@@ -31,18 +31,15 @@ export class Play implements Command {
     )
   }
 
-  handleMessage(event: Event): Observable<EventWithResult> {
+  handleMessage(event: Event): Observable<Event> {
     return this.getOrCreatePlayer(event)
       .pipe(
         map(player => {}),
-        mapTo({
-          event,
-          result: {
-            player: {
-              joined: 'testing'
-            }
+        mapTo(event.withResult({
+          player: {
+            joined: 'testing',
           }
-        }),
+        }))
       )
   }
 }

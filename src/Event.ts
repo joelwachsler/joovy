@@ -5,48 +5,70 @@ import { Player } from './player/Player';
 import { ObjectStore, Store, StringStore } from './Store';
 
 export interface Event {
-  store: {
-    string: StringStore
-    object: ObjectStore
-  }
+  store: Event.Store
   factory: Event.Factory
   message: JMessage
-  addResult(resultToAdd: any): void
+  withResult(resultToAdd: any): this
   result: any
 }
 
 export namespace Event {
-  export interface Factory {
-    player: Player.Factory
-  }
-
-  export class FactoryImpl implements Factory {
-    constructor(private message: Message) {}
-
-    get player() {
-      return Player.from(this.message)
-    }
-  }
-
-  export type JMessageAndFactory = { message: JMessage, factory: Factory }
-
-  export const from = ({ message, factory }: JMessageAndFactory): Observable<Event> => {
+  export const from = (message: Message): Observable<Event> => {
     return forkJoin({
       string: Store.getOrCreateStringStore(message),
       object: Store.getOrCreateObjectStore(message),
     })
-    .pipe(map(store => withResult({ store, message, factory })))
+    .pipe(
+      map(store => Base(store, message)),
+      map(EventClass => WithResult(EventClass)),
+      map(EventClass => WithFactory(EventClass)),
+      map(EventClass => new EventClass()),
+    )
   }
 
-  export const withResult = (obj: any) => {
-    let result = {}
+  export interface Store {
+    string: StringStore
+    object: ObjectStore
+  }
 
-    return {
-      ...obj,
-      result,
-      addResult(resultToAdd: any) {
-        result = {...result, resultToAdd}
-      },
+  export interface Factory {
+    player: Player.Factory
+  }
+
+  type Constructor<T = {}> = new (...args: any[]) => T
+  type BaseConstructor = Constructor<{ message: Message }>
+
+  const Base = (store: Store, message: Message) => {
+    return class {
+      store = store
+      message = message
+    }
+  }
+
+  const WithFactory = <TBase extends BaseConstructor>(Base: TBase) => {
+    return class extends Base implements Factory {
+      get player() {
+        return Player.from(this.message)
+      }
+
+      get factory() {
+        return this
+      }
+    }
+  }
+
+  export const WithResult = <TBase extends Constructor>(Base: TBase) => {
+    return class extends Base {
+      private _result: any
+
+      get result() {
+        return this._result
+      }
+
+      withResult(resultToAdd: any) {
+        this._result = {...this._result, ...resultToAdd}
+        return this
+      }
     }
   }
 }

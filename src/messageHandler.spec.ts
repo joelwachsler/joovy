@@ -24,26 +24,37 @@ class PlayerFake implements Player {
 }
 
 const createTestEvent = (input?: Partial<JMessage>): Event => {
-  const message: JMessage = {
-    author: {
-      bot: false,
-      id: 'testAuthorId',
-    },
-    channelId: 'testChannelId',
-    content: 'testContent',
-    ...input,
+
+  class EventFakeBase {
+    get message() {
+      return {
+        author: {
+          bot: false,
+          id: 'testAuthorId',
+        },
+        channelId: 'testChannelId',
+        content: 'testContent',
+        ...input,
+      }
+    }
+
+    get store() {
+      return {
+        string: Store.getOrCreateInMemoryStore(this.message),
+        object: Store.getOrCreateInMemoryStore(this.message),
+      }
+    }
+
+    get factory() {
+      return {
+        player: of(new PlayerFake())
+      }
+    }
   }
 
-  return Event.withResult({
-    message,
-    factory:  {
-      player: of(new PlayerFake()),
-    },
-    store: {
-      string: Store.getOrCreateInMemoryStore(message),
-      object: Store.getOrCreateInMemoryStore(message),
-    }
-  })
+  return new class EventFake
+    extends Event.WithResult(EventFakeBase)
+    implements Event { }
 }
 
 test('should ignore bot messages', () =>  {
