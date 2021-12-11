@@ -19,14 +19,10 @@ const main = async () => {
   client.once('ready', () => {
     logger.info('Client is ready!')
 
-    const createEvent = (message: Message) => Event.from({
-      message,
-      factory: new Event.FactoryImpl(message)
-    })
-
     const msgEvent$ = fromEvent(client, 'messageCreate') as Observable<Message>
-    handleMessage(msgEvent$.pipe(mergeMap(createEvent)))
-      .subscribe(({ event, result }) => {
+    handleMessage(msgEvent$.pipe(mergeMap(Event.from)))
+      .subscribe(event => {
+        const result = event.result
         logger.info(`${event.message.content} by ${event.message.author} has been handled with result: ${result ? JSON.stringify(result) : result}!`)
       })
   })
