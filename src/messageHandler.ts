@@ -1,15 +1,15 @@
-import { mergeMap, Observable, of } from 'rxjs'
+import { mergeMap, Observable } from 'rxjs'
 import { handle } from './commands/command'
-import JEvent from './jevent/JEvent'
+import JEvent, { ResultEntry } from './jevent/JEvent'
 
-export const handleMessage = (event$: Observable<JEvent>): Observable<JEvent> => {
+export const handleMessage = (event$: Observable<JEvent>): Observable<ResultEntry> => {
   return event$.pipe(
     mergeMap(event => {
       const message = event.message
       if (message.author.bot) {
-        return of(event.withResult({ ignored: `${message.content} was sent by a bot` }))
+        return event.withResult({ ignored: `${message.content} was sent by a bot` })
       } else if (!message.content.startsWith('/')) {
-        return of(event.withResult({ ignored: `${message.content} does not start with a slash` }))
+        return event.withResult({ ignored: `${message.content} does not start with a slash` })
       } else {
         return handle(event)
       }

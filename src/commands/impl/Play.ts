@@ -1,5 +1,5 @@
 import { defaultIfEmpty, map, mergeMap, Observable, of } from 'rxjs'
-import JEvent from '../../jevent/JEvent'
+import JEvent, { ResultEntry } from '../../jevent/JEvent'
 import logger from '../../logger'
 import Player from '../../player/Player'
 import ArgParser from '../ArgParser'
@@ -34,17 +34,13 @@ export default class Play implements Command {
     )
   }
 
-  handleMessage(event: JEvent): Observable<JEvent> {
+  handleMessage(event: JEvent): Observable<ResultEntry> {
     return this.getOrCreatePlayer(event)
       .pipe(
         map(_ => {
           logger.info('called')
         }),
-        map(() => event.withResult({
-          player: {
-            joined: 'testing',
-          },
-        })),
+        mergeMap(() => event.withResult({ player: 'joined' })),
       )
   }
 }

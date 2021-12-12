@@ -1,13 +1,12 @@
+import { MessageEmbed } from 'discord.js'
 import { Observable, of } from 'rxjs'
 import { TestScheduler } from 'rxjs/testing'
-import WithEventStore from './jevent/impl/EventStore'
-import WithResult from './jevent/impl/Result'
-import JEvent from './jevent/JEvent'
+import JEvent, { WithBaseFunctionality } from './jevent/JEvent'
 import { JMessage } from './JMessage'
 import { handleMessage } from './messageHandler'
 import Player, { Track } from './player/Player'
 
-export const createScheduler = () => {
+const createScheduler = () => {
   return new TestScheduler((actual, expected) => expect(actual).toMatchObject(expected))
 }
 
@@ -24,27 +23,32 @@ const createTestEvent = (input?: Partial<JMessage>): JEvent => {
     }
   }
 
-  class EventFakeBase {
-    get message() {
-      return {
-        author: {
-          bot: false,
-          id: 'testAuthorId',
-        },
-        channelId: 'testChannelId',
-        content: 'testContent',
-        ...input,
-      }
-    }
+  const message: JMessage = {
+    author: {
+      bot: false,
+      id: 'testAuthorId',
+    },
+    channelId: 'testChannelId',
+    content: 'testContent',
+    ...input,
+  }
 
+  return new class EventFake extends WithBaseFunctionality(message) {
     get factory() {
       return {
         player: of(new PlayerFake()),
       }
     }
-  }
 
-  return new class EventFake extends WithEventStore(WithResult(EventFakeBase)) { }
+    sendMessage(event: JEvent, message: string | MessageEmbed): Observable<JMessage> {
+      event.withResult({ sendMessage: 'called' })
+      if (message instanceof MessageEmbed) {
+        return of(event.message)
+      } else {
+        return of(event.message)
+      }
+    }
+  }
 }
 
 test('should ignore bot messages', () =>  {
@@ -60,9 +64,9 @@ test('should ignore bot messages', () =>  {
     const source$ = hot<JEvent>('a', { a: event })
     expectObservable(handleMessage(source$)).toBe('r', {
       r: {
-        result: [
-          { ignored: '/test was sent by a bot' },
-        ],
+        result: {
+          ignored: '/test was sent by a bot',
+        },
       },
     })
   })
@@ -77,9 +81,9 @@ test('should ignore messages not starting with a slash', () => {
     const source$ = hot<JEvent>('a', { a: event })
     expectObservable(handleMessage(source$)).toBe('r', {
       r: {
-        result: [
-          { ignored: 'test does not start with a slash' },
-        ],
+        result: {
+          ignored: 'test does not start with a slash',
+        },
       },
     })
   })
@@ -91,12 +95,39 @@ test('should join channel if not previously joined', () => {
       content: '/play test',
     })
 
+    const source$ = hot<JEvent>('a-', { a: event })
+    expectObservable(handleMessage(source$)).toBe('(ab)', {
+      a: {
+        result: {
+          commandCalled: '/play',
+        },
+      },
+      b: {
+        result: {
+          player: 'joined',
+        },
+      },
+    })
+  })
+})
+
+test('invalid command should call help', () => {
+  scheduler.run(({ expectObservable, hot }) => {
+    const event = createTestEvent({
+      content: '/invalid command',
+    })
+
     const source$ = hot<JEvent>('a', { a: event })
-    expectObservable(handleMessage(source$)).toBe('r', {
-      r: {
-        result: [
-          { player: { joined: 'testing' } },
-        ],
+    expectObservable(handleMessage(source$)).toBe('(ab)', {
+      a: {
+        result: {
+          invalidCommand: '/invalid command',
+        },
+      },
+      b: {
+        result: {
+          help: 'called',
+        },
       },
     })
   })

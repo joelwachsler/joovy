@@ -48,9 +48,15 @@ export interface Factory {
   }
 }
 
+export type ResultResult = string | Record<string, string>
+
 export interface Result {
-  withResult(resultToAdd: any): this
-  readonly result: any[]
+  withResult(resultToAdd: ResultResult): Observable<ResultEntry>
+}
+
+export interface ResultEntry {
+  result: ResultResult
+  event: JEvent
 }
 
 export interface SendMessage {
