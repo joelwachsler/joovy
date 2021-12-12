@@ -48,7 +48,7 @@ export interface Factory {
   }
 }
 
-export type ResultResult = string | Record<string, string>
+export type ResultResult = string | Record<string, string | boolean>
 
 export interface Result {
   withResult(resultToAdd: ResultResult, ...andThen: Observable<ResultEntry>[]): Observable<ResultEntry>

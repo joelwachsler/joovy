@@ -23,6 +23,6 @@ export default class Help implements Command {
       })))
 
     return event.sendMessage(event, help)
-      .pipe(mergeMapTo(event.withResult({ help: 'called' })))
+      .pipe(mergeMapTo(event.withResult({ help: true })))
   }
 }
