@@ -1,6 +1,8 @@
 import { Observable, of } from 'rxjs'
 import { TestScheduler } from 'rxjs/testing'
-import JEvent, { WithResult, WithStore } from './JEvent'
+import WithEventStore from './jevent/impl/EventStore'
+import WithResult from './jevent/impl/Result'
+import JEvent from './jevent/JEvent'
 import { JMessage } from './JMessage'
 import { handleMessage } from './messageHandler'
 import Player, { Track } from './player/Player'
@@ -42,7 +44,7 @@ const createTestEvent = (input?: Partial<JMessage>): JEvent => {
     }
   }
 
-  return new class EventFake extends WithStore(WithResult(EventFakeBase)) { }
+  return new class EventFake extends WithEventStore(WithResult(EventFakeBase)) { }
 }
 
 test('should ignore bot messages', () =>  {

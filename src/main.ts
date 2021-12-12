@@ -1,7 +1,7 @@
 import { Client, Intents, Message } from 'discord.js'
 import { fromEvent, Observable } from 'rxjs'
 import { init } from './config'
-import * as Event from './JEvent'
+import * as Event from './jevent/JEvent'
 import logger from './logger'
 import { handleMessage } from './messageHandler'
 
