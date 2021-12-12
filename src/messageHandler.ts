@@ -1,8 +1,8 @@
-import { mergeMap, Observable, of } from 'rxjs';
-import { Command } from './commands/command';
-import { Event } from './Event';
+import { mergeMap, Observable, of } from 'rxjs'
+import { handle } from './commands/command'
+import JEvent from './JEvent'
 
-export const handleMessage = (event$: Observable<Event>): Observable<Event> => {
+export const handleMessage = (event$: Observable<JEvent>): Observable<JEvent> => {
   return event$
     .pipe(
       mergeMap(event => {
@@ -12,7 +12,7 @@ export const handleMessage = (event$: Observable<Event>): Observable<Event> => {
         } else if (!message.content.startsWith('/')) {
           return of(event.withResult({ ignored: `${message.content} does not start with a slash` }))
         } else {
-          return Command.handle(event)
+          return handle(event)
         }
       }),
     )

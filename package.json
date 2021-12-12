@@ -5,7 +5,8 @@
   "license": "MIT",
   "scripts": {
     "start": "node --unhandled-rejections=strict -r ts-node/register/transpile-only src/main.ts",
-    "test": "jest"
+    "test": "jest",
+    "lint": "eslint src/**/*.ts"
   },
   "dependencies": {
     "@discordjs/builders": "^0.6.0",
@@ -28,6 +29,9 @@
     "@types/jest": "^27.0.2",
     "@types/node": "^16.7.11",
     "@types/yt-search": "^2.3.2",
+    "@typescript-eslint/eslint-plugin": "^5.6.0",
+    "@typescript-eslint/parser": "^5.6.0",
+    "eslint": "^8.4.1",
     "jest": "^27.3.1",
     "ts-essentials": "^8.1.0",
     "ts-jest": "^27.0.7",

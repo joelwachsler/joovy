@@ -1,4 +1,4 @@
-import { Message } from 'discord.js';
+import { Message } from 'discord.js'
 
 export interface JMessage {
   channelId: string
@@ -9,6 +9,4 @@ export interface JMessage {
   content: string
 }
 
-export namespace JMessage {
-  export const from = (message: Message): JMessage => message
-}
+export const from = (message: Message): JMessage => message
