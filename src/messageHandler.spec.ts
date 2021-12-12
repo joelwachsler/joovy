@@ -13,8 +13,7 @@ const scheduler = createScheduler()
 
 const createTestEvent = (input?: Partial<JMessage>): JEvent => {
   class PlayerFake implements Player {
-
-    play(track: Track): Observable<void> {
+    play(_: Track): Observable<void> {
       throw new Error('Method not implemented.')
     }
 

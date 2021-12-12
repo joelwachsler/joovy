@@ -8,7 +8,7 @@ export default class Help implements Command {
 
   helpText = 'Print this message.'
 
-  handleMessage(event: JEvent): Observable<JEvent> {
+  handleMessage(_: JEvent): Observable<JEvent> {
     throw new Error('Method not implemented.')
   }
 }
