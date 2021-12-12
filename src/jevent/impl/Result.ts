@@ -1,23 +1,15 @@
-import { BaseConstructor, Result } from '../JEvent'
+import { Observable, of } from 'rxjs'
+import JEvent, { BaseConstructor, Result, ResultEntry, ResultResult } from '../JEvent'
 
 const WithResult = <TBase extends BaseConstructor>(Base: TBase) => {
   return class extends Base implements Result {
-    private _result: any[] = []
-
-    get result() {
-      return this._result
-    }
-
-    /**
-     * Needed to prevent jest matcher errors.
-     */
-    set result(result: any[]) {
-      this._result = result
-    }
-
-    withResult(resultToAdd: any) {
-      this.result.push(resultToAdd)
-      return this
+    withResult(resultToAdd: ResultResult): Observable<ResultEntry> {
+      return of({
+        result: resultToAdd,
+        // hacky but makes life so much easier by not having the user
+        // to pass event each time this method is called :)
+        event: this as unknown as JEvent,
+      })
     }
   }
 }
