@@ -1,6 +1,7 @@
 import { Observable } from 'rxjs'
 import JEvent, { ResultEntry } from '../jevent/JEvent'
 import ArgParser from './ArgParser'
+import Disconnect from './impl/Disconnect'
 import Help from './impl/Help'
 import Play from './impl/Play'
 
@@ -23,6 +24,7 @@ export default interface Command {
 
 const cmds = [
   new Play(),
+  new Disconnect(),
 ]
 
 const help = new Help(cmds)

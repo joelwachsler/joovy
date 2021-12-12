@@ -8,11 +8,16 @@ import Command from '../command'
 export default class Play implements Command {
   argument = ArgParser.create('play')
     .withArg('url', arg => arg.or('query'))
-
   helpText = 'Play a track or queue it if a track is already playing.'
 
-  getAudioPlayer(event: JEvent) {
-    event.message.channelId
+  handleMessage(event: JEvent): Observable<ResultEntry> {
+    return this.getOrCreatePlayer(event)
+      .pipe(
+        map(_ => {
+          logger.info('called')
+        }),
+        mergeMap(() => event.withResult({ player: 'joined' })),
+      )
   }
 
   private getOrCreatePlayer(event: JEvent): Observable<Player> {
@@ -32,15 +37,5 @@ export default class Play implements Command {
         )
       }),
     )
-  }
-
-  handleMessage(event: JEvent): Observable<ResultEntry> {
-    return this.getOrCreatePlayer(event)
-      .pipe(
-        map(_ => {
-          logger.info('called')
-        }),
-        mergeMap(() => event.withResult({ player: 'joined' })),
-      )
   }
 }
