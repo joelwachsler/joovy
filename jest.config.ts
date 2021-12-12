@@ -67,7 +67,8 @@ export default {
 
   // An array of directory names to be searched recursively up from the requiring module's location
   // moduleDirectories: [
-  //   "node_modules"
+  //   'node_modules',
+  //   'src',
   // ],
 
   // An array of file extensions your modules use
@@ -81,7 +82,9 @@ export default {
   // ],
 
   // A map from regular expressions to module names or to arrays of module names that allow to stub out resources with a single module
-  // moduleNameMapper: {},
+  moduleNameMapper: {
+    '^rxjs/internal(.*)$': '<rootDir>/node_modules/rxjs/dist/cjs/internal$1',
+  },
 
   // An array of regexp pattern strings, matched against all module paths before considered 'visible' to the module loader
   // modulePathIgnorePatterns: [],
@@ -118,7 +121,7 @@ export default {
 
   // A list of paths to directories that Jest should use to search for files in
   // roots: [
-  //   "<rootDir>"
+  //   '<rootDir>',
   // ],
 
   // Allows you to use a custom runner instead of Jest's default test runner

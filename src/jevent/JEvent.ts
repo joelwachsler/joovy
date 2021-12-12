@@ -60,5 +60,5 @@ export interface ResultEntry {
 }
 
 export interface SendMessage {
-  sendMessage(event: JEvent, message: string | MessageEmbed): Observable<JMessage>
+  sendMessage(event: JEvent, message: string | MessageEmbed): Observable<ResultEntry>
 }
