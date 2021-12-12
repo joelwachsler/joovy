@@ -1,6 +1,6 @@
-import { Constructor, Result } from '../JEvent'
+import { BaseConstructor, Result } from '../JEvent'
 
-const WithResult = <TBase extends Constructor>(Base: TBase) => {
+const WithResult = <TBase extends BaseConstructor>(Base: TBase) => {
   return class extends Base implements Result {
     private _result: any[] = []
 
