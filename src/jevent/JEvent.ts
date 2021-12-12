@@ -1,4 +1,4 @@
-import { Message } from 'discord.js'
+import { Message, MessageEmbed } from 'discord.js'
 import { map, Observable } from 'rxjs'
 import { JMessage } from '../JMessage'
 import * as Player from '../player/Player'
@@ -6,29 +6,33 @@ import { ObjectStore, StringStore } from '../Store'
 import WithEventStore from './impl/EventStore'
 import WithFactory from './impl/Factory'
 import WithResult from './impl/Result'
+import WithSendMessage from './impl/SendMessage'
 
-export default interface JEvent extends Result, Factory, EventStore {
+export default interface JEvent extends Result, Factory, EventStore, SendMessage {
   readonly message: JMessage
 }
 
 export const from = (message$: Observable<Message>): Observable<JEvent> => {
   return message$.pipe(
-    map(message => Base(message)),
-    map(EventClass => WithEventStore(EventClass)),
-    map(EventClass => WithResult(EventClass)),
+    map(message => WithBaseFunctionality(message)),
     map(EventClass => WithFactory(EventClass)),
+    map(EventClass => WithSendMessage(EventClass)),
     map(EventClass => new EventClass()),
   )
 }
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 export type Constructor<T = {}> = new (...args: any[]) => T
-export type BaseConstructor<T extends JMessage = Message> = Constructor<{ message: T }>
+export type BaseConstructor<T extends JMessage = JMessage> = Constructor<{ message: T }>
 
-const Base = (message: Message) => {
+const Base = <T extends JMessage = JMessage>(message: T) => {
   return class {
     message = message
   }
+}
+
+export const WithBaseFunctionality = <T extends JMessage = JMessage>(message: T) => {
+  return WithResult(WithEventStore(Base(message)))
 }
 
 export interface EventStore {
@@ -47,4 +51,8 @@ export interface Factory {
 export interface Result {
   withResult(resultToAdd: any): this
   readonly result: any[]
+}
+
+export interface SendMessage {
+  sendMessage(event: JEvent, message: string | MessageEmbed): Observable<JMessage>
 }

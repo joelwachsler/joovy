@@ -1,5 +1,8 @@
 import { Message } from 'discord.js'
 
+/**
+ * Facade around Message for easier test implementations.
+ */
 export interface JMessage {
   channelId: string
   author: {
