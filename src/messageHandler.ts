@@ -1,6 +1,6 @@
 import { mergeMap, Observable, of } from 'rxjs'
 import { handle } from './commands/command'
-import JEvent from './JEvent'
+import JEvent from './jevent/JEvent'
 
 export const handleMessage = (event$: Observable<JEvent>): Observable<JEvent> => {
   return event$.pipe(

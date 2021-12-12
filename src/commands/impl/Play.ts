@@ -1,5 +1,5 @@
 import { defaultIfEmpty, map, mergeMap, Observable, of } from 'rxjs'
-import JEvent from '../../JEvent'
+import JEvent from '../../jevent/JEvent'
 import logger from '../../logger'
 import Player from '../../player/Player'
 import ArgParser from '../ArgParser'

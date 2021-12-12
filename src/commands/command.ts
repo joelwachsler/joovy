@@ -1,5 +1,5 @@
 import { Observable } from 'rxjs'
-import JEvent from '../JEvent'
+import JEvent from '../jevent/JEvent'
 import ArgParser from './ArgParser'
 import Help from './impl/Help'
 import Play from './impl/Play'
