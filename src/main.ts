@@ -1,8 +1,8 @@
 import { Client, Intents, Message } from 'discord.js'
-import { fromEvent, mergeMap, Observable } from 'rxjs'
-import { Config } from './config'
-import { Event } from './Event'
-import { logger } from './logger'
+import { fromEvent, Observable } from 'rxjs'
+import { Config, init } from './config'
+import * as Event from './JEvent'
+import logger from './logger'
 import { handleMessage } from './messageHandler'
 
 const main = async () => {
@@ -12,7 +12,7 @@ const main = async () => {
       Intents.FLAGS.GUILDS,
       Intents.FLAGS.GUILD_MESSAGES,
       Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
-      Intents.FLAGS.GUILD_VOICE_STATES
+      Intents.FLAGS.GUILD_VOICE_STATES,
     ],
   })
 
@@ -27,7 +27,7 @@ const main = async () => {
       })
   })
 
-  client.login(Config.init().token)
+  client.login(init().token)
   logger.info('Done creating client!')
 }
 

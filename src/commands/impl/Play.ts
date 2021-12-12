@@ -1,20 +1,21 @@
-import { defaultIfEmpty, map, mapTo, mergeMap, Observable, of } from 'rxjs';
-import { Event } from '../../Event';
-import { Player } from '../../player/Player';
-import { ArgParser } from '../ArgParser';
-import { Command } from '../command';
+import { defaultIfEmpty, map, mergeMap, Observable, of } from 'rxjs'
+import JEvent from '../../JEvent'
+import logger from '../../logger'
+import Player from '../../player/Player'
+import ArgParser from '../ArgParser'
+import Command from '../command'
 
-export class Play implements Command {
+export default class Play implements Command {
   argument = ArgParser.create('play')
-    .withArg('url', arg => arg.or('query'));
+    .withArg('url', arg => arg.or('query'))
 
-  helpText = 'Play a track or queue it if a track is already playing.';
+  helpText = 'Play a track or queue it if a track is already playing.'
 
-  getAudioPlayer(event: Event) {
+  getAudioPlayer(event: JEvent) {
     event.message.channelId
   }
 
-  private getOrCreatePlayer(event: Event): Observable<Player> {
+  private getOrCreatePlayer(event: JEvent): Observable<Player> {
     const playerKey = 'player'
     return event.store.object.pipe(
       mergeMap(objectStore => {
@@ -29,19 +30,21 @@ export class Play implements Command {
           defaultIfEmpty(createPlayer()),
           mergeMap(p => p),
         )
-      })
+      }),
     )
   }
 
-  handleMessage(event: Event): Observable<Event> {
+  handleMessage(event: JEvent): Observable<JEvent> {
     return this.getOrCreatePlayer(event)
       .pipe(
-        map(player => {}),
-        mapTo(event.withResult({
+        map(player => {
+          logger.info('called')
+        }),
+        map(() => event.withResult({
           player: {
             joined: 'testing',
-          }
-        }))
+          },
+        })),
       )
   }
 }
