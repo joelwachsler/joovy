@@ -51,7 +51,7 @@ export interface Factory {
 export type ResultResult = string | Record<string, string>
 
 export interface Result {
-  withResult(resultToAdd: ResultResult): Observable<ResultEntry>
+  withResult(resultToAdd: ResultResult, ...andThen: Observable<ResultEntry>[]): Observable<ResultEntry>
 }
 
 export interface ResultEntry {

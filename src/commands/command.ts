@@ -1,4 +1,4 @@
-import { concat, Observable } from 'rxjs'
+import { Observable } from 'rxjs'
 import JEvent, { ResultEntry } from '../jevent/JEvent'
 import ArgParser from './ArgParser'
 import Help from './impl/Help'
@@ -32,15 +32,15 @@ export const handle = (event: JEvent): Observable<ResultEntry> => {
 
   for (const cmd of cmds) {
     if (cmd.argument.is(content)) {
-      return concat(
-        event.withResult({ commandCalled: cmd.argument.command }),
+      return event.withResult(
+        { commandCalled: cmd.argument.command },
         cmd.handleMessage(event),
       )
     }
   }
 
-  return concat(
-    event.withResult({ invalidCommand: content }),
+  return event.withResult(
+    { invalidCommand: content },
     help.handleMessage(event),
   )
 }
