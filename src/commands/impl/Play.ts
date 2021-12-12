@@ -37,7 +37,7 @@ export default class Play implements Command {
   handleMessage(event: JEvent): Observable<JEvent> {
     return this.getOrCreatePlayer(event)
       .pipe(
-        map(player => {
+        map(_ => {
           logger.info('called')
         }),
         map(() => event.withResult({

@@ -24,5 +24,6 @@ module.exports = {
     '@typescript-eslint/no-explicit-any': 0,
     'arrow-parens': ['error', 'as-needed'],
     'func-style': ['error', 'expression'],
+    '@typescript-eslint/no-unused-vars': ['error', { 'argsIgnorePattern': '^_' }],
   },
 }
