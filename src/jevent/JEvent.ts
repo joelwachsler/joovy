@@ -2,7 +2,7 @@ import { Message, MessageEmbed } from 'discord.js'
 import { map, Observable } from 'rxjs'
 import { JMessage } from '../JMessage'
 import * as Player from '../player/Player'
-import { ObjectStore, StringStore } from '../Store'
+import { ObjectStore, StoreProvider, StringStore } from '../Store'
 import WithEventStore from './impl/EventStore'
 import WithFactory from './impl/Factory'
 import WithResult from './impl/Result'
@@ -13,8 +13,10 @@ export default interface JEvent extends Result, Factory, EventStore, SendMessage
 }
 
 export const from = (message$: Observable<Message>): Observable<JEvent> => {
+  const store = new Map<string, unknown>()
+
   return message$.pipe(
-    map(message => WithBaseFunctionality(message)),
+    map(message => WithBaseFunctionality(message, () => store)),
     map(EventClass => WithFactory(EventClass)),
     map(EventClass => WithSendMessage(EventClass)),
     map(EventClass => new EventClass()),
@@ -31,8 +33,8 @@ const Base = <T extends JMessage = JMessage>(message: T) => {
   }
 }
 
-export const WithBaseFunctionality = <T extends JMessage = JMessage>(message: T) => {
-  return WithResult(WithEventStore(Base(message)))
+export const WithBaseFunctionality = <T extends JMessage = JMessage>(message: T, storeProvider: StoreProvider) => {
+  return WithResult(WithEventStore(Base(message), storeProvider))
 }
 
 export interface EventStore {
@@ -48,17 +50,21 @@ export interface Factory {
   }
 }
 
-export type ResultResult = string | Record<string, string | boolean>
+export type ResultResult = string | Record<string, unknown>
+
+export type ResultArg<T = undefined> = { result: ResultResult, item: T }
 
 export interface Result {
-  withResult(resultToAdd: ResultResult, ...andThen: Observable<ResultEntry>[]): Observable<ResultEntry>
+  result(resultToAdd: ResultResult, ...andThen: Observable<ResultEntry>[]): Observable<ResultEntry>
+  complexResult<T = undefined>(arg: ResultArg<T>, ...andThen: Observable<ResultEntry>[]): Observable<ResultEntry<T>>
 }
 
-export interface ResultEntry {
+export interface ResultEntry<T = any> {
+  item: T,
   result: ResultResult
   event: JEvent
 }
 
 export interface SendMessage {
-  sendMessage(event: JEvent, message: string | MessageEmbed): Observable<ResultEntry>
+  sendMessage(message: string | MessageEmbed): Observable<ResultEntry>
 }

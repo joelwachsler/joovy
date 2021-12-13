@@ -1,9 +1,9 @@
-import { defer, Observable, of } from 'rxjs'
+import { defer, EMPTY, Observable, of } from 'rxjs'
 import { JMessage } from './JMessage'
 
 export default interface Store<T> {
   put(key: string, value: T): Observable<T>
-  get(key: string): Observable<T | undefined>
+  get(key: string): Observable<T>
   remove(key: string): Observable<void>
 }
 
@@ -21,7 +21,12 @@ class InMemoryStore<T> implements Store<T> {
   }
 
   get(key: string) {
-    return defer(() => of(this.storage.get(key)))
+    return defer(() => {
+      const res = this.storage.get(key)
+      return res
+        ? of(res)
+        : EMPTY
+    })
   }
 
   remove(key: string) {
@@ -32,22 +37,27 @@ class InMemoryStore<T> implements Store<T> {
   }
 }
 
-const storeStore = new Map<string, any>()
+export type StoreProvider = () => Map<string, any>
 
-export const getOrCreateStringStore = (msg: JMessage): Observable<StringStore> => {
-  return of(getOrCreateInMemoryStore(msg))
+type GetStoreArgs = { message: JMessage, storeProvider: StoreProvider }
+
+export const getOrCreateStringStore = (args: GetStoreArgs): Observable<StringStore> => {
+  return of(getOrCreateInMemoryStore(args))
 }
 
-export const getOrCreateObjectStore = (msg: JMessage): Observable<ObjectStore> => {
-  return of(getOrCreateInMemoryStore(msg))
+export const getOrCreateObjectStore = (args: GetStoreArgs): Observable<ObjectStore> => {
+  return of(getOrCreateInMemoryStore(args))
 }
 
-export const getOrCreateInMemoryStore = (msg: JMessage): Store<any> => {
-  if (!storeStore.has(msg.channelId)) {
-    storeStore.set(msg.channelId, new InMemoryStore())
+export const getOrCreateInMemoryStore = (args: GetStoreArgs): Store<any> => {
+  const { message, storeProvider } = { ...args, storeProvider: args.storeProvider }
+  const store = storeProvider()
+
+  if (!store.has(message.channelId)) {
+    store.set(message.channelId, new InMemoryStore())
   }
 
-  return storeStore.get(msg.channelId) ?? throwError('Store is not defined!')
+  return store.get(message.channelId) ?? throwError('Store is not defined!')
 }
 
 const throwError = (err: string) => {

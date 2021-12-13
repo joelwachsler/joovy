@@ -22,7 +22,7 @@ export default class Help implements Command {
         value: cmd.helpText,
       })))
 
-    return event.sendMessage(event, help)
-      .pipe(mergeMapTo(event.withResult({ help: true })))
+    return event.sendMessage(help)
+      .pipe(mergeMapTo(event.result({ help: true })))
   }
 }
