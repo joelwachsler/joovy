@@ -1,7 +1,6 @@
-import { concat, defaultIfEmpty, map, mergeAll, mergeMap, Observable, of, tap } from 'rxjs'
+import { concat, defaultIfEmpty, map, mergeAll, mergeMap, Observable, of } from 'rxjs'
 import JEvent, { ResultEntry } from '../../jevent/JEvent'
 import { JMessage } from '../../JMessage'
-import logger from '../../logger'
 import { createPlayer, getPlayer, Track } from '../../player/Player'
 import ArgParser from '../ArgParser'
 import Command from '../command'
@@ -34,9 +33,6 @@ export default class Play implements Command {
         const success$ = event.result({ playing: track })
 
         return concat(play$, success$)
-          .pipe(tap(e => {
-            logger.info(`called with: ${JSON.stringify(e)}`)
-          }))
       }))
     }
 
