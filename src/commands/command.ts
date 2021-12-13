@@ -34,14 +34,14 @@ export const handle = (event: JEvent): Observable<ResultEntry> => {
 
   for (const cmd of cmds) {
     if (cmd.argument.is(content)) {
-      return event.withResult(
+      return event.result(
         { commandCalled: cmd.argument.command },
         cmd.handleMessage(event),
       )
     }
   }
 
-  return event.withResult(
+  return event.result(
     { invalidCommand: content },
     help.handleMessage(event),
   )

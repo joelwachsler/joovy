@@ -1,14 +1,15 @@
-import { getOrCreateObjectStore, getOrCreateStringStore } from '../../Store'
+import { getOrCreateObjectStore, getOrCreateStringStore, StoreProvider } from '../../Store'
 import { BaseConstructor, EventStore } from '../JEvent'
 
-const WithEventStore = <TBase extends BaseConstructor>(Base: TBase) => {
+const WithEventStore = <TBase extends BaseConstructor>(Base: TBase, storeProvider: StoreProvider) => {
   return class extends Base implements EventStore {
+
     get string() {
-      return getOrCreateStringStore(this.message)
+      return getOrCreateStringStore({ message: this.message, storeProvider })
     }
 
     get object() {
-      return getOrCreateObjectStore(this.message)
+      return getOrCreateObjectStore({ message: this.message, storeProvider })
     }
 
     get store() {

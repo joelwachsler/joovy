@@ -1,7 +1,8 @@
-import { defaultIfEmpty, map, mergeMap, Observable, of } from 'rxjs'
+import { concat, defaultIfEmpty, map, mergeAll, mergeMap, Observable, of, tap } from 'rxjs'
 import JEvent, { ResultEntry } from '../../jevent/JEvent'
+import { JMessage } from '../../JMessage'
 import logger from '../../logger'
-import Player from '../../player/Player'
+import { createPlayer, getPlayer, Track } from '../../player/Player'
 import ArgParser from '../ArgParser'
 import Command from '../command'
 
@@ -11,31 +12,35 @@ export default class Play implements Command {
   helpText = 'Play a track or queue it if a track is already playing.'
 
   handleMessage(event: JEvent): Observable<ResultEntry> {
-    return this.getOrCreatePlayer(event)
-      .pipe(
-        map(_ => {
-          logger.info('called')
-        }),
-        mergeMap(() => event.withResult({ player: 'joined' })),
-      )
-  }
+    const parseTrack = (message: JMessage): Observable<Track> => {
+      return of({
+        name: message.content,
+        link: message.content.split(' ').splice(1).join(' '),
+      })
+    }
 
-  private getOrCreatePlayer(event: JEvent): Observable<Player> {
-    const playerKey = 'player'
-    return event.store.object.pipe(
-      mergeMap(objectStore => {
-        const createPlayer = (): Observable<Player> => {
-          return event.factory.player.pipe(
-            mergeMap(newPlayer => objectStore.put(playerKey, newPlayer)),
-          )
-        }
-
-        return objectStore.get(playerKey).pipe(
-          map(result => of(result as Player)),
-          defaultIfEmpty(createPlayer()),
-          mergeMap(p => p),
-        )
-      }),
+    const playerResult$ = getPlayer(event).pipe(
+      map(player => event.complexResult({ item: player, result: { player: 'found' } })),
+      defaultIfEmpty(createPlayer(event).pipe(
+        mergeMap(player => event.complexResult({ item: player, result: { player: 'created' } })),
+      )),
+      mergeAll(),
     )
+
+    const playTrack = (track: Track): Observable<ResultEntry> => {
+      return playerResult$.pipe(mergeMap(playerResult => {
+        const play$ = playerResult.item.play(track)
+          .pipe(map(() => playerResult))
+        const success$ = event.result({ playing: track })
+
+        return concat(play$, success$)
+          .pipe(tap(e => {
+            logger.info(`called with: ${JSON.stringify(e)}`)
+          }))
+      }))
+    }
+
+    return parseTrack(event.message)
+      .pipe(mergeMap(track => playTrack(track)))
   }
 }
