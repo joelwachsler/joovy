@@ -188,4 +188,15 @@ it('disconnect should disconnect if connected to channel', () => {
   }))
 })
 
-test.todo('disconnect should not do anything if not connected to channel')
+test('disconnect should not do anything if not connected to channel', () => {
+  const disconnect = createTestEvent({
+    content: '/disconnect',
+  })
+
+  const messages = handle(hot('a|', { a: disconnect }))
+  expect(messages).toMatchObject(e('a|', {
+    a: {
+      commandCalled: '/disconnect',
+    },
+  }))
+})
