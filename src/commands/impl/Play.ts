@@ -1,7 +1,8 @@
-import { concat, defaultIfEmpty, map, mergeAll, mergeMap, Observable, of } from 'rxjs'
+import { merge, mergeMap, Observable, of } from 'rxjs'
 import JEvent, { ResultEntry } from '../../jevent/JEvent'
 import { JMessage } from '../../JMessage'
-import { createPlayer, getPlayer, Track } from '../../player/Player'
+import { Track } from '../../player/Player'
+import { getOrCreatePlaylist } from '../../playlist/Playlist'
 import ArgParser from '../ArgParser'
 import Command from '../command'
 
@@ -18,25 +19,22 @@ export default class Play implements Command {
       })
     }
 
-    const playerResult$ = getPlayer(event).pipe(
-      map(player => event.complexResult({ item: player, result: { player: 'found' } })),
-      defaultIfEmpty(createPlayer(event).pipe(
-        mergeMap(player => event.complexResult({ item: player, result: { player: 'created' } })),
-      )),
-      mergeAll(),
-    )
-
-    const playTrack = (track: Track): Observable<ResultEntry> => {
-      return playerResult$.pipe(mergeMap(playerResult => {
-        const play$ = playerResult.item.play(track)
-          .pipe(map(() => playerResult))
-        const success$ = event.result({ playing: track })
-
-        return concat(play$, success$)
-      }))
-    }
-
     return parseTrack(event.message)
-      .pipe(mergeMap(track => playTrack(track)))
+      .pipe(
+        mergeMap(track => {
+          return getOrCreatePlaylist(event)
+            .pipe(mergeMap(({ playlist$, results$ }) => {
+              const addToPlaylist$ = playlist$
+                .pipe(mergeMap(playlist => merge(
+                  of(playlist),
+                  playlist.item.add(event, track),
+                )))
+
+
+              // return merge(addToPlaylist$, results$)
+              return merge(results$, addToPlaylist$)
+            }))
+        }),
+      )
   }
 }

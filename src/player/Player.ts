@@ -1,4 +1,4 @@
-import { AudioPlayer, createAudioPlayer, createAudioResource, joinVoiceChannel, VoiceConnection, VoiceConnectionStatus } from '@discordjs/voice'
+import { AudioPlayer, AudioPlayerStatus, createAudioPlayer, createAudioResource, joinVoiceChannel, VoiceConnection, VoiceConnectionStatus } from '@discordjs/voice'
 import { Message, VoiceChannel } from 'discord.js'
 import { map, mergeMap, Observable } from 'rxjs'
 import JEvent from '../jevent/JEvent'
@@ -8,6 +8,7 @@ import * as Ytdl from './Ytdl'
 export default interface Player {
   play(track: Track): Observable<void>
   disconnect(): void
+  idle(): Observable<void>
 }
 
 export interface Track {
@@ -87,6 +88,14 @@ class PlayerImpl implements Player {
         map(dl => createAudioResource(dl)),
         map(resource => this.player.play(resource)),
       )
+  }
+
+  idle(): Observable<void> {
+    return new Observable(res => {
+      this.player.on(AudioPlayerStatus.Idle, () => {
+        res.next(undefined)
+      })
+    })
   }
 
   private createReadStream(track: Track) {
