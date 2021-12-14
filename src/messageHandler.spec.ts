@@ -1,8 +1,9 @@
 import { MessageEmbed } from 'discord.js'
 import { rxSandbox, RxSandboxInstance } from 'rx-sandbox'
-import { map, Observable, of } from 'rxjs'
+import { delay, map, Observable, of, SchedulerLike, Subject, tap } from 'rxjs'
 import JEvent, { ResultEntry, WithBaseFunctionality } from './jevent/JEvent'
 import { JMessage } from './JMessage'
+import logger from './logger'
 import { handleMessage } from './messageHandler'
 import Player, { Track } from './player/Player'
 
@@ -10,27 +11,43 @@ let sandbox: RxSandboxInstance
 let e: RxSandboxInstance['e']
 let hot: RxSandboxInstance['hot']
 let store: Map<string, unknown>
+let player: Player
 
 beforeEach(() => {
   sandbox = rxSandbox.create(true)
   e = sandbox.e
   hot = sandbox.hot
   store = new Map()
+  player = new PlayerFake(sandbox.scheduler)
 })
 
 const handle = (source$: Observable<any>) => sandbox.getMessages(handleMessage(source$).pipe(map(r => r.result)))
 
-const createTestEvent = (input?: Partial<JMessage>): JEvent => {
-  class PlayerFake implements Player {
-    play(_: Track): Observable<void> {
-      return of(undefined)
-    }
+class PlayerFake implements Player {
+  private playing = new Subject<void>()
 
-    disconnect(): void {
-      return undefined
-    }
+  constructor(private scheduler: SchedulerLike) { }
+
+  idle(): Observable<void> {
+    return this.playing
+      .pipe(
+        tap(v => logger.info(`idle before delay: ${v}`)),
+        delay(5, this.scheduler),
+        tap(v => logger.info(`idle sending: ${v}`)),
+      )
   }
 
+  play(_: Track): Observable<void> {
+    this.playing.next(undefined)
+    return of(undefined)
+  }
+
+  disconnect(): void {
+    return undefined
+  }
+}
+
+const createTestEvent = (input?: Partial<JMessage>): JEvent => {
   const message: JMessage = {
     author: {
       bot: false,
@@ -44,7 +61,7 @@ const createTestEvent = (input?: Partial<JMessage>): JEvent => {
   return new class EventFake extends WithBaseFunctionality(message, () => store) {
     get factory() {
       return {
-        player: of(new PlayerFake()),
+        player: of(player),
       }
     }
 
@@ -206,5 +223,36 @@ describe('disconnection', () => {
         commandCalled: '/disconnect',
       },
     }))
+  })
+})
+
+describe('playlist', () => {
+  it('should queue song if another one is already playing', () => {
+    const play = createTestEvent({
+      content: '/play test',
+    })
+    const playAgain = createTestEvent({
+      content: '/play test2',
+    })
+
+    const messages = handle(hot('ab ...5... |', { a: play, b: playAgain }))
+    expect(messages).toMatchSnapshot()
+    // expect(messages).toMatchObject(e('(abc)(a) 1s (de)|', laylist should queue song if another one i{
+    //   a: {
+    //     commandCalled: '/play',
+    //   },
+    //   b: {
+    //     player: 'created',
+    //   },
+    //   c: {
+    //     playing: { name: '/play test', link: 'test' },
+    //   },
+    //   d: {
+    //     player: 'found',
+    //   },
+    //   e: {
+    //     playing: { name: '/play test2', link: 'test2' },
+    //   },
+    // }))
   })
 })
