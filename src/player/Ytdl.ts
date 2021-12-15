@@ -1,5 +1,5 @@
 import { FFmpeg, opus as Opus } from 'prism-media'
-import { from, map, Observable } from 'rxjs'
+import { defer, from, map, Observable } from 'rxjs'
 import { Readable } from 'stream'
 import ytdl, { downloadOptions as DownloadOptions } from 'ytdl-core'
 import logger from '../logger'
@@ -11,7 +11,7 @@ export const createStream = (args: CreateStreamArgs): Observable<Readable> => {
 
 const createYtdlStream = (url: string, options?: DownloadOptions): Observable<Readable> => {
   // add &bpctr=9999999999 to prevent age restriction errors
-  return from(ytdl.getInfo(`${url}&bpctr=9999999999`))
+  return defer(() => from(ytdl.getInfo(`${url}&bpctr=9999999999`)))
     .pipe(map(info => ytdl.downloadFromInfo(info, options)))
 }
 
