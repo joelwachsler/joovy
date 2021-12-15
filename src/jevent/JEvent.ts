@@ -62,6 +62,14 @@ export type ResultArg<T = undefined> = { result: ResultResult, item: T }
 export interface Result {
   result(resultToAdd: ResultResult, ...andThen: Observable<ResultEntry>[]): Observable<ResultEntry>
   complexResult<T = undefined>(arg: ResultArg<T>, ...andThen: Observable<ResultEntry>[]): Observable<ResultEntry<T>>
+  empty(): Observable<EmptyResult>
+}
+
+export class EmptyResult implements ResultEntry {
+  constructor(public event: JEvent) {}
+
+  item: any
+  result: ResultResult = ''
 }
 
 export interface ResultEntry<T = any> {

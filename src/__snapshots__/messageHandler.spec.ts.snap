@@ -1,31 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`playlist my test 1`] = `
-Array [
-  TestMessageValue {
-    "frame": 0,
-    "notification": Object {
-      "kind": "N",
-      "value": "Got message: a",
-    },
-  },
-  TestMessageValue {
-    "frame": 1,
-    "notification": Object {
-      "kind": "N",
-      "value": "Got message: b",
-    },
-  },
-  TestMessageValue {
-    "frame": 2,
-    "notification": Object {
-      "kind": "N",
-      "value": "Got message: c",
-    },
-  },
-]
-`;
-
 exports[`playlist should queue song if another one is already playing 1`] = `
 Array [
   TestMessageValue {
@@ -92,7 +66,34 @@ Array [
     },
   },
   TestMessageValue {
-    "frame": 6,
+    "frame": 2,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "commandCalled": "/play",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 2,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "playlist": "found",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 2,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "messageSent": "{\\"name\\":\\"/play test3\\",\\"link\\":\\"test3\\"} has been added to the queue",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 5,
     "notification": Object {
       "kind": "N",
       "value": Object {
@@ -101,11 +102,38 @@ Array [
     },
   },
   TestMessageValue {
-    "frame": 0,
+    "frame": 5,
     "notification": Object {
       "kind": "N",
       "value": Object {
         "messageSent": "Now playing: {\\"name\\":\\"/play test2\\",\\"link\\":\\"test2\\"}",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 10,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "player": "idle",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 10,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "messageSent": "Now playing: {\\"name\\":\\"/play test3\\",\\"link\\":\\"test3\\"}",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 15,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "player": "idle",
       },
     },
   },

@@ -225,20 +225,12 @@ describe('disconnection', () => {
 
 describe('playlist', () => {
   it('should queue song if another one is already playing', () => {
-    const play = createTestEvent({
-      content: '/play test',
-    })
-    const playAgain = createTestEvent({
-      content: '/play test2',
-    })
+    const play = createTestEvent({ content: '/play test' })
+    const playAgain = createTestEvent({ content: '/play test2' })
+    const playAgainAgain = createTestEvent({ content: '/play test3' })
 
-    const playAgainAgain = createTestEvent({
-      content: '/play test3',
-    })
-
-    const messages = handle(hot('abc...30...|', { a: play, b: playAgain, c: playAgainAgain }))
-    console.log(JSON.stringify(messages, null, 2))
-    // expect(messages).toMatchSnapshot()
+    const messages = handle(hot('abc', { a: play, b: playAgain, c: playAgainAgain }))
+    expect(messages).toMatchSnapshot()
   })
 
   it('my test', () => {
