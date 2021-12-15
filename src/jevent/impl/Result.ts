@@ -1,5 +1,5 @@
 import { concat, Observable, of } from 'rxjs'
-import JEvent, { BaseConstructor, Result, ResultArg, ResultEntry, ResultResult } from '../JEvent'
+import JEvent, { BaseConstructor, EmptyResult, Result, ResultArg, ResultEntry, ResultResult } from '../JEvent'
 
 const WithResult = <TBase extends BaseConstructor>(Base: TBase) => {
   return class extends Base implements Result {
@@ -16,6 +16,10 @@ const WithResult = <TBase extends BaseConstructor>(Base: TBase) => {
           event: this as unknown as JEvent,
         }),
       )
+    }
+
+    empty(): Observable<EmptyResult> {
+      return of(new EmptyResult(this as unknown as JEvent))
     }
   }
 }

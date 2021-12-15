@@ -1,35 +1,35 @@
-import { concatMap, concatMapTo, defaultIfEmpty, defer, map, mapTo, mergeAll, mergeMap, Observable, of, Subject } from 'rxjs'
+import { concatMap, concatMapTo, defaultIfEmpty, defer, map, merge, mergeAll, mergeMap, Observable, of, Subject } from 'rxjs'
 import JEvent, { ResultEntry } from '../jevent/JEvent'
 import Player, { Track } from '../player/Player'
 
 export class Playlist {
   private _queue = new Subject<Track>()
-  private _output = new Subject<Observable<ResultEntry>>()
 
   constructor(private event: JEvent, private player: Player) {}
 
-  get output(): Observable<ResultEntry> {
-    return this._output.pipe(mergeAll())
-  }
-
   get results() {
-    return this._queue.pipe(
+    const q$ = this._queue.pipe(
       concatMap(track => {
         const sendMsg$ = this.event.sendMessage(`Now playing: ${JSON.stringify(track)}`)
-        const waitForPlayerToFinish = <T>(t: T) => this.player.idle().pipe(mapTo(t))
-
-        return this.player.play(track).pipe(
-          concatMapTo(sendMsg$),
-          concatMap(waitForPlayerToFinish),
+        return merge(
+          this.player.play(track).pipe(concatMapTo(sendMsg$)),
+          this.player.idle().pipe(concatMapTo(this.event.result({ player: 'idle' }))),
         )
       }),
+    )
+
+    const q2$ = this._queue.pipe(mergeMap(track => this.event.sendMessage(`${JSON.stringify(track)} has been added to the queue`)))
+
+    return merge(
+      q2$,
+      q$,
     )
   }
 
   add(event: JEvent, track: Track): Observable<ResultEntry> {
     return defer(() => {
       this._queue.next(track)
-      return event.sendMessage(`${JSON.stringify(track)} has been added to the queue`)
+      return event.empty()
     })
   }
 }
