@@ -1,6 +1,6 @@
 import { AudioPlayer, AudioPlayerStatus, createAudioPlayer, createAudioResource, joinVoiceChannel, VoiceConnection, VoiceConnectionStatus } from '@discordjs/voice'
 import { Message, VoiceChannel } from 'discord.js'
-import { defer, fromEvent, map, mapTo, Observable } from 'rxjs'
+import { defer, map, mapTo, Observable } from 'rxjs'
 import logger from '../logger'
 import * as Ytdl from './Ytdl'
 
@@ -67,8 +67,12 @@ class PlayerImpl implements Player {
   }
 
   idle(): Observable<void> {
-    return fromEvent(this.player, AudioPlayerStatus.Idle.toString())
-      .pipe(mapTo(undefined))
+    return new Observable(subscribe => {
+      this.player.once(AudioPlayerStatus.Idle, () => {
+        subscribe.next(undefined)
+        subscribe.complete()
+      })
+    })
   }
 
   private createReadStream(track: Track) {
