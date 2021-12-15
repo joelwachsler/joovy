@@ -19,22 +19,13 @@ export default class Play implements Command {
       })
     }
 
-    return parseTrack(event.message)
-      .pipe(
-        mergeMap(track => {
-          return getOrCreatePlaylist(event)
-            .pipe(mergeMap(({ playlist$, results$ }) => {
-              const addToPlaylist$ = playlist$
-                .pipe(mergeMap(playlist => merge(
-                  of(playlist),
-                  playlist.item.add(event, track),
-                )))
-
-
-              // return merge(addToPlaylist$, results$)
-              return merge(results$, addToPlaylist$)
-            }))
-        }),
+    const playlistFromEvent = (event: JEvent, track: Track) => {
+      return getOrCreatePlaylist(event).pipe(
+        mergeMap(({ playlist, results$ }) => merge(results$, playlist.add(event, track))),
       )
+    }
+
+    return parseTrack(event.message)
+      .pipe(mergeMap(track => playlistFromEvent(event, track)))
   }
 }

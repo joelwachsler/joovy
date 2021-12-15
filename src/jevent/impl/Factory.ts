@@ -1,4 +1,4 @@
-import { BaseConstructor, Factory } from '../JEvent'
+import { BaseConstructor, delayFactoryImpl, Factory } from '../JEvent'
 import * as Player from '../../player/Player'
 import { Message } from 'discord.js'
 
@@ -6,6 +6,10 @@ const WithFactory = <TBase extends BaseConstructor<Message>>(Base: TBase) => {
   return class extends Base implements Factory {
     get player() {
       return Player.from(this.message)
+    }
+
+    get delay() {
+      return delayFactoryImpl
     }
 
     get factory() {

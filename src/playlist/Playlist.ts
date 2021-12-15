@@ -1,54 +1,69 @@
-import { concat, concatMapTo, defaultIfEmpty, EMPTY, map, mapTo, mergeAll, mergeMap, Observable, of, Subject } from 'rxjs'
+import { concatMap, concatMapTo, defaultIfEmpty, defer, map, mapTo, mergeAll, mergeMap, Observable, of, Subject } from 'rxjs'
 import JEvent, { ResultEntry } from '../jevent/JEvent'
 import Player, { Track } from '../player/Player'
 
-class Playlist {
-  private queue = new Subject<Track>()
-  results: Observable<ResultEntry>
+export class Playlist {
+  private _queue = new Subject<Track>()
+  private _output = new Subject<Observable<ResultEntry>>()
 
-  constructor(event: JEvent, player: Player) {
-    this.results = this.queue.pipe(
-      mergeMap(track => {
-        const waitForTrackToFinish$ = concat(
-          event.sendMessage(`Now playing: ${JSON.stringify(track)}`),
-          player.idle().pipe(concatMapTo(event.result({ player: 'idle' }))),
+  constructor(private event: JEvent, private player: Player) {}
+
+  get output(): Observable<ResultEntry> {
+    return this._output.pipe(mergeAll())
+  }
+
+  get results() {
+    return this._queue.pipe(
+      concatMap(track => {
+        const sendMsg$ = this.event.sendMessage(`Now playing: ${JSON.stringify(track)}`)
+        const waitForPlayerToFinish = <T>(t: T) => this.player.idle().pipe(mapTo(t))
+
+        return this.player.play(track).pipe(
+          concatMapTo(sendMsg$),
+          concatMap(waitForPlayerToFinish),
         )
-
-        return player.play(track).pipe(concatMapTo(waitForTrackToFinish$))
       }),
     )
   }
 
   add(event: JEvent, track: Track): Observable<ResultEntry> {
-    return of(this.queue.next(track))
-      .pipe(concatMapTo(event.sendMessage(`${JSON.stringify(track)} has been added to the queue`)))
+    return defer(() => {
+      this._queue.next(track)
+      return event.sendMessage(`${JSON.stringify(track)} has been added to the queue`)
+    })
   }
 }
 
 const PLAYLIST_KEY = 'playlist'
 
-type PlaylistResult = { playlist$: Observable<ResultEntry<Playlist>>, results$: Observable<ResultEntry> }
+type PlaylistResult = { playlist: Playlist, results$: Observable<ResultEntry> }
 
-export const getOrCreatePlaylist = (event: JEvent): Observable<PlaylistResult> => {
-  const createPlaylist$: Observable<PlaylistResult> = event.factory.player.pipe(
-    mergeMap(player => {
+const createPlaylist = (event: JEvent): Observable<PlaylistResult> => {
+  return event.factory.player.pipe(mergeMap(player => {
+    return event.store.object.pipe(mergeMap(store => {
       const playlist = new Playlist(event, player)
-      return event.store.object.pipe(
-        mergeMap(store => store.put(PLAYLIST_KEY, playlist)),
-        mapTo(playlist),
-        map(playlist => ({
-          playlist$: event.complexResult({ item: playlist, result: { playlist: 'created' } }),
-          results$: playlist.results,
-        })),
-      )
-    }),
-  )
 
+      return store.put(PLAYLIST_KEY, playlist).pipe(map(() => {
+        return {
+          playlist,
+          results$: event.result({ playlist: 'created' }, playlist.results),
+        }
+      }))
+    }))
+  }))
+}
+
+const getPlaylist = (event: JEvent) => {
   return event.store.object.pipe(
     mergeMap(store => store.get(PLAYLIST_KEY)),
     map(r => r as Playlist),
-    map(playlist => of({ playlist$: event.complexResult({ item: playlist, result: { playlist: 'found' } }), results$: EMPTY })),
-    defaultIfEmpty(createPlaylist$),
+    map(playlist => of({ playlist, results$: event.result({ playlist: 'found' }) })),
+  )
+}
+
+export const getOrCreatePlaylist = (event: JEvent): Observable<PlaylistResult> => {
+  return getPlaylist(event).pipe(
+    defaultIfEmpty(createPlaylist(event)),
     mergeAll(),
   )
 }
