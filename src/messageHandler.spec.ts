@@ -46,6 +46,7 @@ class PlayerFake implements Player {
 const createTestEvent = (input?: Partial<JMessage>): JEvent => {
   const message: JMessage = {
     author: {
+      username: 'testuser',
       bot: false,
       id: 'testAuthorId',
     },
@@ -78,6 +79,7 @@ describe('message filtering', () => {
   it('should ignore bot messages', () =>  {
     const event = createTestEvent({
       author: {
+        username: 'testuser',
         bot: true,
         id: 'testAuthorId',
       },
