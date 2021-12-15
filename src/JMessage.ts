@@ -6,6 +6,7 @@ import { Message } from 'discord.js'
 export interface JMessage {
   channelId: string
   author: {
+    username: string
     bot: boolean
     id: string
   }

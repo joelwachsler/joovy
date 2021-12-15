@@ -1,6 +1,6 @@
 import { AudioPlayer, AudioPlayerStatus, createAudioPlayer, createAudioResource, joinVoiceChannel, VoiceConnection, VoiceConnectionStatus } from '@discordjs/voice'
 import { Message, VoiceChannel } from 'discord.js'
-import { fromEvent, map, mapTo, Observable } from 'rxjs'
+import { defer, fromEvent, map, mapTo, Observable } from 'rxjs'
 import logger from '../logger'
 import * as Ytdl from './Ytdl'
 
@@ -18,32 +18,34 @@ export interface Track {
 export type Factory = Observable<Player>
 
 export const from = (message: Message): Observable<Player> => {
-  const throwError = (err: string) => {
-    throw Error(`Unable to join voice channel: ${err}`)
-  }
+  return defer(() => {
+    const throwError = (err: string) => {
+      throw Error(`Unable to join voice channel: ${err}`)
+    }
 
-  const voiceChannel = message.member?.voice.channel ?? throwError('Could not determine voice channel')
-  logger.info(`Joining channel: ${voiceChannel?.id}...`)
+    const voiceChannel = message.member?.voice.channel ?? throwError('Could not determine voice channel')
+    logger.info(`Joining channel: ${voiceChannel?.id}...`)
 
-  const connection = joinVoiceChannel({
-    channelId: voiceChannel.id,
-    guildId: voiceChannel.guildId,
-    adapterCreator: voiceChannel.guild.voiceAdapterCreator,
-  })
+    const connection = joinVoiceChannel({
+      channelId: voiceChannel.id,
+      guildId: voiceChannel.guildId,
+      adapterCreator: voiceChannel.guild.voiceAdapterCreator,
+    })
 
-  const player = createAudioPlayer()
-  connection.subscribe(player)
+    const player = createAudioPlayer()
+    connection.subscribe(player)
 
-  return new Observable(observer => {
-    connection.once(VoiceConnectionStatus.Ready, () => {
-      logger.info('Connection is ready')
+    return new Observable<Player>(observer => {
+      connection.once(VoiceConnectionStatus.Ready, () => {
+        logger.info('Connection is ready')
 
-      if (voiceChannel instanceof VoiceChannel) {
-        observer.next(new PlayerImpl(player, connection))
-        observer.complete()
-      } else {
-        observer.error(`Voice channel was not correct type, got: ${typeof voiceChannel}, expected: ${typeof VoiceChannel}`)
-      }
+        if (voiceChannel instanceof VoiceChannel) {
+          observer.next(new PlayerImpl(player, connection))
+          observer.complete()
+        } else {
+          observer.error(`Voice channel was not correct type, got: ${typeof voiceChannel}, expected: ${typeof VoiceChannel}`)
+        }
+      })
     })
   })
 }
