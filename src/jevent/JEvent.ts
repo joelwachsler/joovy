@@ -1,5 +1,5 @@
 import { Message, MessageEmbed } from 'discord.js'
-import { map, Observable } from 'rxjs'
+import { delay, map, Observable } from 'rxjs'
 import { JMessage } from '../JMessage'
 import * as Player from '../player/Player'
 import { ObjectStore, StoreProvider, StringStore } from '../Store'
@@ -44,9 +44,14 @@ export interface EventStore {
   }
 }
 
+export const delayFactoryImpl = <T>(ms: number) => delay<T>(ms)
+
+export type DelayFactory = typeof delayFactoryImpl
+
 export interface Factory {
   readonly factory: {
     readonly player: Player.Factory
+    readonly delay: DelayFactory
   }
 }
 

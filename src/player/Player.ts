@@ -1,12 +1,11 @@
 import { AudioPlayer, AudioPlayerStatus, createAudioPlayer, createAudioResource, joinVoiceChannel, VoiceConnection, VoiceConnectionStatus } from '@discordjs/voice'
 import { Message, VoiceChannel } from 'discord.js'
-import { map, mergeMap, Observable } from 'rxjs'
-import JEvent from '../jevent/JEvent'
+import { fromEvent, map, mapTo, Observable } from 'rxjs'
 import logger from '../logger'
 import * as Ytdl from './Ytdl'
 
 export default interface Player {
-  play(track: Track): Observable<void>
+  play(track: Track): Observable<Track>
   disconnect(): void
   idle(): Observable<void>
 }
@@ -17,32 +16,6 @@ export interface Track {
 }
 
 export type Factory = Observable<Player>
-
-const PLAYER_KEY = 'player'
-
-export const getPlayer = (event: JEvent): Observable<Player> => {
-  return event.store.object.pipe(
-    mergeMap(store => store.get(PLAYER_KEY)),
-    map(player => player as Player),
-  )
-}
-
-export const createPlayer = (event: JEvent): Observable<Player> => {
-  const addPlayerToStore = (player: Player) => event.store.object
-    .pipe(mergeMap(store => store.put(PLAYER_KEY, player)))
-
-  return event.factory.player.pipe(mergeMap(addPlayerToStore))
-}
-
-export const disconnectPlayer = (event: JEvent): Observable<void> => {
-  return getPlayer(event)
-    .pipe(map(player => player.disconnect()))
-}
-
-export const removePlayerFromStore = (event: JEvent): Observable<void> => {
-  return event.store.object
-    .pipe(mergeMap(store => store.remove(PLAYER_KEY)))
-}
 
 export const from = (message: Message): Observable<Player> => {
   const throwError = (err: string) => {
@@ -82,20 +55,18 @@ class PlayerImpl implements Player {
 
   constructor(private player: AudioPlayer, private connection: VoiceConnection) { }
 
-  play(track: Track) {
+  play(track: Track): Observable<Track> {
     return this.createReadStream(track)
       .pipe(
         map(dl => createAudioResource(dl)),
         map(resource => this.player.play(resource)),
+        mapTo(track),
       )
   }
 
   idle(): Observable<void> {
-    return new Observable(res => {
-      this.player.on(AudioPlayerStatus.Idle, () => {
-        res.next(undefined)
-      })
-    })
+    return fromEvent(this.player, AudioPlayerStatus.Idle.toString())
+      .pipe(mapTo(undefined))
   }
 
   private createReadStream(track: Track) {
