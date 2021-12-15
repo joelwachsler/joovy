@@ -1,5 +1,150 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`player creation should create player if not previously created 1`] = `
+Array [
+  TestMessageValue {
+    "frame": 0,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "commandCalled": "/play",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 0,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "playlist": "created",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 0,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "messageSent": "{\\"name\\":\\"/play test\\",\\"link\\":\\"test\\"} has been added to the queue",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 0,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "messageSent": "Now playing: {\\"name\\":\\"/play test\\",\\"link\\":\\"test\\"}",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 5,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "player": "idle",
+      },
+    },
+  },
+]
+`;
+
+exports[`player creation should not create player if previously created 1`] = `
+Array [
+  TestMessageValue {
+    "frame": 0,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "commandCalled": "/play",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 0,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "playlist": "created",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 0,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "messageSent": "{\\"name\\":\\"/play test\\",\\"link\\":\\"test\\"} has been added to the queue",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 0,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "messageSent": "Now playing: {\\"name\\":\\"/play test\\",\\"link\\":\\"test\\"}",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 1,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "commandCalled": "/play",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 1,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "playlist": "found",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 1,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "messageSent": "{\\"name\\":\\"/play test2\\",\\"link\\":\\"test2\\"} has been added to the queue",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 5,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "player": "idle",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 5,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "messageSent": "Now playing: {\\"name\\":\\"/play test2\\",\\"link\\":\\"test2\\"}",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 10,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "player": "idle",
+      },
+    },
+  },
+]
+`;
+
 exports[`playlist should queue song if another one is already playing 1`] = `
 Array [
   TestMessageValue {

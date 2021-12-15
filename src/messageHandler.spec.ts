@@ -115,17 +115,7 @@ describe('player creation', () => {
     })
 
     const messages = handle(hot('a|', { a: event }))
-    expect(messages).toMatchObject(e('(abc)|', {
-      a: {
-        commandCalled: '/play',
-      },
-      b: {
-        player: 'created',
-      },
-      c: {
-        playing: { name: '/play test', link: 'test' },
-      },
-    }))
+    expect(messages).toMatchSnapshot()
   })
 
   it('should not create player if previously created', () => {
@@ -138,23 +128,7 @@ describe('player creation', () => {
     })
 
     const messages = handle(hot('ab|', { a: play, b: playAgain }))
-    expect(messages).toMatchObject(e('(abc)(ade)|', {
-      a: {
-        commandCalled: '/play',
-      },
-      b: {
-        player: 'created',
-      },
-      c: {
-        playing: { name: '/play test', link: 'test' },
-      },
-      d: {
-        player: 'found',
-      },
-      e: {
-        playing: { name: '/play test2', link: 'test2' },
-      },
-    }))
+    expect(messages).toMatchSnapshot()
   })
 })
 
