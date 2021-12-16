@@ -32,6 +32,11 @@ export class Playlist {
       return event.empty()
     })
   }
+
+  disconnect() {
+    this._queue.complete()
+    this.player.disconnect()
+  }
 }
 
 const PLAYLIST_KEY = 'playlist'
@@ -39,10 +44,10 @@ const PLAYLIST_KEY = 'playlist'
 type PlaylistResult = { playlist: Playlist, results$: Observable<ResultEntry> }
 
 const createPlaylist = (event: JEvent): Observable<PlaylistResult> => {
-  return event.factory.player.pipe(mergeMap(player => {
-    return event.store.object.pipe(mergeMap(store => {
-      const playlist = new Playlist(event, player)
+  const playlist$ = event.factory.player.pipe(map(player => new Playlist(event, player)))
 
+  return playlist$.pipe(mergeMap(playlist => {
+    return event.store.object.pipe(mergeMap(store => {
       return store.put(PLAYLIST_KEY, playlist).pipe(map(() => {
         return {
           playlist,
@@ -53,16 +58,25 @@ const createPlaylist = (event: JEvent): Observable<PlaylistResult> => {
   }))
 }
 
-const getPlaylist = (event: JEvent) => {
+export const getPlaylist = (event: JEvent) => {
   return event.store.object.pipe(
     mergeMap(store => store.get(PLAYLIST_KEY)),
     map(r => r as Playlist),
-    map(playlist => of({ playlist, results$: event.result({ playlist: 'found' }) })),
+  )
+}
+
+export const removePlaylist = (event: JEvent) => {
+  return getPlaylist(event).pipe(
+    mergeMap(playlist => {
+      playlist.disconnect()
+      return event.result({ playlist: 'disconnected' })
+    }),
   )
 }
 
 export const getOrCreatePlaylist = (event: JEvent): Observable<PlaylistResult> => {
   return getPlaylist(event).pipe(
+    map(playlist => of({ playlist, results$: event.result({ playlist: 'found' }) })),
     defaultIfEmpty(createPlaylist(event)),
     mergeAll(),
   )
