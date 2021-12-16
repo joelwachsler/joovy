@@ -1,13 +1,14 @@
-import { concatMap, concatMapTo, defaultIfEmpty, defer, map, merge, mergeAll, mergeMap, Observable, of, Subject } from 'rxjs'
+import { concatMap, concatMapTo, defaultIfEmpty, defer, map, merge, mergeAll, mergeMap, Observable, of, Subject, takeUntil } from 'rxjs'
 import JEvent, { ResultEntry } from '../jevent/JEvent'
 import Player, { Track } from '../player/Player'
 
 export class Playlist {
   private _queue = new Subject<Track>()
+  private _cancelled = new Subject<void>()
 
   constructor(private event: JEvent, private player: Player) {}
 
-  get results() {
+  get results(): Observable<ResultEntry> {
     const q$ = this._queue.pipe(
       concatMap(track => {
         const sendMsg$ = this.event.sendMessage(`Now playing: ${JSON.stringify(track)}`)
@@ -16,6 +17,7 @@ export class Playlist {
           this.player.idle().pipe(concatMapTo(this.event.result({ player: 'idle' }))),
         )
       }),
+      takeUntil(this._cancelled),
     )
 
     const q2$ = this._queue.pipe(mergeMap(track => this.event.sendMessage(`${JSON.stringify(track)} has been added to the queue`)))
@@ -36,6 +38,7 @@ export class Playlist {
   disconnect() {
     this._queue.complete()
     this.player.disconnect()
+    this._cancelled.next()
   }
 }
 
