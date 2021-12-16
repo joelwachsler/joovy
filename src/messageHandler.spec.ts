@@ -1,6 +1,6 @@
 import { MessageEmbed } from 'discord.js'
 import { rxSandbox, RxSandboxInstance } from 'rx-sandbox'
-import { concatMap, defer, delay, map, mapTo, merge, mergeMap, mergeWith, Observable, of, SchedulerLike, Subject } from 'rxjs'
+import { concatMap, defer, delay, map, mapTo, merge, mergeMap, mergeWith, Observable, of, SchedulerLike, Subject, takeUntil } from 'rxjs'
 import JEvent, { ResultEntry, WithBaseFunctionality } from './jevent/JEvent'
 import { JMessage } from './JMessage'
 import { handleMessage } from './messageHandler'
@@ -151,6 +151,14 @@ describe('misc commands', () => {
 })
 
 describe('disconnection', () => {
+  it('testing', () => {
+    const e1 = hot('abc')
+    const e2 = hot('-b-')
+
+    const messages = sandbox.getMessages(e1.pipe(takeUntil(e2)))
+    console.log(JSON.stringify(messages, null, 2))
+  })
+
   it('disconnect should disconnect if connected to channel', () => {
     const play = createTestEvent({
       content: '/play test',
