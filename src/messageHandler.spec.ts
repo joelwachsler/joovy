@@ -160,29 +160,7 @@ describe('disconnection', () => {
     })
 
     const messages = handle(hot('ab|', { a: play, b: disconnect }))
-    expect(messages).toMatchObject(e('(abc)(defg)|', {
-      a: {
-        commandCalled: '/play',
-      },
-      b: {
-        player: 'created',
-      },
-      c: {
-        playing: { name: '/play test', link: 'test' },
-      },
-      d: {
-        commandCalled: '/disconnect',
-      },
-      e: {
-        player: 'disconnected',
-      },
-      f: {
-        player: 'removed',
-      },
-      g: {
-        messageSent: 'Bye!',
-      },
-    }))
+    expect(messages).toMatchSnapshot()
   })
 
   test('disconnect should not do anything if not connected to channel', () => {
@@ -190,8 +168,8 @@ describe('disconnection', () => {
       content: '/disconnect',
     })
 
-    const messages = handle(hot('a|', { a: disconnect }))
-    expect(messages).toMatchObject(e('a|', {
+    const messages = handle(hot('a', { a: disconnect }))
+    expect(messages).toMatchObject(e('a', {
       a: {
         commandCalled: '/disconnect',
       },
