@@ -14,7 +14,7 @@ import WithSendMessage from './impl/SendMessage'
  * The main reason for this interface is to make it easier to create "mock"
  * implementations of a user interaction.
  */
-export default interface JEvent extends Result, Factory, EventStore, SendMessage {
+export default interface JEvent extends ResultFactory, Factory, EventStore, SendMessage {
   readonly message: JMessage
   readonly timestamp: number,
 }
@@ -67,25 +67,25 @@ export type ResultResult = string | Record<string, unknown>
 
 export type ResultArg<T = undefined> = { result: ResultResult, item: T }
 
-export interface Result {
-  result(resultToAdd: ResultResult, ...andThen: Observable<ResultEntry>[]): Observable<ResultEntry>
-  complexResult<T = undefined>(arg: ResultArg<T>, ...andThen: Observable<ResultEntry>[]): Observable<ResultEntry<T>>
+export interface ResultFactory {
+  result(resultToAdd: ResultResult, ...andThen: Observable<Result>[]): Observable<Result>
+  complexResult<T = undefined>(arg: ResultArg<T>, ...andThen: Observable<Result>[]): Observable<Result<T>>
   empty(): Observable<EmptyResult>
 }
 
-export class EmptyResult implements ResultEntry {
+export class EmptyResult implements Result {
   constructor(public event: JEvent) {}
 
   item: any
   result: ResultResult = ''
 }
 
-export interface ResultEntry<T = any> {
+export interface Result<T = any> {
   item: T,
   result: ResultResult
   event: JEvent
 }
 
 export interface SendMessage {
-  sendMessage(message: string | MessageEmbed): Observable<ResultEntry>
+  sendMessage(message: string | MessageEmbed): Observable<Result>
 }

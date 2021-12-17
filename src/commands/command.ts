@@ -1,5 +1,5 @@
 import { Observable } from 'rxjs'
-import JEvent, { ResultEntry } from '../jevent/JEvent'
+import JEvent, { Result } from '../jevent/JEvent'
 import ArgParser from './ArgParser'
 import Disconnect from './impl/Disconnect'
 import Help from './impl/Help'
@@ -20,7 +20,7 @@ export default interface Command {
   /**
    * Will be called if the message sent matches the one defined in argument.
    */
-  handleMessage(event: JEvent): Observable<ResultEntry>
+  handleMessage(event: JEvent): Observable<Result>
 }
 
 const cmds = [
@@ -31,7 +31,7 @@ const cmds = [
 
 const help = new Help(cmds)
 
-export const handle = (event: JEvent): Observable<ResultEntry> => {
+export const handle = (event: JEvent): Observable<Result> => {
   const content = event.message.content
 
   for (const cmd of cmds) {

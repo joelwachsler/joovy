@@ -2,7 +2,7 @@ import { MessageEmbed } from 'discord.js'
 import { RxSandboxInstance, rxSandbox } from 'rx-sandbox'
 import { of, delay, Observable, map } from 'rxjs'
 import { sendMessage } from '../jevent/impl/SendMessage'
-import JEvent, { WithBaseFunctionality, ResultEntry } from '../jevent/JEvent'
+import JEvent, { WithBaseFunctionality, Result } from '../jevent/JEvent'
 import { JMessage } from '../JMessage'
 import { handleMessage } from '../messageHandler'
 import Player from '../player/Player'
@@ -45,7 +45,7 @@ export const createTestEvent = (input?: Partial<JMessage>): JEvent => {
       }
     }
 
-    sendMessage(message: string | MessageEmbed): Observable<ResultEntry> {
+    sendMessage(message: string | MessageEmbed): Observable<Result> {
       return sendMessage({
         message,
         event: this as unknown as JEvent,
