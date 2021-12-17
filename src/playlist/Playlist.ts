@@ -14,7 +14,7 @@ export class Playlist {
   get results(): Observable<Result> {
     const q$ = this._queue.pipe(
       concatMap(track => {
-        const sendMsg$ = this.event.sendMessage(`Now playing: ${JSON.stringify(track)}`)
+        const sendMsg$ = this.event.sendMessage(`Now playing: ${track.name}`)
         const playTrack$ = this.player.play(track).pipe(
           tap(() => this._currentTrack.next(this._currentTrack.getValue() + 1)),
           concatMapTo(sendMsg$),
@@ -34,7 +34,7 @@ export class Playlist {
         const queue = this._currentQueue.getValue()
         this._currentQueue.next([...queue, track])
       }),
-      mergeMap(track => this.event.sendMessage(`${JSON.stringify(track)} has been added to the queue`)),
+      mergeMap(track => this.event.sendMessage(`${track.name} has been added to the queue`)),
     )
 
     return merge(

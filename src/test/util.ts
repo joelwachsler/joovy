@@ -1,8 +1,8 @@
 import { MessageEmbed } from 'discord.js'
-import { RxSandboxInstance, rxSandbox } from 'rx-sandbox'
-import { of, delay, Observable, map } from 'rxjs'
+import { rxSandbox, RxSandboxInstance } from 'rx-sandbox'
+import { delay, map, Observable, of } from 'rxjs'
 import { sendMessage } from '../jevent/impl/SendMessage'
-import JEvent, { WithBaseFunctionality, Result } from '../jevent/JEvent'
+import JEvent, { Result, WithBaseFunctionality, YtSearchResult } from '../jevent/JEvent'
 import { JMessage } from '../JMessage'
 import { handleMessage } from '../messageHandler'
 import Player from '../player/Player'
@@ -42,6 +42,13 @@ export const createTestEvent = (input?: Partial<JMessage>): JEvent => {
       return {
         player: of(player),
         delay: <T>(ms: number) => delay<T>(ms, sandbox.scheduler),
+        ytSearch(query: string): Observable<YtSearchResult> {
+          return of({
+            url: `https://${query}.com`,
+            title: `${query}`,
+            timestamp: '1:10',
+          })
+        },
       }
     }
 

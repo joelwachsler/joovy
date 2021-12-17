@@ -1,6 +1,6 @@
-import { BaseConstructor, delayFactoryImpl, Factory } from '../JEvent'
-import * as Player from '../../player/Player'
 import { Message } from 'discord.js'
+import * as Player from '../../player/Player'
+import { BaseConstructor, delayFactoryImpl, Factory, ytSearchFactoryImpl } from '../JEvent'
 
 const WithFactory = <TBase extends BaseConstructor<Message>>(Base: TBase) => {
   return class extends Base implements Factory {
@@ -10,6 +10,10 @@ const WithFactory = <TBase extends BaseConstructor<Message>>(Base: TBase) => {
 
     get delay() {
       return delayFactoryImpl
+    }
+
+    get ytSearch() {
+      return ytSearchFactoryImpl
     }
 
     get factory() {

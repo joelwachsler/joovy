@@ -1,5 +1,7 @@
 import { Message, MessageEmbed } from 'discord.js'
-import { delay, map, Observable } from 'rxjs'
+import { defer, delay, filter, from as rxFrom, map, Observable } from 'rxjs'
+import yts from 'yt-search'
+import ytdl from 'ytdl-core'
 import { JMessage } from '../JMessage'
 import * as Player from '../player/Player'
 import { ObjectStore, StoreProvider, StringStore } from '../Store'
@@ -56,10 +58,56 @@ export const delayFactoryImpl = <T>(ms: number) => delay<T>(ms)
 
 export type DelayFactory = typeof delayFactoryImpl
 
+export const ytSearchFactoryImpl = (query: string): Observable<YtSearchResult> => {
+  return defer(() => {
+    const normalLink = /(?:https)?:\/\/www.youtube.com\/watch\?.*?v=(\w+).*?/
+    const shortenedLink = /(?:https)?:\/\/youtu.be\/(\w+).*?/
+
+    const videoIdMatch = query.match(normalLink) ?? query.match(shortenedLink)
+
+    if (videoIdMatch) {
+      // yt-search doesn't work that well with actual url:s, let's use
+      // ytdl-core for this instead.
+      return rxFrom(ytdl.getInfo(`${query}&bpctr=9999999999`)).pipe(
+        map(r => {
+          const details = r.videoDetails
+
+          const toMinutesAndSeconds = (seconds: number) => {
+            return `${Math.floor(seconds / 60)}:${seconds % 60}`
+          }
+
+          return {
+            url: details.video_url,
+            title: details.title,
+            timestamp: toMinutesAndSeconds(Number(details.lengthSeconds)),
+          }
+        }),
+      )
+    } else {
+      // const { videos: [ match ] } = rxFrom(yts.search(query))
+      return rxFrom(yts.search(query))
+        .pipe(
+          map(res => res.videos),
+          filter(videos => videos.length > 0),
+          map(([ video ]) => video),
+        )
+    }
+  })
+}
+
+export interface YtSearchResult {
+  url: string
+  title: string
+  timestamp: string
+}
+
+export type YtSearchFactory = typeof ytSearchFactoryImpl
+
 export interface Factory {
   readonly factory: {
     readonly player: Player.Factory
     readonly delay: DelayFactory
+    readonly ytSearch: YtSearchFactory
   }
 }
 
