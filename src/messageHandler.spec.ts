@@ -139,14 +139,7 @@ describe('misc commands', () => {
     })
 
     const messages = handle(hot('a|', { a: event }))
-    expect(messages).toMatchObject(e('(ab)|', {
-      a: {
-        invalidCommand: '/invalid command',
-      },
-      b: {
-        help: true,
-      },
-    }))
+    expect(messages).toMatchSnapshot()
   })
 })
 

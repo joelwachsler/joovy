@@ -187,6 +187,35 @@ Array [
 ]
 `;
 
+exports[`misc commands invalid command should call help 1`] = `
+Array [
+  TestMessageValue {
+    "frame": 0,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "invalidCommand": "/invalid command",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 0,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "help": true,
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 1,
+    "notification": Object {
+      "kind": "C",
+    },
+  },
+]
+`;
+
 exports[`player creation should create player if not previously created 1`] = `
 Array [
   TestMessageValue {
