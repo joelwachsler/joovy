@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`disconnection disconnect should disconnect if connected to channel 1`] = `
+exports[`disconnection should disconnect if connected to channel 1`] = `
 Array [
   TestMessageValue {
     "frame": 0,
