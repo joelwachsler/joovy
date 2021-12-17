@@ -216,4 +216,15 @@ describe('playlist', () => {
     const messages = handle(hot('abc', { a: play, b: playAnotherTrack, c: queue }))
     expect(messages).toMatchSnapshot()
   })
+
+  it('should mark the current track the user is listening to', () => {
+    const play = createTestEvent({ content: '/play test' })
+    const playAnotherTrack = createTestEvent({ content: '/play test2' })
+    const queue = createTestEvent({ content: '/queue' })
+
+    // each track is 5 frames long, move to the frame after next track has started
+    // i.e. frame 6 (ab = 2 frames + 4 frames = 6)
+    const messages = handle(hot('ab----c', { a: play, b: playAnotherTrack, c: queue }))
+    expect(messages).toMatchSnapshot()
+  })
 })

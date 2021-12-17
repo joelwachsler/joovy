@@ -14,10 +14,10 @@ export class Playlist {
     const q$ = this._queue.pipe(
       concatMap(track => {
         const sendMsg$ = this.event.sendMessage(`Now playing: ${JSON.stringify(track)}`)
-        const playTrack$ = this.player.play(track).pipe(concatMap((_, index) => {
-          this._currentTrack.next(index)
-          return sendMsg$
-        }))
+        const playTrack$ = this.player.play(track).pipe(
+          tap(() => this._currentTrack.next(this._currentTrack.getValue() + 1)),
+          concatMapTo(sendMsg$),
+        )
 
         const waitForPlayerIdle$ = this.player.idle().pipe(concatMapTo(this.event.result({ player: 'idle' })))
 
