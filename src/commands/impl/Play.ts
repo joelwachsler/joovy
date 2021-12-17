@@ -1,6 +1,5 @@
-import { merge, mergeMap, Observable, of } from 'rxjs'
+import { catchError, map, merge, mergeMap, Observable } from 'rxjs'
 import JEvent, { Result } from '../../jevent/JEvent'
-import { JMessage } from '../../JMessage'
 import { Track } from '../../player/Player'
 import { getOrCreatePlaylist } from '../../playlist/Playlist'
 import ArgParser from '../ArgParser'
@@ -12,21 +11,24 @@ export default class Play implements Command {
   helpText = 'Play a track or queue it if a track is already playing.'
 
   handleMessage(event: JEvent): Observable<Result> {
-    const parseTrack = (message: JMessage): Observable<Track> => {
-      return of({
-        name: message.content,
-        link: message.content.split(' ').splice(1).join(' '),
-        removed: false,
-      })
-    }
-
     const playlistFromEvent = (event: JEvent, track: Track) => {
       return getOrCreatePlaylist(event).pipe(
         mergeMap(({ playlist, results$ }) => merge(results$, playlist.add(event, track))),
       )
     }
 
-    return parseTrack(event.message)
-      .pipe(mergeMap(track => playlistFromEvent(event, track)))
+    const msgWithoutPlay = event.message.content.split(' ').splice(1).join(' ')
+
+    return event.factory.ytSearch(msgWithoutPlay).pipe(
+      catchError(err => {
+        throw Error(`Failed to add: ${msgWithoutPlay}, reason: ${err}`)
+      }),
+      map(info => ({
+        link: info.url,
+        name: `[${info.title} (${info.timestamp})](${info.url}) [<@${event.message.author.id}>]`,
+        removed: false,
+      })),
+      mergeMap(track => playlistFromEvent(event, track)),
+    )
   }
 }

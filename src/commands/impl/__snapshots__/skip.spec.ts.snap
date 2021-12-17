@@ -42,7 +42,7 @@ Array [
         "messageSent": "{
           \\"title\\": null,
           \\"type\\": \\"rich\\",
-          \\"description\\": \\"{\\\\\\"name\\\\\\":\\\\\\"/play test\\\\\\",\\\\\\"link\\\\\\":\\\\\\"test\\\\\\",\\\\\\"removed\\\\\\":false} has been added to the queue\\",
+          \\"description\\": \\"[test (1:10)](https://test.com) [<@testAuthorId>] has been added to the queue\\",
           \\"url\\": null,
           \\"timestamp\\": null,
           \\"color\\": null,
@@ -63,7 +63,7 @@ Array [
         "messageSent": "{
           \\"title\\": null,
           \\"type\\": \\"rich\\",
-          \\"description\\": \\"Now playing: {\\\\\\"name\\\\\\":\\\\\\"/play test\\\\\\",\\\\\\"link\\\\\\":\\\\\\"test\\\\\\",\\\\\\"removed\\\\\\":false}\\",
+          \\"description\\": \\"Now playing: [test (1:10)](https://test.com) [<@testAuthorId>]\\",
           \\"url\\": null,
           \\"timestamp\\": null,
           \\"color\\": null,
@@ -152,7 +152,7 @@ Array [
         "messageSent": "{
           \\"title\\": null,
           \\"type\\": \\"rich\\",
-          \\"description\\": \\"{\\\\\\"name\\\\\\":\\\\\\"/play test\\\\\\",\\\\\\"link\\\\\\":\\\\\\"test\\\\\\",\\\\\\"removed\\\\\\":false} has been added to the queue\\",
+          \\"description\\": \\"[test (1:10)](https://test.com) [<@testAuthorId>] has been added to the queue\\",
           \\"url\\": null,
           \\"timestamp\\": null,
           \\"color\\": null,
@@ -173,7 +173,7 @@ Array [
         "messageSent": "{
           \\"title\\": null,
           \\"type\\": \\"rich\\",
-          \\"description\\": \\"Now playing: {\\\\\\"name\\\\\\":\\\\\\"/play test\\\\\\",\\\\\\"link\\\\\\":\\\\\\"test\\\\\\",\\\\\\"removed\\\\\\":false}\\",
+          \\"description\\": \\"Now playing: [test (1:10)](https://test.com) [<@testAuthorId>]\\",
           \\"url\\": null,
           \\"timestamp\\": null,
           \\"color\\": null,
