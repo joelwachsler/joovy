@@ -1,6 +1,7 @@
 import { MessageEmbed } from 'discord.js'
 import { rxSandbox, RxSandboxInstance } from 'rx-sandbox'
-import { concatMap, defer, delay, map, mapTo, merge, mergeMap, mergeWith, Observable, of, SchedulerLike, Subject } from 'rxjs'
+import { delay, map, Observable, of, SchedulerLike, Subject } from 'rxjs'
+import { sendMessage } from './jevent/impl/SendMessage'
 import JEvent, { ResultEntry, WithBaseFunctionality } from './jevent/JEvent'
 import { JMessage } from './JMessage'
 import { handleMessage } from './messageHandler'
@@ -11,6 +12,7 @@ let e: RxSandboxInstance['e']
 let hot: RxSandboxInstance['hot']
 let store: Map<string, unknown>
 let player: Player
+const date = new Date(2000, 1, 1)
 
 beforeEach(() => {
   sandbox = rxSandbox.create(true)
@@ -55,7 +57,7 @@ const createTestEvent = (input?: Partial<JMessage>): JEvent => {
     ...input,
   }
 
-  return new class EventFake extends WithBaseFunctionality(message, () => store) {
+  return new class EventFake extends WithBaseFunctionality(message, () => store, date.getTime()) {
     get factory() {
       return {
         player: of(player),
@@ -64,13 +66,12 @@ const createTestEvent = (input?: Partial<JMessage>): JEvent => {
     }
 
     sendMessage(message: string | MessageEmbed): Observable<ResultEntry> {
-      const event = this as unknown as JEvent
-
-      if (message instanceof MessageEmbed) {
-        return event.result({ messageSent: `${message.toJSON()}` })
-      } else {
-        return event.result({ messageSent: message })
-      }
+      return sendMessage({
+        message,
+        event: this as unknown as JEvent,
+        messageSender: _ => of(undefined),
+        indent: 12,
+      })
     }
   }
 }
@@ -192,38 +193,27 @@ describe('playlist', () => {
     expect(messages).toMatchSnapshot()
   })
 
-  it('my test', () => {
-    const createPlaylist = () => {
-      const playlist = new Subject<string>()
-      const addPrint$ = playlist.pipe(map(msg => `Item from playlist: ${msg}`))
+  it('should print queue with no tracks', () => {
+    const queue = createTestEvent({ content: '/queue' })
 
-      const addDelay$ = addPrint$.pipe(
-        concatMap((msg, index) => {
-          return index === 0
-            ? of(msg)
-            : of(msg).pipe(delay(5, sandbox.scheduler))
-        }),
-      )
+    const messages = handle(hot('a', { a: queue }))
+    expect(messages).toMatchSnapshot()
+  })
 
-      return {
-        add(entry: string) {
-          return defer(() => of(playlist.next(entry)))
-        },
-        playlist$: addDelay$,
-      }
-    }
+  it('should print queue', () => {
+    const play = createTestEvent({ content: '/play test' })
+    const queue = createTestEvent({ content: '/queue' })
 
-    const playlist = createPlaylist()
+    const messages = handle(hot('ab', { a: play, b: queue }))
+    expect(messages).toMatchSnapshot()
+  })
 
-    const messages = sandbox.getMessages(hot('abc...30...|').pipe(
-      mergeMap(msg => {
-        return merge(
-          playlist.add(msg).pipe(mapTo(`Msg added to queue: ${msg}`)),
-        )
-      }),
-      mergeWith(playlist.playlist$),
-    ))
+  it('should print queue with multiple tracks', () => {
+    const play = createTestEvent({ content: '/play test' })
+    const playAnotherTrack = createTestEvent({ content: '/play test2' })
+    const queue = createTestEvent({ content: '/queue' })
 
-    console.log(messages)
+    const messages = handle(hot('abc', { a: play, b: playAnotherTrack, c: queue }))
+    expect(messages).toMatchSnapshot()
   })
 })
