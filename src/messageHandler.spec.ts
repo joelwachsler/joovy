@@ -151,15 +151,7 @@ describe('misc commands', () => {
 })
 
 describe('disconnection', () => {
-  it('testing', () => {
-    const e1 = hot('abc')
-    const e2 = hot('-b-')
-
-    const messages = sandbox.getMessages(e1.pipe(takeUntil(e2)))
-    console.log(JSON.stringify(messages, null, 2))
-  })
-
-  it('disconnect should disconnect if connected to channel', () => {
+  it('should disconnect if connected to channel', () => {
     const play = createTestEvent({
       content: '/play test',
     })
@@ -171,7 +163,7 @@ describe('disconnection', () => {
     expect(messages).toMatchSnapshot()
   })
 
-  it('disconnect should not do anything if not connected to channel', () => {
+  it('should not do anything if not connected to channel', () => {
     const disconnect = createTestEvent({
       content: '/disconnect',
     })
