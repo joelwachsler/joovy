@@ -10,13 +10,14 @@ import WithSendMessage from './impl/SendMessage'
 
 export default interface JEvent extends Result, Factory, EventStore, SendMessage {
   readonly message: JMessage
+  readonly timestamp: number,
 }
 
 export const from = (message$: Observable<Message>): Observable<JEvent> => {
   const store = new Map<string, unknown>()
 
   return message$.pipe(
-    map(message => WithBaseFunctionality(message, () => store)),
+    map(message => WithBaseFunctionality(message, () => store, message.createdTimestamp)),
     map(EventClass => WithFactory(EventClass)),
     map(EventClass => WithSendMessage(EventClass)),
     map(EventClass => new EventClass()),
@@ -27,14 +28,15 @@ export const from = (message$: Observable<Message>): Observable<JEvent> => {
 export type Constructor<T = {}> = new (...args: any[]) => T
 export type BaseConstructor<T extends JMessage = JMessage> = Constructor<{ message: T }>
 
-const Base = <T extends JMessage = JMessage>(message: T) => {
+const Base = <T extends JMessage = JMessage>(message: T, timestamp: number) => {
   return class {
     message = message
+    timestamp = timestamp
   }
 }
 
-export const WithBaseFunctionality = <T extends JMessage = JMessage>(message: T, storeProvider: StoreProvider) => {
-  return WithResult(WithEventStore(Base(message), storeProvider))
+export const WithBaseFunctionality = <T extends JMessage = JMessage>(message: T, storeProvider: StoreProvider, timestamp: number) => {
+  return WithResult(WithEventStore(Base(message, timestamp), storeProvider))
 }
 
 export interface EventStore {

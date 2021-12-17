@@ -1,10 +1,12 @@
-import { concatMap, concatMapTo, defaultIfEmpty, defer, map, merge, mergeAll, mergeMap, mergeMapTo, Observable, of, Subject, takeUntil } from 'rxjs'
+import { BehaviorSubject, concatMap, concatMapTo, defaultIfEmpty, defer, map, merge, mergeAll, mergeMap, mergeMapTo, Observable, of, Subject, takeUntil, tap } from 'rxjs'
 import JEvent, { ResultEntry } from '../jevent/JEvent'
 import Player, { Track } from '../player/Player'
 
 export class Playlist {
   private _queue = new Subject<Track>()
   private _cancelled = new Subject<void>()
+  private _currentQueue = new BehaviorSubject<Track[]>([])
+  private _currentTrack = new BehaviorSubject<number>(-1)
 
   constructor(private event: JEvent, private player: Player) {}
 
@@ -12,20 +14,37 @@ export class Playlist {
     const q$ = this._queue.pipe(
       concatMap(track => {
         const sendMsg$ = this.event.sendMessage(`Now playing: ${JSON.stringify(track)}`)
-        return merge(
-          this.player.play(track).pipe(concatMapTo(sendMsg$)),
-          this.player.idle().pipe(concatMapTo(this.event.result({ player: 'idle' }))),
-        )
+        const playTrack$ = this.player.play(track).pipe(concatMap((_, index) => {
+          this._currentTrack.next(index)
+          return sendMsg$
+        }))
+
+        const waitForPlayerIdle$ = this.player.idle().pipe(concatMapTo(this.event.result({ player: 'idle' })))
+
+        return merge(playTrack$, waitForPlayerIdle$)
       }),
       takeUntil(this._cancelled),
     )
 
-    const q2$ = this._queue.pipe(mergeMap(track => this.event.sendMessage(`${JSON.stringify(track)} has been added to the queue`)))
+    const q2$ = this._queue.pipe(
+      tap(track => {
+        const queue = this._currentQueue.getValue()
+        this._currentQueue.next([...queue, track])
+      }),
+      mergeMap(track => this.event.sendMessage(`${JSON.stringify(track)} has been added to the queue`)),
+    )
 
     return merge(
       q2$,
       q$,
     )
+  }
+
+  get currentQueue() {
+    return {
+      currentTrack: this._currentTrack.getValue(),
+      queue: this._currentQueue.getValue(),
+    }
   }
 
   add(event: JEvent, track: Track): Observable<ResultEntry> {

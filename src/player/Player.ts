@@ -13,6 +13,7 @@ export default interface Player {
 export interface Track {
   name: string
   link: string
+  removed: boolean
 }
 
 export type Factory = Observable<Player>

@@ -16,6 +16,7 @@ export default class Play implements Command {
       return of({
         name: message.content,
         link: message.content.split(' ').splice(1).join(' '),
+        removed: false,
       })
     }
 
