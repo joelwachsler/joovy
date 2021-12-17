@@ -8,6 +8,12 @@ import WithFactory from './impl/Factory'
 import WithResult from './impl/Result'
 import WithSendMessage from './impl/SendMessage'
 
+/**
+ * "JEvent" or "Joovy Event" represents an interaction a user or bot has created.
+ * 
+ * The main reason for this interface is to make it easier to create "mock"
+ * implementations of a user interaction.
+ */
 export default interface JEvent extends Result, Factory, EventStore, SendMessage {
   readonly message: JMessage
   readonly timestamp: number,
