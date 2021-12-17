@@ -529,6 +529,179 @@ Array [
 ]
 `;
 
+exports[`playlist should mark the current track the user is listening to 1`] = `
+Array [
+  TestMessageValue {
+    "frame": 0,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "commandCalled": "/play",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 0,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "playlist": "created",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 0,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "messageSent": "{
+          \\"title\\": null,
+          \\"type\\": \\"rich\\",
+          \\"description\\": \\"{\\\\\\"name\\\\\\":\\\\\\"/play test\\\\\\",\\\\\\"link\\\\\\":\\\\\\"test\\\\\\",\\\\\\"removed\\\\\\":false} has been added to the queue\\",
+          \\"url\\": null,
+          \\"timestamp\\": null,
+          \\"color\\": null,
+          \\"fields\\": [],
+          \\"thumbnail\\": null,
+          \\"image\\": null,
+          \\"author\\": null,
+          \\"footer\\": null
+}",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 0,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "messageSent": "{
+          \\"title\\": null,
+          \\"type\\": \\"rich\\",
+          \\"description\\": \\"Now playing: {\\\\\\"name\\\\\\":\\\\\\"/play test\\\\\\",\\\\\\"link\\\\\\":\\\\\\"test\\\\\\",\\\\\\"removed\\\\\\":false}\\",
+          \\"url\\": null,
+          \\"timestamp\\": null,
+          \\"color\\": null,
+          \\"fields\\": [],
+          \\"thumbnail\\": null,
+          \\"image\\": null,
+          \\"author\\": null,
+          \\"footer\\": null
+}",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 1,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "commandCalled": "/play",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 1,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "playlist": "found",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 1,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "messageSent": "{
+          \\"title\\": null,
+          \\"type\\": \\"rich\\",
+          \\"description\\": \\"{\\\\\\"name\\\\\\":\\\\\\"/play test2\\\\\\",\\\\\\"link\\\\\\":\\\\\\"test2\\\\\\",\\\\\\"removed\\\\\\":false} has been added to the queue\\",
+          \\"url\\": null,
+          \\"timestamp\\": null,
+          \\"color\\": null,
+          \\"fields\\": [],
+          \\"thumbnail\\": null,
+          \\"image\\": null,
+          \\"author\\": null,
+          \\"footer\\": null
+}",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 5,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "player": "idle",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 5,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "messageSent": "{
+          \\"title\\": null,
+          \\"type\\": \\"rich\\",
+          \\"description\\": \\"Now playing: {\\\\\\"name\\\\\\":\\\\\\"/play test2\\\\\\",\\\\\\"link\\\\\\":\\\\\\"test2\\\\\\",\\\\\\"removed\\\\\\":false}\\",
+          \\"url\\": null,
+          \\"timestamp\\": null,
+          \\"color\\": null,
+          \\"fields\\": [],
+          \\"thumbnail\\": null,
+          \\"image\\": null,
+          \\"author\\": null,
+          \\"footer\\": null
+}",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 6,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "commandCalled": "/queue",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 6,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "messageSent": "{
+          \\"title\\": \\"Queue\\",
+          \\"type\\": \\"rich\\",
+          \\"description\\": \\"\`0)\` /play test\\\\n\`1)\` /play test2 ← Currently playing\\",
+          \\"url\\": null,
+          \\"timestamp\\": \\"2000-02-01T00:00:00.000Z\\",
+          \\"color\\": 16758815,
+          \\"fields\\": [],
+          \\"thumbnail\\": null,
+          \\"image\\": null,
+          \\"author\\": null,
+          \\"footer\\": null
+}",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 10,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "player": "idle",
+      },
+    },
+  },
+]
+`;
+
 exports[`playlist should print queue 1`] = `
 Array [
   TestMessageValue {
