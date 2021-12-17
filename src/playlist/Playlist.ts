@@ -7,6 +7,7 @@ export class Playlist {
   private _cancelled = new Subject<void>()
   private _currentQueue = new BehaviorSubject<Track[]>([])
   private _currentTrack = new BehaviorSubject<number>(-1)
+  private _skipTrack = new Subject<void>()
 
   constructor(private event: JEvent, private player: Player) {}
 
@@ -19,9 +20,11 @@ export class Playlist {
           concatMapTo(sendMsg$),
         )
 
-        const waitForPlayerIdle$ = this.player.idle().pipe(concatMapTo(this.event.result({ player: 'idle' })))
+        const waitForPlayerIdle$ = this.player.idle(this._skipTrack).pipe(
+          concatMapTo(this.event.result({ player: 'idle' })),
+        )
 
-        return merge(playTrack$, waitForPlayerIdle$)
+        return merge(waitForPlayerIdle$, playTrack$)
       }),
       takeUntil(this._cancelled),
     )
@@ -45,6 +48,13 @@ export class Playlist {
       currentTrack: this._currentTrack.getValue(),
       queue: this._currentQueue.getValue(),
     }
+  }
+
+  skipCurrentTrack() {
+    return defer(() => {
+      this._skipTrack.next()
+      return of(undefined)
+    })
   }
 
   add(event: JEvent, track: Track): Observable<Result> {
