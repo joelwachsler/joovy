@@ -1,6 +1,6 @@
 import { MessageEmbed } from 'discord.js'
 import { rxSandbox, RxSandboxInstance } from 'rx-sandbox'
-import { concatMap, defer, delay, map, mapTo, merge, mergeMap, mergeWith, Observable, of, SchedulerLike, Subject, takeUntil } from 'rxjs'
+import { concatMap, defer, delay, map, mapTo, merge, mergeMap, mergeWith, Observable, of, SchedulerLike, Subject } from 'rxjs'
 import JEvent, { ResultEntry, WithBaseFunctionality } from './jevent/JEvent'
 import { JMessage } from './JMessage'
 import { handleMessage } from './messageHandler'
@@ -160,6 +160,18 @@ describe('disconnection', () => {
     })
 
     const messages = handle(hot('ab|', { a: play, b: disconnect }))
+    expect(messages).toMatchSnapshot()
+  })
+
+  it('should disconnect, reconnect and disconnect again without any problem', () => {
+    const play = createTestEvent({
+      content: '/play test',
+    })
+    const disconnect = createTestEvent({
+      content: '/disconnect',
+    })
+
+    const messages = handle(hot('aba|', { a: play, b: disconnect }))
     expect(messages).toMatchSnapshot()
   })
 

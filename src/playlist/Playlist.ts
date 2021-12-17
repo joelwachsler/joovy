@@ -1,4 +1,4 @@
-import { concatMap, concatMapTo, defaultIfEmpty, defer, map, merge, mergeAll, mergeMap, Observable, of, Subject, takeUntil } from 'rxjs'
+import { concatMap, concatMapTo, defaultIfEmpty, defer, map, merge, mergeAll, mergeMap, mergeMapTo, Observable, of, Subject, takeUntil } from 'rxjs'
 import JEvent, { ResultEntry } from '../jevent/JEvent'
 import Player, { Track } from '../player/Player'
 
@@ -72,7 +72,9 @@ export const removePlaylist = (event: JEvent) => {
   return getPlaylist(event).pipe(
     mergeMap(playlist => {
       playlist.disconnect()
-      return event.result({ playlist: 'disconnected' })
+
+      return event.store.object.pipe(mergeMap(store => store.remove(PLAYLIST_KEY)))
+        .pipe(mergeMapTo(event.result({ playlist: 'disconnected' })))
     }),
   )
 }
