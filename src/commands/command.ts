@@ -5,6 +5,7 @@ import Disconnect from './impl/Disconnect'
 import Help from './impl/Help'
 import Play from './impl/Play'
 import Queue from './impl/Queue'
+import Skip from './impl/Skip'
 
 export default interface Command {
   /**
@@ -27,6 +28,7 @@ const cmds = [
   new Play(),
   new Disconnect(),
   new Queue(),
+  new Skip(),
 ]
 
 const help = new Help(cmds)

@@ -7,7 +7,7 @@ import * as Ytdl from './Ytdl'
 export default interface Player {
   play(track: Track): Observable<Track>
   disconnect(): void
-  idle(): Observable<void>
+  idle(cancel$: Observable<void>): Observable<void>
 }
 
 export interface Track {
@@ -67,12 +67,16 @@ class PlayerImpl implements Player {
       )
   }
 
-  idle(): Observable<void> {
+  idle(cancel$: Observable<void>): Observable<void> {
     return new Observable(subscribe => {
-      this.player.once(AudioPlayerStatus.Idle, () => {
+      const complete = () => {
         subscribe.next(undefined)
         subscribe.complete()
-      })
+        this.player.stop()
+      }
+
+      cancel$.subscribe(complete)
+      this.player.once(AudioPlayerStatus.Idle, complete)
     })
   }
 
