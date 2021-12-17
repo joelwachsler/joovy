@@ -1,0 +1,218 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`should create player if not previously created 1`] = `
+Array [
+  TestMessageValue {
+    "frame": 0,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "commandCalled": "/play",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 0,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "playlist": "created",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 0,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "messageSent": "{
+          \\"title\\": null,
+          \\"type\\": \\"rich\\",
+          \\"description\\": \\"{\\\\\\"name\\\\\\":\\\\\\"/play test\\\\\\",\\\\\\"link\\\\\\":\\\\\\"test\\\\\\",\\\\\\"removed\\\\\\":false} has been added to the queue\\",
+          \\"url\\": null,
+          \\"timestamp\\": null,
+          \\"color\\": null,
+          \\"fields\\": [],
+          \\"thumbnail\\": null,
+          \\"image\\": null,
+          \\"author\\": null,
+          \\"footer\\": null
+}",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 0,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "messageSent": "{
+          \\"title\\": null,
+          \\"type\\": \\"rich\\",
+          \\"description\\": \\"Now playing: {\\\\\\"name\\\\\\":\\\\\\"/play test\\\\\\",\\\\\\"link\\\\\\":\\\\\\"test\\\\\\",\\\\\\"removed\\\\\\":false}\\",
+          \\"url\\": null,
+          \\"timestamp\\": null,
+          \\"color\\": null,
+          \\"fields\\": [],
+          \\"thumbnail\\": null,
+          \\"image\\": null,
+          \\"author\\": null,
+          \\"footer\\": null
+}",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 5,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "player": "idle",
+      },
+    },
+  },
+]
+`;
+
+exports[`should not create player if previously created 1`] = `
+Array [
+  TestMessageValue {
+    "frame": 0,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "commandCalled": "/play",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 0,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "playlist": "created",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 0,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "messageSent": "{
+          \\"title\\": null,
+          \\"type\\": \\"rich\\",
+          \\"description\\": \\"{\\\\\\"name\\\\\\":\\\\\\"/play test\\\\\\",\\\\\\"link\\\\\\":\\\\\\"test\\\\\\",\\\\\\"removed\\\\\\":false} has been added to the queue\\",
+          \\"url\\": null,
+          \\"timestamp\\": null,
+          \\"color\\": null,
+          \\"fields\\": [],
+          \\"thumbnail\\": null,
+          \\"image\\": null,
+          \\"author\\": null,
+          \\"footer\\": null
+}",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 0,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "messageSent": "{
+          \\"title\\": null,
+          \\"type\\": \\"rich\\",
+          \\"description\\": \\"Now playing: {\\\\\\"name\\\\\\":\\\\\\"/play test\\\\\\",\\\\\\"link\\\\\\":\\\\\\"test\\\\\\",\\\\\\"removed\\\\\\":false}\\",
+          \\"url\\": null,
+          \\"timestamp\\": null,
+          \\"color\\": null,
+          \\"fields\\": [],
+          \\"thumbnail\\": null,
+          \\"image\\": null,
+          \\"author\\": null,
+          \\"footer\\": null
+}",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 1,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "commandCalled": "/play",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 1,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "playlist": "found",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 1,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "messageSent": "{
+          \\"title\\": null,
+          \\"type\\": \\"rich\\",
+          \\"description\\": \\"{\\\\\\"name\\\\\\":\\\\\\"/play test2\\\\\\",\\\\\\"link\\\\\\":\\\\\\"test2\\\\\\",\\\\\\"removed\\\\\\":false} has been added to the queue\\",
+          \\"url\\": null,
+          \\"timestamp\\": null,
+          \\"color\\": null,
+          \\"fields\\": [],
+          \\"thumbnail\\": null,
+          \\"image\\": null,
+          \\"author\\": null,
+          \\"footer\\": null
+}",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 5,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "player": "idle",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 5,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "messageSent": "{
+          \\"title\\": null,
+          \\"type\\": \\"rich\\",
+          \\"description\\": \\"Now playing: {\\\\\\"name\\\\\\":\\\\\\"/play test2\\\\\\",\\\\\\"link\\\\\\":\\\\\\"test2\\\\\\",\\\\\\"removed\\\\\\":false}\\",
+          \\"url\\": null,
+          \\"timestamp\\": null,
+          \\"color\\": null,
+          \\"fields\\": [],
+          \\"thumbnail\\": null,
+          \\"image\\": null,
+          \\"author\\": null,
+          \\"footer\\": null
+}",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 10,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "player": "idle",
+      },
+    },
+  },
+]
+`;
