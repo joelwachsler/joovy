@@ -1,6 +1,6 @@
 import { MessageEmbed } from 'discord.js'
 import { defaultIfEmpty, map, mergeMap, Observable } from 'rxjs'
-import JEvent, { ResultEntry } from '../../jevent/JEvent'
+import JEvent, { Result } from '../../jevent/JEvent'
 import { Track } from '../../player/Player'
 import { getPlaylist } from '../../playlist/Playlist'
 import ArgParser from '../ArgParser'
@@ -43,7 +43,7 @@ export default class Queue implements Command {
       .setTimestamp(event.timestamp)
   }
 
-  handleMessage(event: JEvent): Observable<ResultEntry> {
+  handleMessage(event: JEvent): Observable<Result> {
     return getPlaylist(event).pipe(
       map(playlist => playlist.currentQueue),
       defaultIfEmpty({

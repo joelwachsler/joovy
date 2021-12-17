@@ -1,5 +1,5 @@
 import { BehaviorSubject, concatMap, concatMapTo, defaultIfEmpty, defer, map, merge, mergeAll, mergeMap, mergeMapTo, Observable, of, Subject, takeUntil, tap } from 'rxjs'
-import JEvent, { ResultEntry } from '../jevent/JEvent'
+import JEvent, { Result } from '../jevent/JEvent'
 import Player, { Track } from '../player/Player'
 
 export class Playlist {
@@ -10,7 +10,7 @@ export class Playlist {
 
   constructor(private event: JEvent, private player: Player) {}
 
-  get results(): Observable<ResultEntry> {
+  get results(): Observable<Result> {
     const q$ = this._queue.pipe(
       concatMap(track => {
         const sendMsg$ = this.event.sendMessage(`Now playing: ${JSON.stringify(track)}`)
@@ -47,7 +47,7 @@ export class Playlist {
     }
   }
 
-  add(event: JEvent, track: Track): Observable<ResultEntry> {
+  add(event: JEvent, track: Track): Observable<Result> {
     return defer(() => {
       this._queue.next(track)
       return event.empty()
@@ -63,7 +63,7 @@ export class Playlist {
 
 const PLAYLIST_KEY = 'playlist'
 
-type PlaylistResult = { playlist: Playlist, results$: Observable<ResultEntry> }
+type PlaylistResult = { playlist: Playlist, results$: Observable<Result> }
 
 const createPlaylist = (event: JEvent): Observable<PlaylistResult> => {
   const playlist$ = event.factory.player.pipe(map(player => new Playlist(event, player)))

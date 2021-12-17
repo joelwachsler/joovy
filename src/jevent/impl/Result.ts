@@ -1,13 +1,13 @@
 import { concat, Observable, of } from 'rxjs'
-import JEvent, { BaseConstructor, EmptyResult, Result, ResultArg, ResultEntry, ResultResult } from '../JEvent'
+import JEvent, { BaseConstructor, EmptyResult, ResultFactory, ResultArg, Result, ResultResult } from '../JEvent'
 
 const WithResult = <TBase extends BaseConstructor>(Base: TBase) => {
-  return class extends Base implements Result {
-    result(result: ResultResult, ...andThen: Observable<ResultEntry>[]): Observable<ResultEntry> {
+  return class extends Base implements ResultFactory {
+    result(result: ResultResult, ...andThen: Observable<Result>[]): Observable<Result> {
       return this.complexResult({ result, item: undefined }, ...andThen)
     }
 
-    complexResult<T = undefined>(arg: ResultArg<T>, ...andThen: Observable<ResultEntry<any>>[]): Observable<ResultEntry<T>> {
+    complexResult<T = undefined>(arg: ResultArg<T>, ...andThen: Observable<Result<any>>[]): Observable<Result<T>> {
       return andThen.reduce(
         (acc, curr) => concat(acc, curr),
         of({

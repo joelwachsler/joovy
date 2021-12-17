@@ -1,5 +1,5 @@
 import { merge, mergeMap, Observable, of } from 'rxjs'
-import JEvent, { ResultEntry } from '../../jevent/JEvent'
+import JEvent, { Result } from '../../jevent/JEvent'
 import { JMessage } from '../../JMessage'
 import { Track } from '../../player/Player'
 import { getOrCreatePlaylist } from '../../playlist/Playlist'
@@ -11,7 +11,7 @@ export default class Play implements Command {
     .withArg('url', arg => arg.or('query'))
   helpText = 'Play a track or queue it if a track is already playing.'
 
-  handleMessage(event: JEvent): Observable<ResultEntry> {
+  handleMessage(event: JEvent): Observable<Result> {
     const parseTrack = (message: JMessage): Observable<Track> => {
       return of({
         name: message.content,
