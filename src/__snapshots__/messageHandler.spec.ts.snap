@@ -57,6 +57,15 @@ Array [
     },
   },
   TestMessageValue {
+    "frame": 1,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "messageSent": "Bye!",
+      },
+    },
+  },
+  TestMessageValue {
     "frame": 2,
     "notification": Object {
       "kind": "C",

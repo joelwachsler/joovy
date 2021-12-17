@@ -171,7 +171,7 @@ describe('disconnection', () => {
     expect(messages).toMatchSnapshot()
   })
 
-  test('disconnect should not do anything if not connected to channel', () => {
+  it('disconnect should not do anything if not connected to channel', () => {
     const disconnect = createTestEvent({
       content: '/disconnect',
     })
