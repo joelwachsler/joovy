@@ -2,7 +2,7 @@ export default class ArgParser {
   private constructor(public command: string, private args: string[]) { }
 
   is(potentialCmd: string) {
-    return potentialCmd.startsWith(this.command)
+    return potentialCmd.startsWith(`${this.command} `) || potentialCmd === this.command
   }
 
   get help() {
