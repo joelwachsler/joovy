@@ -1,7 +1,7 @@
 import { MessageEmbed } from 'discord.js'
 import { rxSandbox, RxSandboxInstance } from 'rx-sandbox'
 import { delay, map, Observable, of } from 'rxjs'
-import { sendMessage } from '../jevent/impl/SendMessage'
+import { sendMessage } from '../jevent/mixin/SendMessage'
 import JEvent, { Result, WithBaseFunctionality, YtSearchResult } from '../jevent/JEvent'
 import { JMessage } from '../JMessage'
 import { handleMessage } from '../messageHandler'
