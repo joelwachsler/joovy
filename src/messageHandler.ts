@@ -1,6 +1,7 @@
 import { catchError, filter, mergeMap, Observable } from 'rxjs'
 import { handle } from './commands/command'
-import JEvent, { EmptyResult, Result } from './jevent/JEvent'
+import JEvent from './jevent/JEvent'
+import { EmptyResult, Result } from './jevent/Result'
 
 export const handleMessage = (event$: Observable<JEvent>): Observable<Result> => {
   return event$.pipe(

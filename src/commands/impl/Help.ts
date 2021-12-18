@@ -1,6 +1,7 @@
 import { MessageEmbed } from 'discord.js'
 import { mergeMapTo, Observable } from 'rxjs'
-import JEvent, { Result } from '../../jevent/JEvent'
+import JEvent from '../../jevent/JEvent'
+import { Result } from '../../jevent/Result'
 import ArgParser from '../ArgParser'
 import Command from '../command'
 

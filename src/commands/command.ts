@@ -1,5 +1,6 @@
 import { Observable } from 'rxjs'
-import JEvent, { Result } from '../jevent/JEvent'
+import JEvent from '../jevent/JEvent'
+import { Result } from '../jevent/Result'
 import ArgParser from './ArgParser'
 import Disconnect from './impl/Disconnect'
 import Help from './impl/Help'

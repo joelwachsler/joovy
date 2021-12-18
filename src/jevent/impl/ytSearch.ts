@@ -1,7 +1,7 @@
 import { defer, filter, from, map, Observable } from 'rxjs'
 import yts from 'yt-search'
 import ytdl from 'ytdl-core'
-import { YtSearchResult } from '../JEvent'
+import { YtSearchResult } from '../YtSearchResult'
 
 export const ytSearchFactoryImpl = (query: string): Observable<YtSearchResult> => {
   return defer(() => {
