@@ -1,6 +1,8 @@
 import { Message } from 'discord.js'
 import * as Player from '../../player/Player'
-import { BaseConstructor, delayFactoryImpl, Factory, ytSearchFactoryImpl } from '../JEvent'
+import { delayFactoryImpl } from '../impl/delay'
+import { ytSearchFactoryImpl } from '../impl/ytSearch'
+import { BaseConstructor, Factory } from '../JEvent'
 
 const WithFactory = <TBase extends BaseConstructor<Message>>(Base: TBase) => {
   return class extends Base implements Factory {
