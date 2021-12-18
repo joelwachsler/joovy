@@ -1,16 +1,16 @@
-import { Message, MessageEmbed } from 'discord.js'
-import { defer, from, mapTo, mergeMapTo, Observable } from 'rxjs'
+import { MessageEmbed } from 'discord.js'
+import { mapTo, mergeMapTo, Observable } from 'rxjs'
 import JEvent, { BaseConstructor } from '../JEvent'
 import { Result } from '../Result'
 import { SendMessage } from '../SendMessage'
 
-const WithSendMessage = <TBase extends BaseConstructor<Message>>(Base: TBase) => {
+const WithSendMessage = <TBase extends BaseConstructor>(Base: TBase) => {
   return class extends Base implements SendMessage {
     sendMessage(message: string | MessageEmbed): Observable<Result> {
       return sendMessage({
         event: this as unknown as JEvent,
         message,
-        messageSender: msg => defer(() => from(this.message.channel.send({ embeds: [msg] })))
+        messageSender: msg => this.message.send({ embeds: [msg] })
           .pipe(mapTo(undefined)),
         indent: 2,
       })

@@ -1,5 +1,5 @@
 import { defer, EMPTY, Observable, of } from 'rxjs'
-import { JMessage } from './JMessage'
+import JMessage from './JMessage'
 
 export default interface Store<T> {
   put(key: string, value: T): Observable<T>
