@@ -89,6 +89,11 @@ export class EmptyResult implements Result {
   result: ResultResult = ''
 }
 
+/**
+ * An easy way to notify the caller that something has happened.
+ * This is especially useful when you want to determine if
+ * something has happened in a test without resolving to mocking.
+ */
 export interface Result<T = any> {
   item: T,
   result: ResultResult
