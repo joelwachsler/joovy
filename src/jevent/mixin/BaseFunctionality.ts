@@ -1,4 +1,4 @@
-import { JMessage } from '../../JMessage'
+import JMessage from '../../JMessage'
 import { StoreProvider } from '../../Store'
 import { Base } from '../JEvent'
 import WithEventStore from './EventStore'

@@ -6,7 +6,7 @@ import { WithBaseFunctionality } from '../jevent/mixin/BaseFunctionality'
 import { sendMessage } from '../jevent/mixin/SendMessage'
 import { Result } from '../jevent/Result'
 import { YtSearchResult } from '../jevent/YtSearchResult'
-import { JMessage } from '../JMessage'
+import JMessage from '../JMessage'
 import { handleMessage } from '../messageHandler'
 import Player from '../player/Player'
 import { PlayerFake } from './PlayerFake'
@@ -37,6 +37,18 @@ export const createTestEvent = (input?: Partial<JMessage>): JEvent => {
     },
     channelId: 'testChannelId',
     content: 'testContent',
+    clearReactions() {
+      return of(this)
+    },
+    edit() {
+      return of(this)
+    },
+    react() {
+      return of(this)
+    },
+    send() {
+      return of(this)
+    },
     ...input,
   }
 

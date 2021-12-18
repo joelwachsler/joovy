@@ -1,6 +1,5 @@
 import { Message } from 'discord.js'
 import { map, Observable } from 'rxjs'
-import { JMessage } from '../JMessage'
 import { EventStore } from './EventStore'
 import { Factory } from './Factory'
 import { WithBaseFunctionality } from './mixin/BaseFunctionality'
@@ -8,6 +7,7 @@ import WithFactory from './mixin/Factory'
 import WithSendMessage from './mixin/SendMessage'
 import { ResultFactory } from './Result'
 import { SendMessage } from './SendMessage'
+import JMessage, { from as jMessageFrom } from '../JMessage'
 
 /**
  * "JEvent" or "Joovy Event" represents an interaction a user or bot has created.
@@ -24,8 +24,7 @@ export const from = (message$: Observable<Message>): Observable<JEvent> => {
   const store = new Map<string, unknown>()
 
   return message$.pipe(
-    map(message => WithBaseFunctionality(message, () => store, message.createdTimestamp)),
-    map(EventClass => WithFactory(EventClass)),
+    map(message => WithFactory(WithBaseFunctionality(jMessageFrom(message), () => store, message.createdTimestamp), message)),
     map(EventClass => WithSendMessage(EventClass)),
     map(EventClass => new EventClass()),
   )
