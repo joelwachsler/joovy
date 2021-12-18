@@ -22,8 +22,8 @@
     "threads": "^1.6.5",
     "ts-node": "^10.4.0",
     "winston": "^3.3.3",
-    "yt-search": "^2.10.1",
-    "ytdl-core": "^4.9.2"
+    "ytdl-core": "^4.9.2",
+    "ytsr": "^3.5.3"
   },
   "devDependencies": {
     "@types/jest": "^27.0.3",

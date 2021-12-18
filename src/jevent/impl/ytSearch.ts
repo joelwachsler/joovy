@@ -1,6 +1,6 @@
-import { defer, filter, from, map, Observable } from 'rxjs'
-import yts from 'yt-search'
+import { defer, from, map, mergeMap, Observable } from 'rxjs'
 import ytdl from 'ytdl-core'
+import ytsr from 'ytsr'
 import { YtSearchResult } from '../YtSearchResult'
 
 export const ytSearchFactoryImpl = (query: string): Observable<YtSearchResult> => {
@@ -29,12 +29,52 @@ export const ytSearchFactoryImpl = (query: string): Observable<YtSearchResult> =
         }),
       )
     } else {
-      return from(yts.search(query))
-        .pipe(
-          map(res => res.videos),
-          filter(videos => videos.length > 0),
-          map(([ video ]) => video),
-        )
+      return getVideoFilter(query).pipe(
+        mergeMap(filter => {
+          const filterUrl = filter.url
+          if (!filterUrl) {
+            throw Error('Filter url not found...')
+          }
+
+          return from(ytsr(filterUrl, { limit: 1, gl: 'SE' }))
+        }),
+        map(res => res.items),
+        map(items => items.filter(item => item.type === 'video')),
+        map(items => {
+          if (items.length < 1) {
+            throw Error(`No results found for: ${query}`)
+          }
+
+          const [result] = items
+          return result
+        }),
+        mergeMap(result => result.type === 'video' ? [result] : []),
+        map(result => {
+          const timestamp = result.duration
+          if (!timestamp) {
+            throw Error('Failed to parse video duration...')
+          }
+
+          return {
+            url: result.url,
+            title: result.title,
+            timestamp,
+          }
+        }),
+      )
     }
   })
+}
+
+const getVideoFilter = (query: string): Observable<ytsr.Filter> => {
+  return defer(() => from(ytsr.getFilters(query))).pipe(
+    map(filter => {
+      const f = filter.get('Type')?.get('Video')
+      if (!f) {
+        throw Error('Filter not found...')
+      }
+
+      return f
+    }),
+  )
 }
