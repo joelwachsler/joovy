@@ -5,10 +5,10 @@ import ytdl from 'ytdl-core'
 import { JMessage } from '../JMessage'
 import * as Player from '../player/Player'
 import { ObjectStore, StoreProvider, StringStore } from '../Store'
-import WithEventStore from './impl/EventStore'
-import WithFactory from './impl/Factory'
-import WithResult from './impl/Result'
-import WithSendMessage from './impl/SendMessage'
+import WithEventStore from './mixin/EventStore'
+import WithFactory from './mixin/Factory'
+import WithResult from './mixin/Result'
+import WithSendMessage from './mixin/SendMessage'
 
 /**
  * "JEvent" or "Joovy Event" represents an interaction a user or bot has created.
@@ -84,7 +84,6 @@ export const ytSearchFactoryImpl = (query: string): Observable<YtSearchResult> =
         }),
       )
     } else {
-      // const { videos: [ match ] } = rxFrom(yts.search(query))
       return rxFrom(yts.search(query))
         .pipe(
           map(res => res.videos),
