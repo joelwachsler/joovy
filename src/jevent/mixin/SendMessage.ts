@@ -1,6 +1,8 @@
 import { Message, MessageEmbed } from 'discord.js'
 import { defer, from, mapTo, mergeMapTo, Observable } from 'rxjs'
-import JEvent, { BaseConstructor, Result, SendMessage } from '../JEvent'
+import JEvent, { BaseConstructor } from '../JEvent'
+import { Result } from '../Result'
+import { SendMessage } from '../SendMessage'
 
 const WithSendMessage = <TBase extends BaseConstructor<Message>>(Base: TBase) => {
   return class extends Base implements SendMessage {

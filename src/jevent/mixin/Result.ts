@@ -1,5 +1,6 @@
 import { concat, Observable, of } from 'rxjs'
-import JEvent, { BaseConstructor, EmptyResult, ResultFactory, ResultArg, Result, ResultResult } from '../JEvent'
+import JEvent, { BaseConstructor } from '../JEvent'
+import { EmptyResult, Result, ResultArg, ResultFactory, ResultResult } from '../Result'
 
 const WithResult = <TBase extends BaseConstructor>(Base: TBase) => {
   return class extends Base implements ResultFactory {

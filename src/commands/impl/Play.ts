@@ -1,5 +1,6 @@
 import { catchError, map, merge, mergeMap, Observable } from 'rxjs'
-import JEvent, { Result } from '../../jevent/JEvent'
+import JEvent from '../../jevent/JEvent'
+import { Result } from '../../jevent/Result'
 import { Track } from '../../player/Player'
 import { getOrCreatePlaylist } from '../../playlist/Playlist'
 import ArgParser from '../ArgParser'

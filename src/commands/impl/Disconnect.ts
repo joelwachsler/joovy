@@ -1,5 +1,6 @@
 import { concat, mergeMap, Observable, of } from 'rxjs'
-import JEvent, { Result } from '../../jevent/JEvent'
+import JEvent from '../../jevent/JEvent'
+import { Result } from '../../jevent/Result'
 import { removePlaylist } from '../../playlist/Playlist'
 import ArgParser from '../ArgParser'
 import Command from '../command'

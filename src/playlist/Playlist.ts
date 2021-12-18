@@ -1,5 +1,6 @@
 import { BehaviorSubject, concatMap, concatMapTo, defaultIfEmpty, defer, map, merge, mergeAll, mergeMap, mergeMapTo, Observable, of, Subject, takeUntil, tap } from 'rxjs'
-import JEvent, { Result } from '../jevent/JEvent'
+import JEvent from '../jevent/JEvent'
+import { Result } from '../jevent/Result'
 import Player, { Track } from '../player/Player'
 
 export class Playlist {
