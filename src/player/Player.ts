@@ -72,7 +72,6 @@ class PlayerImpl implements Player {
       const complete = () => {
         subscribe.next(undefined)
         subscribe.complete()
-        this.player.stop()
       }
 
       cancel$.subscribe(complete)
