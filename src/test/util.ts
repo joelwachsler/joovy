@@ -1,6 +1,7 @@
 import { MessageEmbed } from 'discord.js'
 import { rxSandbox, RxSandboxInstance } from 'rx-sandbox'
-import { defer, delay, map, Observable, of } from 'rxjs'
+import { defer, delay, map, Observable, ObservableInput, of, timeout } from 'rxjs'
+import { TimeoutConfig, TimeoutInfo } from 'rxjs/internal/operators/timeout'
 import JEvent from '../jevent/JEvent'
 import { WithBaseFunctionality } from '../jevent/mixin/BaseFunctionality'
 import { sendMessage } from '../jevent/mixin/SendMessage'
@@ -80,6 +81,9 @@ export const createTestEvent = (input?: Partial<JMessage>): JEvent => {
       return {
         player: of(player),
         delay: <T>(ms: number) => delay<T>(ms, sandbox.scheduler),
+        timeout: <T, O extends ObservableInput<any>, M>(
+          config: TimeoutConfig<T, O, M> & { with: (info: TimeoutInfo<T, M>) => O },
+        ) => timeout<T, O, M>({ ...config, scheduler: sandbox.scheduler }),
         ytSearch(query: string): Observable<YtSearchResult> {
           return of({
             url: `https://${query}.com`,

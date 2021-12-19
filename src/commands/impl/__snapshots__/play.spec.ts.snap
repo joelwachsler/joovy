@@ -71,6 +71,27 @@ Array [
       },
     },
   },
+  TestMessageValue {
+    "frame": 5,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "messageSent": "{
+  \\"title\\": null,
+  \\"type\\": \\"rich\\",
+  \\"description\\": \\"End of playlist, will disconnect in 5 minutes.\\",
+  \\"url\\": null,
+  \\"timestamp\\": null,
+  \\"color\\": null,
+  \\"fields\\": [],
+  \\"thumbnail\\": null,
+  \\"image\\": null,
+  \\"author\\": null,
+  \\"footer\\": null
+}",
+      },
+    },
+  },
 ]
 `;
 
@@ -211,6 +232,27 @@ Array [
       "kind": "N",
       "value": Object {
         "player": "idle",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 10,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "messageSent": "{
+  \\"title\\": null,
+  \\"type\\": \\"rich\\",
+  \\"description\\": \\"End of playlist, will disconnect in 5 minutes.\\",
+  \\"url\\": null,
+  \\"timestamp\\": null,
+  \\"color\\": null,
+  \\"fields\\": [],
+  \\"thumbnail\\": null,
+  \\"image\\": null,
+  \\"author\\": null,
+  \\"footer\\": null
+}",
       },
     },
   },

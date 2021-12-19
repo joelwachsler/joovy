@@ -1,4 +1,5 @@
 import { Track } from '../../player/Player'
+import { playlistConfig } from '../../playlist/Playlist'
 import { createTestEvent, handle, hot } from '../../test/util'
 import { createReactions, FormatQueueArgs, QueueReactions } from './Queue'
 
@@ -43,6 +44,17 @@ test('should mark the current track the user is listening to', () => {
   // each track is 5 frames long, move to the frame after next track has started
   // i.e. frame 6 (ab = 2 frames + 4 frames = 6)
   const messages = handle(hot('ab----c', { a: play, b: playAnotherTrack, c: queue }))
+  expect(messages).toMatchSnapshot()
+})
+
+test('should disconnect after the player has been idle for a certain amount of frames', () => {
+  const play1 = createTestEvent({ content: '/play test1' })
+  const play2 = createTestEvent({ content: '/play test2' })
+  playlistConfig.timeoutFrames = 3
+
+  // A song is 5 frame long, added on frame 0 -> frame 5 should result in the player being idle.
+  // At frame 13 the player should disconnect.
+  const messages = handle(hot('ab', { a: play1, b: play2 }))
   expect(messages).toMatchSnapshot()
 })
 

@@ -2,6 +2,7 @@ import { Message } from 'discord.js'
 import * as Player from '../../player/Player'
 import { Factory } from '../Factory'
 import { delayFactoryImpl } from '../impl/delay'
+import { timeoutFactoryImpl } from '../impl/timeout'
 import { ytSearchFactoryImpl } from '../impl/ytSearch'
 import { Constructor } from '../JEvent'
 
@@ -13,6 +14,10 @@ const WithFactory = <TBase extends Constructor>(Base: TBase, message: Message) =
 
     get delay() {
       return delayFactoryImpl
+    }
+
+    get timeout() {
+      return timeoutFactoryImpl
     }
 
     get ytSearch() {

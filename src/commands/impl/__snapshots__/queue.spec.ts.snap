@@ -463,6 +463,209 @@ Array [
       },
     },
   },
+  TestMessageValue {
+    "frame": 30,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "messageSent": "{
+  \\"title\\": null,
+  \\"type\\": \\"rich\\",
+  \\"description\\": \\"End of playlist, will disconnect in 5 minutes.\\",
+  \\"url\\": null,
+  \\"timestamp\\": null,
+  \\"color\\": null,
+  \\"fields\\": [],
+  \\"thumbnail\\": null,
+  \\"image\\": null,
+  \\"author\\": null,
+  \\"footer\\": null
+}",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 33,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "player": "disconnected because idle",
+      },
+    },
+  },
+]
+`;
+
+exports[`should disconnect after the player has been idle for a certain amount of frames 1`] = `
+Array [
+  TestMessageValue {
+    "frame": 0,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "commandCalled": "/play",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 0,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "playlist": "created",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 0,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "messageSent": "{
+  \\"title\\": null,
+  \\"type\\": \\"rich\\",
+  \\"description\\": \\"[test1 (1:10)](https://test1.com) [<@testAuthorId>] has been added to the queue\\",
+  \\"url\\": null,
+  \\"timestamp\\": null,
+  \\"color\\": null,
+  \\"fields\\": [],
+  \\"thumbnail\\": null,
+  \\"image\\": null,
+  \\"author\\": null,
+  \\"footer\\": null
+}",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 0,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "messageSent": "{
+  \\"title\\": null,
+  \\"type\\": \\"rich\\",
+  \\"description\\": \\"Now playing: [test1 (1:10)](https://test1.com) [<@testAuthorId>]\\",
+  \\"url\\": null,
+  \\"timestamp\\": null,
+  \\"color\\": null,
+  \\"fields\\": [],
+  \\"thumbnail\\": null,
+  \\"image\\": null,
+  \\"author\\": null,
+  \\"footer\\": null
+}",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 1,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "commandCalled": "/play",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 1,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "playlist": "found",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 1,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "messageSent": "{
+  \\"title\\": null,
+  \\"type\\": \\"rich\\",
+  \\"description\\": \\"[test2 (1:10)](https://test2.com) [<@testAuthorId>] has been added to the queue\\",
+  \\"url\\": null,
+  \\"timestamp\\": null,
+  \\"color\\": null,
+  \\"fields\\": [],
+  \\"thumbnail\\": null,
+  \\"image\\": null,
+  \\"author\\": null,
+  \\"footer\\": null
+}",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 5,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "player": "idle",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 5,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "messageSent": "{
+  \\"title\\": null,
+  \\"type\\": \\"rich\\",
+  \\"description\\": \\"Now playing: [test2 (1:10)](https://test2.com) [<@testAuthorId>]\\",
+  \\"url\\": null,
+  \\"timestamp\\": null,
+  \\"color\\": null,
+  \\"fields\\": [],
+  \\"thumbnail\\": null,
+  \\"image\\": null,
+  \\"author\\": null,
+  \\"footer\\": null
+}",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 10,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "player": "idle",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 10,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "messageSent": "{
+  \\"title\\": null,
+  \\"type\\": \\"rich\\",
+  \\"description\\": \\"End of playlist, will disconnect in 5 minutes.\\",
+  \\"url\\": null,
+  \\"timestamp\\": null,
+  \\"color\\": null,
+  \\"fields\\": [],
+  \\"thumbnail\\": null,
+  \\"image\\": null,
+  \\"author\\": null,
+  \\"footer\\": null
+}",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 13,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "player": "disconnected because idle",
+      },
+    },
+  },
 ]
 `;
 
@@ -636,6 +839,27 @@ Array [
       },
     },
   },
+  TestMessageValue {
+    "frame": 10,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "messageSent": "{
+  \\"title\\": null,
+  \\"type\\": \\"rich\\",
+  \\"description\\": \\"End of playlist, will disconnect in 5 minutes.\\",
+  \\"url\\": null,
+  \\"timestamp\\": null,
+  \\"color\\": null,
+  \\"fields\\": [],
+  \\"thumbnail\\": null,
+  \\"image\\": null,
+  \\"author\\": null,
+  \\"footer\\": null
+}",
+      },
+    },
+  },
 ]
 `;
 
@@ -737,6 +961,27 @@ Array [
       "kind": "N",
       "value": Object {
         "player": "idle",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 5,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "messageSent": "{
+  \\"title\\": null,
+  \\"type\\": \\"rich\\",
+  \\"description\\": \\"End of playlist, will disconnect in 5 minutes.\\",
+  \\"url\\": null,
+  \\"timestamp\\": null,
+  \\"color\\": null,
+  \\"fields\\": [],
+  \\"thumbnail\\": null,
+  \\"image\\": null,
+  \\"author\\": null,
+  \\"footer\\": null
+}",
       },
     },
   },
@@ -910,6 +1155,27 @@ Array [
       "kind": "N",
       "value": Object {
         "player": "idle",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 10,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "messageSent": "{
+  \\"title\\": null,
+  \\"type\\": \\"rich\\",
+  \\"description\\": \\"End of playlist, will disconnect in 5 minutes.\\",
+  \\"url\\": null,
+  \\"timestamp\\": null,
+  \\"color\\": null,
+  \\"fields\\": [],
+  \\"thumbnail\\": null,
+  \\"image\\": null,
+  \\"author\\": null,
+  \\"footer\\": null
+}",
       },
     },
   },
@@ -1157,6 +1423,27 @@ Array [
       "kind": "N",
       "value": Object {
         "player": "idle",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 15,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "messageSent": "{
+  \\"title\\": null,
+  \\"type\\": \\"rich\\",
+  \\"description\\": \\"End of playlist, will disconnect in 5 minutes.\\",
+  \\"url\\": null,
+  \\"timestamp\\": null,
+  \\"color\\": null,
+  \\"fields\\": [],
+  \\"thumbnail\\": null,
+  \\"image\\": null,
+  \\"author\\": null,
+  \\"footer\\": null
+}",
       },
     },
   },
