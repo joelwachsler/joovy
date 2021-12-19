@@ -95,7 +95,7 @@ export const createTestEvent = (input?: Partial<JMessage>): JEvent => {
         message: messageToSend,
         event: this as unknown as JEvent,
         messageSender: _ => of(message),
-        indent: 12,
+        indent: 2,
       })
     }
   }
