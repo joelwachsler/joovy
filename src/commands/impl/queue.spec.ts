@@ -58,6 +58,15 @@ test('should disconnect after the player has been idle for a certain amount of f
   expect(messages).toMatchSnapshot()
 })
 
+test('should be able to reconnect after idle timeout', () => {
+  const play = createTestEvent({ content: '/play test' })
+  const skip = createTestEvent({ content: '/skip' })
+  playlistConfig.timeoutFrames = 3
+
+  const messages = handle(hot('ab----c', { a: play, b: skip, c: play }))
+  expect(messages).toMatchSnapshot()
+})
+
 test('should add reactions to playlist longer than a single page', () => {
   const play1 = createTestEvent({ content: '/play test1' })
   const play2 = createTestEvent({ content: '/play test2' })

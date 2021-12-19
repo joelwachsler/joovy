@@ -54,8 +54,9 @@ export class Playlist {
               of(undefined).pipe(
                 this.event.factory.delay(playlistConfig.timeoutFrames),
                 concatMap(() => {
-                  this.disconnect()
-                  return this.event.result({ player: 'disconnected because idle' })
+                  return removePlaylist(this.event).pipe(
+                    mergeMapTo(this.event.result({ player: 'disconnected because idle' })),
+                  )
                 }),
               ),
             )
