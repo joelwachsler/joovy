@@ -280,5 +280,26 @@ Array [
       },
     },
   },
+  TestMessageValue {
+    "frame": 7,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "messageSent": "{
+  \\"title\\": null,
+  \\"type\\": \\"rich\\",
+  \\"description\\": \\"End of playlist, will disconnect in 5 minutes.\\",
+  \\"url\\": null,
+  \\"timestamp\\": null,
+  \\"color\\": null,
+  \\"fields\\": [],
+  \\"thumbnail\\": null,
+  \\"image\\": null,
+  \\"author\\": null,
+  \\"footer\\": null
+}",
+      },
+    },
+  },
 ]
 `;

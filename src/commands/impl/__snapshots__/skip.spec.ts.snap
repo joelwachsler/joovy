@@ -99,6 +99,27 @@ Array [
     "notification": Object {
       "kind": "N",
       "value": Object {
+        "messageSent": "{
+  \\"title\\": null,
+  \\"type\\": \\"rich\\",
+  \\"description\\": \\"End of playlist, will disconnect in 5 minutes.\\",
+  \\"url\\": null,
+  \\"timestamp\\": null,
+  \\"color\\": null,
+  \\"fields\\": [],
+  \\"thumbnail\\": null,
+  \\"image\\": null,
+  \\"author\\": null,
+  \\"footer\\": null
+}",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 1,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
         "skipped": true,
       },
     },
@@ -201,6 +222,27 @@ Array [
       "kind": "N",
       "value": Object {
         "player": "idle",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 1,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "messageSent": "{
+  \\"title\\": null,
+  \\"type\\": \\"rich\\",
+  \\"description\\": \\"End of playlist, will disconnect in 5 minutes.\\",
+  \\"url\\": null,
+  \\"timestamp\\": null,
+  \\"color\\": null,
+  \\"fields\\": [],
+  \\"thumbnail\\": null,
+  \\"image\\": null,
+  \\"author\\": null,
+  \\"footer\\": null
+}",
       },
     },
   },

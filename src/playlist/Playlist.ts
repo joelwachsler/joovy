@@ -1,4 +1,4 @@
-import { BehaviorSubject, concatMap, concatMapTo, defaultIfEmpty, defer, map, merge, mergeAll, mergeMap, mergeMapTo, Observable, of, Subject, takeUntil, tap } from 'rxjs'
+import { BehaviorSubject, concat, concatMap, concatMapTo, defaultIfEmpty, defer, map, merge, mergeAll, mergeMap, mergeMapTo, Observable, of, Subject, switchMap, takeUntil, tap } from 'rxjs'
 import JEvent from '../jevent/JEvent'
 import { Result } from '../jevent/Result'
 import Player, { Track } from '../player/Player'
@@ -7,22 +7,24 @@ export class Playlist {
   private _queue = new Subject<Track>()
   private _cancelled = new Subject<void>()
   private _currentQueue = new BehaviorSubject<Track[]>([])
-  private _currentTrack = new BehaviorSubject<number>(-1)
+  private _currentTrack = new BehaviorSubject<number>(0)
   private _skipTrack = new Subject<void>()
 
-  constructor(private event: JEvent, private player: Player) {}
+  constructor(private event: JEvent, private player: Player) { }
+
+  isEndOfPlaylist() {
+    return this._currentQueue.getValue().length <= this._currentTrack.getValue()
+  }
 
   get results(): Observable<Result> {
-    const q$ = this._queue.pipe(
+    const player$ = this._queue.pipe(
       concatMap(track => {
         const sendMsg$ = this.event.sendMessage(`Now playing: ${track.name}`)
-        const playTrack$ = this.player.play(track).pipe(
-          tap(() => this._currentTrack.next(this._currentTrack.getValue() + 1)),
-          concatMapTo(sendMsg$),
-        )
+        const playTrack$ = this.player.play(track).pipe(concatMapTo(sendMsg$))
 
-        const waitForPlayerIdle$ = this.player.idle(this._skipTrack).pipe(
+        const waitForPlayerIdle$ = this.player.idle(this._skipTrack, this.isEndOfPlaylist.bind(this)).pipe(
           concatMapTo(this.event.result({ player: 'idle' })),
+          tap(() => this._currentTrack.next(this._currentTrack.getValue() + 1)),
         )
 
         return merge(waitForPlayerIdle$, playTrack$)
@@ -30,7 +32,7 @@ export class Playlist {
       takeUntil(this._cancelled),
     )
 
-    const q2$ = this._queue.pipe(
+    const addedToQueue$ = this._queue.pipe(
       tap(track => {
         const queue = this._currentQueue.getValue()
         this._currentQueue.next([...queue, track])
@@ -38,9 +40,35 @@ export class Playlist {
       mergeMap(track => this.event.sendMessage(`${track.name} has been added to the queue`)),
     )
 
+    const disconnectIfIdle$ = player$.pipe(
+      switchMap(res => {
+        const result = res.result
+        if (typeof result === 'string' || result.player !== 'idle' || !this.isEndOfPlaylist()) {
+          return of(res)
+        }
+
+        const disconnectWhenIdle$ = this.event.sendMessage('End of playlist, will disconnect in 5 minutes.').pipe(
+          mergeMap(res => {
+            return concat(
+              of(res),
+              of(undefined).pipe(
+                concatMap(() => {
+                  this.player.disconnect()
+                  return this.event.result({ player: 'disconnected because idle' })
+                }),
+                this.event.factory.delay(playlistConfig.timeoutFrames),
+              ),
+            )
+          }),
+        )
+
+        return concat(of(res), disconnectWhenIdle$)
+      }),
+    )
+
     return merge(
-      q2$,
-      q$,
+      addedToQueue$,
+      disconnectIfIdle$,
     )
   }
 
@@ -73,6 +101,10 @@ export class Playlist {
 }
 
 const PLAYLIST_KEY = 'playlist'
+
+export const playlistConfig = {
+  timeoutFrames: 5 * 60 * 1000,
+}
 
 type PlaylistResult = { playlist: Playlist, results$: Observable<Result> }
 
