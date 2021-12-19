@@ -1,5 +1,6 @@
 import { Message, MessageOptions, MessagePayload } from 'discord.js'
-import { defer, from as rxFrom, map, mapTo, mergeMap, Observable, of } from 'rxjs'
+import { defer, filter, from as rxFrom, map, mapTo, mergeMap, Observable, of } from 'rxjs'
+import { QueueReactions } from './commands/impl/Queue'
 
 /**
  * Facade around Message for easier test implementations.
@@ -12,15 +13,19 @@ export default interface JMessage {
     id: string
   }
   content: string
-  edit(update: Partial<JMessage>): Observable<JMessage>
-  clearReactions(): Observable<JMessage>
+  edit(update: MessageContent): Observable<JMessage>
+  clearReactions$: Observable<JMessage>
   react(reaction: string): Observable<JMessage>
-  send(message: string | MessagePayload | MessageOptions): Observable<JMessage>
+  send(message: MessageContent): Observable<JMessage>
+  reactions$: Observable<JReaction>
 }
+
+export type MessageContent = string | MessagePayload | MessageOptions
+
+export type JReaction = string
 
 class JMessageImpl implements JMessage {
   constructor(private message: Message) {}
-
   get channelId() {
     return this.message.channelId
   }
@@ -33,13 +38,13 @@ class JMessageImpl implements JMessage {
     return this.message.content
   }
 
-  edit(update: Partial<JMessage>): Observable<JMessage> {
+  edit(update: MessageContent): Observable<JMessage> {
     return defer(() => rxFrom(this.message.edit(update))).pipe(
       map(updatedMsg => new JMessageImpl(updatedMsg)),
     )
   }
 
-  clearReactions(): Observable<JMessage> {
+  get clearReactions$(): Observable<JMessage> {
     return defer(() => of(this.message.reactions)).pipe(
       mergeMap(reactionManager => reactionManager.removeAll()),
       map(resultingMessage => new JMessageImpl(resultingMessage)),
@@ -52,9 +57,48 @@ class JMessageImpl implements JMessage {
     )
   }
 
-  send(message: string | MessagePayload | MessageOptions): Observable<JMessage> {
+  send(message: MessageContent): Observable<JMessage> {
     return defer(() => rxFrom(this.message.channel.send(message))).pipe(
       map(msg => new JMessageImpl(msg)),
+    )
+  }
+
+  get reactions$(): Observable<JReaction> {
+    const reactions$ = defer(() => rxFrom(this.message.awaitReactions({
+      filter: (reaction, user) => {
+        const emojiName = reaction.emoji.name
+        if (emojiName == null) {
+          return false
+        }
+
+        if (user.bot) {
+          return false
+        }
+
+        const reactions = [
+          QueueReactions.TWO_PREVIOUS,
+          QueueReactions.PREVIOUS,
+          QueueReactions.NEXT,
+          QueueReactions.TWO_NEXT,
+        ]
+
+        const reactionsAsString = reactions.map(r => `${r}`)
+        return reactionsAsString.includes(emojiName)
+      },
+      max: 1,
+      time: 60000,
+      errors: ['time'],
+    })))
+
+    const firstReaction$ = reactions$.pipe(
+      filter(reactions => reactions.size > 0),
+      mergeMap(reactions => [reactions.first()]),
+      mergeMap(reaction => reaction !== undefined ? [reaction] : []),
+    )
+
+    return firstReaction$.pipe(
+      map(reaction => reaction.emoji.name),
+      mergeMap(emojiReaction => emojiReaction !== null ? [emojiReaction] : []),
     )
   }
 }

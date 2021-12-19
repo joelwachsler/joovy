@@ -1,17 +1,17 @@
 import { MessageEmbed } from 'discord.js'
-import { mapTo, mergeMapTo, Observable } from 'rxjs'
+import { mergeMap, Observable } from 'rxjs'
+import JMessage from '../../JMessage'
 import JEvent, { BaseConstructor } from '../JEvent'
 import { Result } from '../Result'
 import { SendMessage } from '../SendMessage'
 
 const WithSendMessage = <TBase extends BaseConstructor>(Base: TBase) => {
   return class extends Base implements SendMessage {
-    sendMessage(message: string | MessageEmbed): Observable<Result> {
+    sendMessage(message: string | MessageEmbed): Observable<Result<JMessage>> {
       return sendMessage({
         event: this as unknown as JEvent,
         message,
-        messageSender: msg => this.message.send({ embeds: [msg] })
-          .pipe(mapTo(undefined)),
+        messageSender: msg => this.message.send({ embeds: [msg] }),
         indent: 2,
       })
     }
@@ -33,10 +33,20 @@ export const sendMessage = ({ message, messageSender, event, indent }: SendMessa
       .setDescription(msg)
   }
 
-  return messageSender(msg)
-    .pipe(mergeMapTo(event.result({ messageSent: `${JSON.stringify(msg.toJSON(), null, indent)}` })))
+  const jsonMsg = msg.toJSON()
+
+  return messageSender(msg).pipe(
+    mergeMap(sentMessage => {
+      return event.complexResult({
+        result: {
+          messageSent: `${JSON.stringify(jsonMsg, null, indent)}`,
+        },
+        item: sentMessage,
+      })
+    }),
+  )
 }
 
-type MessageSender  = (message: MessageEmbed) => Observable<void>
+type MessageSender  = (message: MessageEmbed) => Observable<JMessage>
 
 export default WithSendMessage

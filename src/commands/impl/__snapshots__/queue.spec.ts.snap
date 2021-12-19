@@ -1,5 +1,471 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`should add reactions to playlist longer than a single page 1`] = `
+Array [
+  TestMessageValue {
+    "frame": 0,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "commandCalled": "/play",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 0,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "playlist": "created",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 0,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "messageSent": "{
+          \\"title\\": null,
+          \\"type\\": \\"rich\\",
+          \\"description\\": \\"[test1 (1:10)](https://test1.com) [<@testAuthorId>] has been added to the queue\\",
+          \\"url\\": null,
+          \\"timestamp\\": null,
+          \\"color\\": null,
+          \\"fields\\": [],
+          \\"thumbnail\\": null,
+          \\"image\\": null,
+          \\"author\\": null,
+          \\"footer\\": null
+}",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 0,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "messageSent": "{
+          \\"title\\": null,
+          \\"type\\": \\"rich\\",
+          \\"description\\": \\"Now playing: [test1 (1:10)](https://test1.com) [<@testAuthorId>]\\",
+          \\"url\\": null,
+          \\"timestamp\\": null,
+          \\"color\\": null,
+          \\"fields\\": [],
+          \\"thumbnail\\": null,
+          \\"image\\": null,
+          \\"author\\": null,
+          \\"footer\\": null
+}",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 1,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "commandCalled": "/play",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 1,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "playlist": "found",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 1,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "messageSent": "{
+          \\"title\\": null,
+          \\"type\\": \\"rich\\",
+          \\"description\\": \\"[test2 (1:10)](https://test2.com) [<@testAuthorId>] has been added to the queue\\",
+          \\"url\\": null,
+          \\"timestamp\\": null,
+          \\"color\\": null,
+          \\"fields\\": [],
+          \\"thumbnail\\": null,
+          \\"image\\": null,
+          \\"author\\": null,
+          \\"footer\\": null
+}",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 2,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "commandCalled": "/play",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 2,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "playlist": "found",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 2,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "messageSent": "{
+          \\"title\\": null,
+          \\"type\\": \\"rich\\",
+          \\"description\\": \\"[test3 (1:10)](https://test3.com) [<@testAuthorId>] has been added to the queue\\",
+          \\"url\\": null,
+          \\"timestamp\\": null,
+          \\"color\\": null,
+          \\"fields\\": [],
+          \\"thumbnail\\": null,
+          \\"image\\": null,
+          \\"author\\": null,
+          \\"footer\\": null
+}",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 3,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "commandCalled": "/play",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 3,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "playlist": "found",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 3,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "messageSent": "{
+          \\"title\\": null,
+          \\"type\\": \\"rich\\",
+          \\"description\\": \\"[test4 (1:10)](https://test4.com) [<@testAuthorId>] has been added to the queue\\",
+          \\"url\\": null,
+          \\"timestamp\\": null,
+          \\"color\\": null,
+          \\"fields\\": [],
+          \\"thumbnail\\": null,
+          \\"image\\": null,
+          \\"author\\": null,
+          \\"footer\\": null
+}",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 4,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "commandCalled": "/play",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 4,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "playlist": "found",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 4,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "messageSent": "{
+          \\"title\\": null,
+          \\"type\\": \\"rich\\",
+          \\"description\\": \\"[test5 (1:10)](https://test5.com) [<@testAuthorId>] has been added to the queue\\",
+          \\"url\\": null,
+          \\"timestamp\\": null,
+          \\"color\\": null,
+          \\"fields\\": [],
+          \\"thumbnail\\": null,
+          \\"image\\": null,
+          \\"author\\": null,
+          \\"footer\\": null
+}",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 5,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "commandCalled": "/play",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 5,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "playlist": "found",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 5,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "messageSent": "{
+          \\"title\\": null,
+          \\"type\\": \\"rich\\",
+          \\"description\\": \\"[test6 (1:10)](https://test6.com) [<@testAuthorId>] has been added to the queue\\",
+          \\"url\\": null,
+          \\"timestamp\\": null,
+          \\"color\\": null,
+          \\"fields\\": [],
+          \\"thumbnail\\": null,
+          \\"image\\": null,
+          \\"author\\": null,
+          \\"footer\\": null
+}",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 5,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "player": "idle",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 5,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "messageSent": "{
+          \\"title\\": null,
+          \\"type\\": \\"rich\\",
+          \\"description\\": \\"Now playing: [test2 (1:10)](https://test2.com) [<@testAuthorId>]\\",
+          \\"url\\": null,
+          \\"timestamp\\": null,
+          \\"color\\": null,
+          \\"fields\\": [],
+          \\"thumbnail\\": null,
+          \\"image\\": null,
+          \\"author\\": null,
+          \\"footer\\": null
+}",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 6,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "commandCalled": "/queue",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 6,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "messageSent": "{
+          \\"title\\": \\"Queue\\",
+          \\"type\\": \\"rich\\",
+          \\"description\\": \\"\`0)\` [test1 (1:10)](https://test1.com) [<@testAuthorId>]\\\\n\`1)\` [test2 (1:10)](https://test2.com) [<@testAuthorId>] ← Currently playing\\\\n\`2)\` [test3 (1:10)](https://test3.com) [<@testAuthorId>]\\\\n\`3)\` [test4 (1:10)](https://test4.com) [<@testAuthorId>]\\\\n\`4)\` [test5 (1:10)](https://test5.com) [<@testAuthorId>]\\\\n\`5)\` [test6 (1:10)](https://test6.com) [<@testAuthorId>]\\",
+          \\"url\\": null,
+          \\"timestamp\\": \\"2000-02-01T00:00:00.000Z\\",
+          \\"color\\": 16758815,
+          \\"fields\\": [
+                    {
+                              \\"name\\": \\"\\\\n1 more track(s) in queue.\\",
+                              \\"value\\": \\"During the current session 6 tracks have been added to the queue in total\\",
+                              \\"inline\\": false
+                    }
+          ],
+          \\"thumbnail\\": null,
+          \\"image\\": null,
+          \\"author\\": null,
+          \\"footer\\": null
+}",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 6,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "addedReactions": Array [
+          "▶",
+        ],
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 10,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "player": "idle",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 10,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "messageSent": "{
+          \\"title\\": null,
+          \\"type\\": \\"rich\\",
+          \\"description\\": \\"Now playing: [test3 (1:10)](https://test3.com) [<@testAuthorId>]\\",
+          \\"url\\": null,
+          \\"timestamp\\": null,
+          \\"color\\": null,
+          \\"fields\\": [],
+          \\"thumbnail\\": null,
+          \\"image\\": null,
+          \\"author\\": null,
+          \\"footer\\": null
+}",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 15,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "player": "idle",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 15,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "messageSent": "{
+          \\"title\\": null,
+          \\"type\\": \\"rich\\",
+          \\"description\\": \\"Now playing: [test4 (1:10)](https://test4.com) [<@testAuthorId>]\\",
+          \\"url\\": null,
+          \\"timestamp\\": null,
+          \\"color\\": null,
+          \\"fields\\": [],
+          \\"thumbnail\\": null,
+          \\"image\\": null,
+          \\"author\\": null,
+          \\"footer\\": null
+}",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 20,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "player": "idle",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 20,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "messageSent": "{
+          \\"title\\": null,
+          \\"type\\": \\"rich\\",
+          \\"description\\": \\"Now playing: [test5 (1:10)](https://test5.com) [<@testAuthorId>]\\",
+          \\"url\\": null,
+          \\"timestamp\\": null,
+          \\"color\\": null,
+          \\"fields\\": [],
+          \\"thumbnail\\": null,
+          \\"image\\": null,
+          \\"author\\": null,
+          \\"footer\\": null
+}",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 25,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "player": "idle",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 25,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "messageSent": "{
+          \\"title\\": null,
+          \\"type\\": \\"rich\\",
+          \\"description\\": \\"Now playing: [test6 (1:10)](https://test6.com) [<@testAuthorId>]\\",
+          \\"url\\": null,
+          \\"timestamp\\": null,
+          \\"color\\": null,
+          \\"fields\\": [],
+          \\"thumbnail\\": null,
+          \\"image\\": null,
+          \\"author\\": null,
+          \\"footer\\": null
+}",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 30,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "player": "idle",
+      },
+    },
+  },
+]
+`;
+
 exports[`should mark the current track the user is listening to 1`] = `
 Array [
   TestMessageValue {
