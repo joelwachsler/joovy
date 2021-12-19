@@ -18,7 +18,7 @@ test('should ignore bot messages', () =>  {
   }))
 })
 
-test('should ignore messages not starting with a slash', () => {
+test('should ignore messages starting with a slash', () => {
   const event = createTestEvent({
     content: 'test',
   })
