@@ -1,12 +1,12 @@
 import { MessageEmbed } from 'discord.js'
 import { rxSandbox, RxSandboxInstance } from 'rx-sandbox'
-import { delay, map, Observable, of } from 'rxjs'
+import { defer, delay, map, Observable, of } from 'rxjs'
 import JEvent from '../jevent/JEvent'
 import { WithBaseFunctionality } from '../jevent/mixin/BaseFunctionality'
 import { sendMessage } from '../jevent/mixin/SendMessage'
 import { Result } from '../jevent/Result'
 import { YtSearchResult } from '../jevent/YtSearchResult'
-import JMessage from '../JMessage'
+import JMessage, { JReaction, MessageContent } from '../JMessage'
 import { handleMessage } from '../messageHandler'
 import Player from '../player/Player'
 import { PlayerFake } from './PlayerFake'
@@ -28,30 +28,53 @@ beforeEach(() => {
 
 export const handle = (source$: Observable<any>) => sandbox.getMessages(handleMessage(source$).pipe(map(r => r.result)))
 
-export const createTestEvent = (input?: Partial<JMessage>): JEvent => {
-  const message: JMessage = {
-    author: {
+class JMessageFake implements JMessage {
+
+  channelId: string
+  author: JMessage['author']
+  content: string
+  reactions: string[] = []
+
+  constructor(input?: Partial<JMessage>) {
+    this.channelId = input?.channelId ?? 'testChannelId'
+    const defaultAuthor = {
       username: 'testuser',
       bot: false,
       id: 'testAuthorId',
-    },
-    channelId: 'testChannelId',
-    content: 'testContent',
-    clearReactions() {
-      return of(this)
-    },
-    edit() {
-      return of(this)
-    },
-    react() {
-      return of(this)
-    },
-    send() {
-      return of(this)
-    },
-    ...input,
+    }
+    this.author = input?.author ?? defaultAuthor
+    this.content = input?.content ?? 'testContent'
   }
 
+  edit(_: MessageContent): Observable<JMessage> {
+    return of(this)
+  }
+
+  get clearReactions$(): Observable<JMessage> {
+    return defer(() => {
+      this.reactions = []
+      return of(this)
+    })
+  }
+
+  react(reaction: string): Observable<JMessage> {
+    return defer(() => {
+      this.reactions.push(reaction)
+      return of(this)
+    })
+  }
+
+  send(_: MessageContent): Observable<JMessage> {
+    return of(this)
+  }
+
+  get reactions$(): Observable<JReaction> {
+    return of()
+  }
+}
+
+export const createTestEvent = (input?: Partial<JMessage>): JEvent => {
+  const message = new JMessageFake(input)
   return new class EventFake extends WithBaseFunctionality(message, () => store, date.getTime()) {
     get factory() {
       return {
@@ -67,11 +90,11 @@ export const createTestEvent = (input?: Partial<JMessage>): JEvent => {
       }
     }
 
-    sendMessage(message: string | MessageEmbed): Observable<Result> {
+    sendMessage(messageToSend: string | MessageEmbed): Observable<Result> {
       return sendMessage({
-        message,
+        message: messageToSend,
         event: this as unknown as JEvent,
-        messageSender: _ => of(undefined),
+        messageSender: _ => of(message),
         indent: 12,
       })
     }
