@@ -17,6 +17,7 @@ jobs:
           TEST: ${{ secrets.REGISTRY }}
           TEST2: "${secrets.REGISTRY}"
           TEST3: "${{ secrets.REGISTRY }}"
+          TEST4: ${secrets.REGISTRY}
         run: |
           echo "TEST: ${TEST}"
           echo "TEST2: ${TEST2}"
@@ -38,6 +39,9 @@ jobs:
             console.log(`TEST2 len: ${TEST2.length}`)
             console.log(`TEST3: ${TEST3}`)
             console.log(`TEST3 len: ${TEST3.length}`)
+
+            console.log('TEST4: ${{ secrets.REGISTRY }}')
+            console.log('TEST5: {{ secrets.REGISTRY }}')
 
       - name: Registry login
         uses: docker/login-action@v1
