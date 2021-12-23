@@ -12,6 +12,16 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Testing
+        env:
+          TEST: ${{ secrets.REGISTRY }}
+          TEST2: "${secrets.REGISTRY}"
+          TEST3: "${{ secrets.REGISTRY }}"
+        run: |
+          echo "TEST: ${TEST}"
+          echo "TEST2: ${TEST2}"
+          echo "TEST3: ${TEST3}"
+
       - name: Registry login
         uses: docker/login-action@v1
         with:
