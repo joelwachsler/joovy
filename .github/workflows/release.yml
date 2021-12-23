@@ -2,7 +2,7 @@ name: Release
 on:
   push:
     tags:
-      - '*'
+      - '**'
 jobs:
   release:
     runs-on: self-hosted
@@ -33,8 +33,11 @@ jobs:
             const { TEST, TEST2, TEST3 } = process.env
 
             console.log(`TEST: ${TEST}`)
+            console.log(`TEST len: ${TEST.length}`)
             console.log(`TEST2: ${TEST2}`)
+            console.log(`TEST2 len: ${TEST2.length}`)
             console.log(`TEST3: ${TEST3}`)
+            console.log(`TEST3 len: ${TEST3.length}`)
 
       - name: Registry login
         uses: docker/login-action@v1
