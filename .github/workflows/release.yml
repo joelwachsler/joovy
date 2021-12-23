@@ -3,10 +3,6 @@ on:
   push:
     tags:
       - '*'
-  workflow_run:
-    workflows: ['Test']
-    branches: [master]
-    types: [completed]
 jobs:
   release:
     runs-on: self-hosted
@@ -19,9 +15,11 @@ jobs:
       - name: Registry login
         uses: docker/login-action@v1
         with:
-          registry: registry.wachsler.se
+          registry: ${{ secrets.REGISTRY }}
           username: ${{ secrets.REGISTRY_USERNAME }}
           password: ${{ secrets.REGISTRY_PASSWORD }}
+          ecr: false
+          logout: false
 
       - name: Determine tag
         id: vars
