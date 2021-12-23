@@ -12,37 +12,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Testing
-        env:
-          TEST: ${{ secrets.REGISTRY }}
-          TEST2: "${secrets.REGISTRY}"
-          TEST3: "${{ secrets.REGISTRY }}"
-          TEST4: ${secrets.REGISTRY}
-        run: |
-          echo "TEST: ${TEST}"
-          echo "TEST2: ${TEST2}"
-          echo "TEST3: ${TEST3}"
-
-      - name: Testing using scripts
-        uses: actions/github-script@v5
-        env:
-          TEST: ${{ secrets.REGISTRY }}
-          TEST2: "${secrets.REGISTRY}"
-          TEST3: "${{ secrets.REGISTRY }}"
-        with:
-          script: |
-            const { TEST, TEST2, TEST3 } = process.env
-
-            console.log(`TEST: ${TEST}`)
-            console.log(`TEST len: ${TEST.length}`)
-            console.log(`TEST2: ${TEST2}`)
-            console.log(`TEST2 len: ${TEST2.length}`)
-            console.log(`TEST3: ${TEST3}`)
-            console.log(`TEST3 len: ${TEST3.length}`)
-
-            console.log('TEST4: ${{ secrets.REGISTRY }}')
-            console.log('TEST5: {{ secrets.REGISTRY }}')
-
       - name: Registry login
         uses: docker/login-action@v1
         with:
