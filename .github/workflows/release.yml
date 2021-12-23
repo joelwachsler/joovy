@@ -23,7 +23,7 @@ jobs:
             return tag
           result-encoding: string
 
-      - uses: aevea/action-kaniko@master
+      - uses: aevea/action-kaniko@v0.6.1
         with:
           image: aevea/kaniko
           registry: ${{ secrets.REGISTRY }}
