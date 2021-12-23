@@ -15,17 +15,25 @@ jobs:
       - name: Registry login
         uses: docker/login-action@v1
         with:
-          registry: ${{ secrets.REGISTRY }}
-          username: ${{ secrets.REGISTRY_USERNAME }}
-          password: ${{ secrets.REGISTRY_PASSWORD }}
           ecr: false
           logout: false
 
       - name: Determine tag
         id: vars
-        run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
+        uses: actions/github-script@v5
+        with:
+          script: |
+            const { GITHUB_REF } = process.env
+            const tag = GITHUB_REF.replace('refs/heads/', '')
+            console.log(`Got the following tag: ${tag}`)
+            return tag
+          result-encoding: string
 
-      - uses: int128/kaniko-action@v1
+      - uses: aevea/action-kaniko@master
         with:
           push: true
-          tags: ${{ steps.vars.outputs.tag }}
+          registry: ${{ secrets.REGISTRY }}
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+          tag: ${{ steps.vars.outputs.tag }}
+
