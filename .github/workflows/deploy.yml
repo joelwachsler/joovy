@@ -1,0 +1,46 @@
+name: Deploy
+on:
+  workflow_run:
+    workflows: ["Release"]
+    types: [completed]
+jobs:
+  deploy:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Setup helm
+        uses: azure/setup-help@v1
+        id: install
+        with:
+          version: 'v3.7.2'
+
+      - name: Determine tag
+        id: vars
+        uses: actions/github-script@v5
+        with:
+          script: |
+            const { GITHUB_REF } = process.env
+            const tag = GITHUB_REF.replace('refs/tags/', '')
+            console.log(`Got the following tag: ${tag}`)
+            return tag
+          result-encoding: string
+
+      - name: Install
+        run: |
+          helm upgrade --install joovy charts/joovy -n ${{ secrets.DEPLOY_NAMESPACE }} -f - <<EOF
+          image:
+            repository: ${{ secrets.REPOSITORY }}
+            tag: ${{ steps.vars.outputs.result }}
+
+          resources:
+            requests:
+              memory: "80Mi"
+              cpu: "10m"
+            limits:
+              memory: "512Mi"
+              cpu: "2000m"
+          EOF

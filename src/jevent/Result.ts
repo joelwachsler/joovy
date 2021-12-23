@@ -4,7 +4,7 @@ import JEvent from './JEvent'
 /**
  * An easy way to notify the caller that something has happened.
  * This is especially useful when you want to determine if
- * something has happened in a test without resolving to mocking.
+ * something has happened in a test without resorting to mocking.
  */
 export interface Result<T = any> {
   item: T
