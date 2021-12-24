@@ -1,4 +1,4 @@
-import { Track } from '../../player/Player'
+import Track from '../../player/Track'
 import { playlistConfig } from '../../playlist/Playlist'
 import { createTestEvent, handle, hot } from '../../test/util'
 import { createReactions, FormatQueueArgs, QueueReactions } from './Queue'

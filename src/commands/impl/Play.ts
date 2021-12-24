@@ -1,7 +1,7 @@
 import { catchError, map, merge, mergeMap, Observable } from 'rxjs'
 import JEvent from '../../jevent/JEvent'
 import { Result } from '../../jevent/Result'
-import { Track } from '../../player/Player'
+import Track, { from as trackFrom } from '../../player/Track'
 import { getOrCreatePlaylist } from '../../playlist/Playlist'
 import ArgParser from '../ArgParser'
 import Command from '../command'
@@ -24,11 +24,7 @@ export default class Play implements Command {
       catchError(err => {
         throw Error(`Failed to add: ${msgWithoutPlay}, reason: ${err}`)
       }),
-      map(info => ({
-        link: info.url,
-        name: `[${info.title} (${info.timestamp})](${info.url}) [<@${event.message.author.id}>]`,
-        removed: false,
-      })),
+      map(info => trackFrom({ event, info })),
       mergeMap(track => playlistFromEvent(event, track)),
     )
   }

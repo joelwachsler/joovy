@@ -1,5 +1,6 @@
 import { defer, Observable, of, SchedulerLike, timeout } from 'rxjs'
-import Player, { Track } from '../player/Player'
+import Player from '../player/Player'
+import Track from '../player/Track'
 
 export class PlayerFake implements Player {
   constructor(private scheduler: SchedulerLike) { }

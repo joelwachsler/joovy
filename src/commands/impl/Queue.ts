@@ -3,7 +3,7 @@ import { catchError, concat, concatMap, defaultIfEmpty, map, mergeMap, mergeMapT
 import JEvent from '../../jevent/JEvent'
 import { Result } from '../../jevent/Result'
 import JMessage, { JReaction } from '../../JMessage'
-import { Track } from '../../player/Player'
+import Track from '../../player/Track'
 import { getPlaylist } from '../../playlist/Playlist'
 import ArgParser from '../ArgParser'
 import Command from '../command'
