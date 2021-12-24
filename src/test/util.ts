@@ -47,15 +47,19 @@ class JMessageFake implements JMessage {
     this.content = input?.content ?? 'testContent'
   }
 
-  edit(_: MessageContent): Observable<JMessage> {
-    return of(this)
-  }
-
   get clearReactions$(): Observable<JMessage> {
     return defer(() => {
       this.reactions = []
       return of(this)
     })
+  }
+
+  get reactions$(): Observable<JReaction> {
+    return of()
+  }
+
+  edit(_: MessageContent): Observable<JMessage> {
+    return of(this)
   }
 
   react(reaction: string): Observable<JMessage> {
@@ -67,10 +71,6 @@ class JMessageFake implements JMessage {
 
   send(_: MessageContent): Observable<JMessage> {
     return of(this)
-  }
-
-  get reactions$(): Observable<JReaction> {
-    return of()
   }
 }
 

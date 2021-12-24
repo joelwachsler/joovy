@@ -13,11 +13,11 @@ export default interface JMessage {
     id: string
   }
   content: string
-  edit(update: MessageContent): Observable<JMessage>
   clearReactions$: Observable<JMessage>
+  reactions$: Observable<JReaction>
+  edit(update: MessageContent): Observable<JMessage>
   react(reaction: string): Observable<JMessage>
   send(message: MessageContent): Observable<JMessage>
-  reactions$: Observable<JReaction>
 }
 
 export type MessageContent = string | MessagePayload | MessageOptions
@@ -25,7 +25,8 @@ export type MessageContent = string | MessagePayload | MessageOptions
 export type JReaction = string
 
 class JMessageImpl implements JMessage {
-  constructor(private message: Message) {}
+  constructor(private message: Message) { }
+
   get channelId() {
     return this.message.channelId
   }
@@ -38,28 +39,10 @@ class JMessageImpl implements JMessage {
     return this.message.content
   }
 
-  edit(update: MessageContent): Observable<JMessage> {
-    return defer(() => rxFrom(this.message.edit(update))).pipe(
-      map(updatedMsg => new JMessageImpl(updatedMsg)),
-    )
-  }
-
   get clearReactions$(): Observable<JMessage> {
     return defer(() => of(this.message.reactions)).pipe(
       mergeMap(reactionManager => reactionManager.removeAll()),
       map(resultingMessage => new JMessageImpl(resultingMessage)),
-    )
-  }
-
-  react(reaction: string): Observable<JMessage> {
-    return defer(() => rxFrom(this.message.react(reaction))).pipe(
-      mapTo(this),
-    )
-  }
-
-  send(message: MessageContent): Observable<JMessage> {
-    return defer(() => rxFrom(this.message.channel.send(message))).pipe(
-      map(msg => new JMessageImpl(msg)),
     )
   }
 
@@ -99,6 +82,24 @@ class JMessageImpl implements JMessage {
     return firstReaction$.pipe(
       map(reaction => reaction.emoji.name),
       mergeMap(emojiReaction => emojiReaction !== null ? [emojiReaction] : []),
+    )
+  }
+
+  edit(update: MessageContent): Observable<JMessage> {
+    return defer(() => rxFrom(this.message.edit(update))).pipe(
+      map(updatedMsg => new JMessageImpl(updatedMsg)),
+    )
+  }
+
+  react(reaction: string): Observable<JMessage> {
+    return defer(() => rxFrom(this.message.react(reaction))).pipe(
+      mapTo(this),
+    )
+  }
+
+  send(message: MessageContent): Observable<JMessage> {
+    return defer(() => rxFrom(this.message.channel.send(message))).pipe(
+      map(msg => new JMessageImpl(msg)),
     )
   }
 }
