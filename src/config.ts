@@ -1,8 +1,8 @@
 import * as dotenv from 'dotenv'
 
-export type Config = ReturnType<typeof initConfig>
+export type Config = ReturnType<typeof init>
 
-export function initConfig() {
+export const init = () => {
   // init config from .env
   dotenv.config()
 
