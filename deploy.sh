@@ -5,7 +5,10 @@ image:
   repository: "${REPOSITORY}"
   tag: "${TAG}"
 
-envConfig: "${ENV_CONFIG}"
+envConfig: |
+  TOKEN: "${TOKEN}"
+  APPLICATION_ID: "${APPLICATION_ID}"
+  TEST_GUILD_ID: "${TEST_GUILD_ID}"
 
 resources:
   requests:
