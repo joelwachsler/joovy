@@ -56,7 +56,6 @@ const createQueueContent = (event: JEvent, args: FormatQueueArgs, reactions: JRe
     .setColor('#ffb81f')
     .setTitle('Queue')
     .setDescription(printedQueue.join('\n'))
-    // will cause testing errors if this is not defined
     .setTimestamp(event.timestamp)
 
   if (reactions.length > 0) {
