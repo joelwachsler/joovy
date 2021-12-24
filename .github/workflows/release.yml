@@ -74,6 +74,8 @@ jobs:
         env:
           NAMESPACE: ${{ secrets.DEPLOY_NAMESPACE }}
           REPOSITORY: ${{ secrets.REGISTRY }}
-          ENV_CONFIG: ${{ secrets.ENV_CONFIG }}
+          TOKEN: ${{ secrets.TOKEN }}
+          APPLICATION_ID: ${{ secrets.APPLICATION_ID }}
+          TEST_GUILD_ID: ${{ secrets.TEST_GUILD_ID }}
           TAG: ${{ steps.vars.outputs.result }}
         run: ./deploy.sh
