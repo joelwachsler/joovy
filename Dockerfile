@@ -1,4 +1,5 @@
-FROM node:16
+ARG REGISTRY=""
+FROM ${REGISTRY}node:16
 
 RUN apt-get update && apt-get install -y ffmpeg
 RUN mkdir -p /server

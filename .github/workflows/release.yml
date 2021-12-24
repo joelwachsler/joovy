@@ -44,3 +44,4 @@ jobs:
           tags: ${{ secrets.REGISTRY }}:${{ steps.vars.outputs.result }},${{ secrets.REGISTRY }}:latest
           cache-from: type=registry,ref=${{ secrets.REGISTRY }}:latest
           cache-to: type=inline
+          build-args: REGISTRY=${{ secrets.REGISTRY_BASE }}/proxy/library/
