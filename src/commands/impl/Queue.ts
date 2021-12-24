@@ -45,7 +45,9 @@ const createQueueContent = (event: JEvent, args: FormatQueueArgs, reactions: JRe
       if (track.removed) {
         printedQueue[j++] = `\`${i})\` ~~${track.name}~~`
       } else if (i == currentTrack) {
-        printedQueue[j++] = `\`${i})\` ${track.name} ← Currently playing`
+        printedQueue[j++] = '⬐ current track'
+        printedQueue[j++] = `\`${i})\` ${track.name}`
+        printedQueue[j++] = '⬑ current track'
       } else {
         printedQueue[j++] = `\`${i})\` ${track.name}`
       }
