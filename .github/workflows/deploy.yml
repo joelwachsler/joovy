@@ -29,7 +29,5 @@ jobs:
 
       - name: Install
         env:
-          NAMESPACE: ${{ secrets.DEPLOY_NAMESPACE }}
-          REPOSITORY: ${{ secrets.REPOSITORY }}
           TAG: ${{ steps.vars.outputs.result }}
         run: ./deploy.sh
