@@ -18,7 +18,7 @@ export default class Play implements Command {
       )
     }
 
-    const msgWithoutPlay = event.message.content.split(' ').splice(1).join(' ')
+    const msgWithoutPlay = event.message.content.replace('/play ', '')
 
     return event.factory.ytSearch(msgWithoutPlay).pipe(
       catchError(err => {
