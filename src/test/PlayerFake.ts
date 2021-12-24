@@ -1,9 +1,7 @@
-import { defer, Observable, of, SchedulerLike, Subject, timeout } from 'rxjs'
+import { defer, Observable, of, SchedulerLike, timeout } from 'rxjs'
 import Player, { Track } from '../player/Player'
 
 export class PlayerFake implements Player {
-  private playing = new Subject<Track>()
-
   constructor(private scheduler: SchedulerLike) { }
 
   idle(cancel$: Observable<void>): Observable<void> {
@@ -22,10 +20,7 @@ export class PlayerFake implements Player {
   }
 
   play(track: Track): Observable<Track> {
-    return defer(() => {
-      this.playing.next(track)
-      return of(track)
-    })
+    return defer(() => of(track))
   }
 
   disconnect(): void {
