@@ -11,7 +11,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Setup helm
-        uses: azure/setup-help@v1
+        uses: azure/setup-helm@v1
         id: install
         with:
           version: 'v3.7.2'
