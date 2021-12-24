@@ -4,15 +4,15 @@ import Player, { Track } from '../player/Player'
 export class PlayerFake implements Player {
   constructor(private scheduler: SchedulerLike) { }
 
-  idle(cancel$: Observable<void>): Observable<void> {
+  idle(cancel: Observable<void>): Observable<void> {
     return new Observable(subscribe => {
-      const timeout$ = timeout({
+      const cancelTimeout = timeout({
         each: 5,
         scheduler: this.scheduler,
         with: () => of(undefined),
       })
 
-      cancel$.pipe(timeout$).subscribe(() => {
+      cancel.pipe(cancelTimeout).subscribe(() => {
         subscribe.next()
         subscribe.complete()
       })

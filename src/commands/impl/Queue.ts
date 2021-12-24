@@ -69,7 +69,7 @@ const createQueueContent = (event: JEvent, args: FormatQueueArgs, reactions: JRe
 const editQueue = (event: JEvent, args: FormatQueueArgs, message: JMessage): Observable<Result> => {
   const reactions = createReactions(args)
   return message.edit({ embeds: [createQueueContent(event, args, reactions)] }).pipe(
-    concatMap(msg => msg.clearReactions$),
+    concatMap(msg => msg.clearReactions),
     mergeMap(newMsg => {
       return concat(
         addReactions({ event, message, allReactions: reactions, reactions }),
@@ -81,7 +81,7 @@ const editQueue = (event: JEvent, args: FormatQueueArgs, message: JMessage): Obs
 }
 
 const editOnReaction = (event: JEvent, args: FormatQueueArgs, message: JMessage) => {
-  return message.reactions$.pipe(
+  return message.reactions.pipe(
     mergeMap(reaction => {
       if (reaction === QueueReactions.NEXT) {
         return editQueue(event, args.nextPage, message)
@@ -98,7 +98,7 @@ const editOnReaction = (event: JEvent, args: FormatQueueArgs, message: JMessage)
     catchError(err => {
       if (err instanceof Map) {
         // this is probably a timeout error -> ignore it
-        return message.clearReactions$.pipe(
+        return message.clearReactions.pipe(
           mergeMapTo(event.result({ reactions: 'cleared' })),
         )
       }

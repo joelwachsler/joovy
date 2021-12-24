@@ -13,8 +13,8 @@ export default interface JMessage {
     id: string
   }
   content: string
-  clearReactions$: Observable<JMessage>
-  reactions$: Observable<JReaction>
+  clearReactions: Observable<JMessage>
+  reactions: Observable<JReaction>
   edit(update: MessageContent): Observable<JMessage>
   react(reaction: string): Observable<JMessage>
   send(message: MessageContent): Observable<JMessage>
@@ -39,15 +39,15 @@ class JMessageImpl implements JMessage {
     return this.message.content
   }
 
-  get clearReactions$(): Observable<JMessage> {
+  get clearReactions(): Observable<JMessage> {
     return defer(() => of(this.message.reactions)).pipe(
       mergeMap(reactionManager => reactionManager.removeAll()),
       map(resultingMessage => new JMessageImpl(resultingMessage)),
     )
   }
 
-  get reactions$(): Observable<JReaction> {
-    const reactions$ = defer(() => rxFrom(this.message.awaitReactions({
+  get reactions(): Observable<JReaction> {
+    const reactions = defer(() => rxFrom(this.message.awaitReactions({
       filter: (reaction, user) => {
         const emojiName = reaction.emoji.name
         if (emojiName == null) {
@@ -73,13 +73,13 @@ class JMessageImpl implements JMessage {
       errors: ['time'],
     })))
 
-    const firstReaction$ = reactions$.pipe(
+    const firstReaction = reactions.pipe(
       filter(reactions => reactions.size > 0),
       mergeMap(reactions => [reactions.first()]),
       mergeMap(reaction => reaction !== undefined ? [reaction] : []),
     )
 
-    return firstReaction$.pipe(
+    return firstReaction.pipe(
       map(reaction => reaction.emoji.name),
       mergeMap(emojiReaction => emojiReaction !== null ? [emojiReaction] : []),
     )
