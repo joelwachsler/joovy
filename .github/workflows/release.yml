@@ -5,7 +5,6 @@ on:
       - '**'
 jobs:
   release:
-    name: Release
     runs-on: self-hosted
     steps:
       - name: Checkout
@@ -46,3 +45,32 @@ jobs:
           cache-from: type=registry,ref=${{ secrets.REGISTRY }}:latest
           cache-to: type=inline
           build-args: REGISTRY=${{ secrets.REGISTRY_BASE }}/proxy/library/
+
+  deploy:
+    needs: release
+    runs-on: self-hosted
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup helm
+        uses: azure/setup-helm@v1
+        id: install
+        with:
+          version: 'v3.7.2'
+
+      - name: Determine tag
+        id: vars
+        uses: actions/github-script@v5
+        with:
+          script: |
+            const { GITHUB_REF } = process.env
+            const tag = GITHUB_REF.replace('refs/tags/', '')
+            console.log(`Got the following tag: ${tag}`)
+            return tag
+          result-encoding: string
+
+      - name: Install
+        env:
+          TAG: ${{ steps.vars.outputs.result }}
+        run: ./deploy.sh
