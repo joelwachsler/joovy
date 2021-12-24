@@ -5,6 +5,8 @@ image:
   repository: "${REPOSITORY}"
   tag: "${TAG}"
 
+envConfig: "${ENV_CONFIG}"
+
 resources:
   requests:
     memory: "80Mi"
