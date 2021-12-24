@@ -2,18 +2,13 @@ import { AudioPlayer, AudioPlayerStatus, createAudioPlayer, createAudioResource,
 import { Message, VoiceChannel } from 'discord.js'
 import { defer, map, mapTo, Observable } from 'rxjs'
 import logger from '../logger'
+import Track from './Track'
 import * as Ytdl from './Ytdl'
 
 export default interface Player {
   play(track: Track): Observable<Track>
   disconnect(): void
   idle(cancel: Observable<void>, isLastTrack: () => boolean): Observable<void>
-}
-
-export interface Track {
-  name: string
-  link: string
-  removed: boolean
 }
 
 export type Factory = Observable<Player>

@@ -1,7 +1,8 @@
 import { BehaviorSubject, concat, concatMap, concatMapTo, defaultIfEmpty, defer, map, merge, mergeAll, mergeMap, mergeMapTo, Observable, of, Subject, switchMap, takeUntil, tap } from 'rxjs'
 import JEvent from '../jevent/JEvent'
 import { Result } from '../jevent/Result'
-import Player, { Track } from '../player/Player'
+import Player from '../player/Player'
+import Track from '../player/Track'
 
 export class Playlist {
   private _queue = new Subject<Track>()
