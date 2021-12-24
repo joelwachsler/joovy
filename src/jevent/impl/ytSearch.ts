@@ -13,6 +13,7 @@ export const ytSearchFactoryImpl = (query: string): Observable<YtSearchResult> =
     if (videoIdMatch) {
       // yt-search doesn't work that well with actual url:s, let's use
       // ytdl-core for this instead.
+      // Add &bpctr=9999999999 to prevent age restriction errors.
       return from(ytdl.getInfo(`${query}&bpctr=9999999999`)).pipe(
         map(r => {
           const details = r.videoDetails
