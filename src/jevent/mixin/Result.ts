@@ -13,14 +13,17 @@ const WithResult = <TBase extends BaseConstructor>(Base: TBase) => {
         (acc, curr) => concat(acc, curr),
         of({
           ...arg,
-          // TODO: make this type safe
-          event: this as unknown as JEvent,
+          event: this.event,
         }),
       )
     }
 
     empty(): Observable<EmptyResult> {
-      return of(new EmptyResult(this as unknown as JEvent))
+      return of(new EmptyResult(this.event))
+    }
+
+    private get event() {
+      return this as unknown as JEvent
     }
   }
 }
