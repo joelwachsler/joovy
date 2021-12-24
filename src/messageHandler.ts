@@ -1,3 +1,4 @@
+import { DiscordAPIError } from 'discord.js'
 import { catchError, filter, mergeMap, Observable } from 'rxjs'
 import { handle } from './commands/command'
 import JEvent from './jevent/JEvent'
@@ -12,12 +13,25 @@ export const handleMessage = (event: Observable<JEvent>): Observable<Result> => 
       } else if (!message.content.startsWith('/')) {
         return event.result({ ignored: `${message.content} does not start with a slash` })
       } else {
-        return handle(event)
-          .pipe(
-            filter(r => !(r instanceof EmptyResult)),
-            catchError(err => event.sendMessage(err.message)),
-          )
+        return handle(event).pipe(
+          filter(r => !(r instanceof EmptyResult)),
+          catchError(errorHandler),
+        )
       }
     }),
   )
 }
+
+const errorHandler = (event: JEvent, err: any) => {
+  if (err instanceof DiscordAPIError) {
+    const customErrMsg = customErrorMessages.get(err.code)
+    if (customErrMsg) {
+      return event.sendMessage(customErrMsg)
+    }
+  }
+
+  return event.sendMessage(err.message)
+}
+
+const customErrorMessages = new Map<number, string>()
+customErrorMessages.set(50013, 'Couldn\'t remove reactions, does the bot have the \'Manage Messages\' permission?')
