@@ -304,17 +304,11 @@ Array [
         "messageSent": "{
   \\"title\\": \\"Queue\\",
   \\"type\\": \\"rich\\",
-  \\"description\\": \\"\`0)\` [test1 (1:10)](https://test1.com) [<@testAuthorId>]\\\\n\`1)\` [test2 (1:10)](https://test2.com) [<@testAuthorId>] ← Currently playing\\\\n\`2)\` [test3 (1:10)](https://test3.com) [<@testAuthorId>]\\\\n\`3)\` [test4 (1:10)](https://test4.com) [<@testAuthorId>]\\\\n\`4)\` [test5 (1:10)](https://test5.com) [<@testAuthorId>]\\\\n\`5)\` [test6 (1:10)](https://test6.com) [<@testAuthorId>]\\",
+  \\"description\\": \\"\`0)\` [test1 (1:10)](https://test1.com) [<@testAuthorId>]\\\\n\`1)\` [test2 (1:10)](https://test2.com) [<@testAuthorId>] ← Currently playing\\\\n\`2)\` [test3 (1:10)](https://test3.com) [<@testAuthorId>]\\\\n\`3)\` [test4 (1:10)](https://test4.com) [<@testAuthorId>]\\\\n\`4)\` [test5 (1:10)](https://test5.com) [<@testAuthorId>]\\\\n\`5)\` [test6 (1:10)](https://test6.com) [<@testAuthorId>]\\\\n\\\\n**1 more track(s) in queue.**\\",
   \\"url\\": null,
   \\"timestamp\\": \\"2000-02-01T00:00:00.000Z\\",
   \\"color\\": 16758815,
-  \\"fields\\": [
-    {
-      \\"name\\": \\"\\\\n1 more track(s) in queue.\\",
-      \\"value\\": \\"During the current session 6 tracks have been added to the queue in total\\",
-      \\"inline\\": false
-    }
-  ],
+  \\"fields\\": [],
   \\"thumbnail\\": null,
   \\"image\\": null,
   \\"author\\": null,

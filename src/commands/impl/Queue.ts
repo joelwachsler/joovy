@@ -59,7 +59,7 @@ const createQueueContent = (event: JEvent, args: FormatQueueArgs, reactions: JRe
     .setTimestamp(event.timestamp)
 
   if (reactions.length > 0) {
-    embed.addField(`\n${args.nrTracksLeftStr} more track(s) in queue.`, `During the current session ${queue.length} tracks have been added to the queue in total`)
+    embed.setDescription(`${embed.description}\n\n**${args.nrTracksLeftStr} more track(s) in queue.**`)
   }
 
   return embed
