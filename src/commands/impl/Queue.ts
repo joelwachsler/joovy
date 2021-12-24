@@ -84,11 +84,11 @@ const editOnReaction = (event: JEvent, args: FormatQueueArgs, message: JMessage)
     mergeMap(reaction => {
       if (reaction === QueueReactions.NEXT) {
         return editQueue(event, args.nextPage, message)
-      } else if (reaction === QueueReactions.PREVIOUS) {
+      } else if (reaction === QueueReactions.BACK) {
         return editQueue(event, args.previousPage, message)
       } else if (reaction === QueueReactions.TWO_NEXT) {
         return editQueue(event, args.nextPage.nextPage, message)
-      } else if (reaction === QueueReactions.TWO_PREVIOUS) {
+      } else if (reaction === QueueReactions.TWO_BACK) {
         return editQueue(event, args.previousPage.previousPage, message)
       } else {
         return of()
@@ -149,11 +149,11 @@ export const createReactions = (args: FormatQueueArgs) => {
   const reactions: string[] = []
 
   if (args.hasMoreThanTwoPagesPrevious) {
-    reactions.push(QueueReactions.TWO_PREVIOUS)
+    reactions.push(QueueReactions.TWO_BACK)
   }
 
   if (args.hasPreviousPages) {
-    reactions.push(QueueReactions.PREVIOUS)
+    reactions.push(QueueReactions.BACK)
   }
 
   if (args.hasMorePages) {
@@ -168,8 +168,8 @@ export const createReactions = (args: FormatQueueArgs) => {
 }
 
 export enum QueueReactions {
-  TWO_PREVIOUS = '⏪',
-  PREVIOUS = '◀',
+  TWO_BACK = '⏪',
+  BACK = '◀',
   NEXT = '▶',
   TWO_NEXT = '⏩',
 }

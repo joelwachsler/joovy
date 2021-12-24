@@ -119,7 +119,7 @@ describe('reactions', () => {
 
     it('should react with previous when on seconds page', () => {
       const reactions = createReactions(new FormatQueueArgs(queue, 0).nextPage)
-      expect(reactions).toEqual([QueueReactions.PREVIOUS])
+      expect(reactions).toEqual([QueueReactions.BACK])
     })
   })
 
@@ -134,12 +134,12 @@ describe('reactions', () => {
 
     it('should react with previous and next on second page', () => {
       const reactions = createReactions(new FormatQueueArgs(queue, 0).nextPage)
-      expect(reactions).toEqual([QueueReactions.PREVIOUS, QueueReactions.NEXT])
+      expect(reactions).toEqual([QueueReactions.BACK, QueueReactions.NEXT])
     })
 
     it('should react with two previous and previous on third page', () => {
       const reactions = createReactions(new FormatQueueArgs(queue, 0).nextPage.nextPage)
-      expect(reactions).toEqual([QueueReactions.TWO_PREVIOUS, QueueReactions.PREVIOUS])
+      expect(reactions).toEqual([QueueReactions.TWO_BACK, QueueReactions.BACK])
     })
   })
 })

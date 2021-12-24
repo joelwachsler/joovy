@@ -59,8 +59,8 @@ class JMessageImpl implements JMessage {
         }
 
         const reactions = [
-          QueueReactions.TWO_PREVIOUS,
-          QueueReactions.PREVIOUS,
+          QueueReactions.TWO_BACK,
+          QueueReactions.BACK,
           QueueReactions.NEXT,
           QueueReactions.TWO_NEXT,
         ]
