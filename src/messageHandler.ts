@@ -3,8 +3,8 @@ import { handle } from './commands/command'
 import JEvent from './jevent/JEvent'
 import { EmptyResult, Result } from './jevent/Result'
 
-export const handleMessage = (event$: Observable<JEvent>): Observable<Result> => {
-  return event$.pipe(
+export const handleMessage = (event: Observable<JEvent>): Observable<Result> => {
+  return event.pipe(
     mergeMap(event => {
       const message = event.message
       if (message.author.bot) {

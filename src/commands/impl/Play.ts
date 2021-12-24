@@ -14,7 +14,7 @@ export default class Play implements Command {
   handleMessage(event: JEvent): Observable<Result> {
     const playlistFromEvent = (event: JEvent, track: Track) => {
       return getOrCreatePlaylist(event).pipe(
-        mergeMap(({ playlist, results$ }) => merge(results$, playlist.add(event, track))),
+        mergeMap(({ playlist, results: results }) => merge(results, playlist.add(event, track))),
       )
     }
 

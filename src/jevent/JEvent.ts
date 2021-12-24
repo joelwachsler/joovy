@@ -20,10 +20,10 @@ export default interface JEvent extends ResultFactory, Factory, EventStore, Send
   readonly timestamp: number,
 }
 
-export const from = (message$: Observable<Message>): Observable<JEvent> => {
+export const from = (message: Observable<Message>): Observable<JEvent> => {
   const store = new Map<string, unknown>()
 
-  return message$.pipe(
+  return message.pipe(
     map(message => WithFactory(WithBaseFunctionality(jMessageFrom(message), () => store, message.createdTimestamp), message)),
     map(EventClass => WithSendMessage(EventClass)),
     map(EventClass => new EventClass()),

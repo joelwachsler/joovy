@@ -17,22 +17,22 @@ export class Playlist {
   }
 
   get results(): Observable<Result> {
-    const player$ = this._queue.pipe(
+    const player = this._queue.pipe(
       concatMap(track => {
-        const sendMsg$ = this.event.sendMessage(`Now playing: ${track.name}`)
-        const playTrack$ = this.player.play(track).pipe(concatMapTo(sendMsg$))
+        const sendMsg = this.event.sendMessage(`Now playing: ${track.name}`)
+        const playTrack = this.player.play(track).pipe(concatMapTo(sendMsg))
 
-        const waitForPlayerIdle$ = this.player.idle(this._skipTrack, this.isEndOfPlaylist.bind(this)).pipe(
+        const waitForPlayerIdle = this.player.idle(this._skipTrack, this.isEndOfPlaylist.bind(this)).pipe(
           concatMapTo(this.event.result({ player: 'idle' })),
           tap(() => this._currentTrack.next(this._currentTrack.getValue() + 1)),
         )
 
-        return merge(waitForPlayerIdle$, playTrack$)
+        return merge(waitForPlayerIdle, playTrack)
       }),
       takeUntil(this._cancelled),
     )
 
-    const addedToQueue$ = this._queue.pipe(
+    const addedToQueue = this._queue.pipe(
       tap(track => {
         const queue = this._currentQueue.getValue()
         this._currentQueue.next([...queue, track])
@@ -40,14 +40,14 @@ export class Playlist {
       mergeMap(track => this.event.sendMessage(`${track.name} has been added to the queue`)),
     )
 
-    const disconnectIfIdle$ = player$.pipe(
+    const disconnectIfIdle = player.pipe(
       switchMap(res => {
         const result = res.result
         if (typeof result === 'string' || result.player !== 'idle' || !this.isEndOfPlaylist()) {
           return of(res)
         }
 
-        const disconnectWhenIdle$ = this.event.sendMessage('End of playlist, will disconnect in 5 minutes.').pipe(
+        const disconnectWhenIdle = this.event.sendMessage('End of playlist, will disconnect in 5 minutes.').pipe(
           mergeMap(res => {
             return concat(
               of(res),
@@ -63,13 +63,13 @@ export class Playlist {
           }),
         )
 
-        return concat(of(res), disconnectWhenIdle$)
+        return concat(of(res), disconnectWhenIdle)
       }),
     )
 
     return merge(
-      addedToQueue$,
-      disconnectIfIdle$,
+      addedToQueue,
+      disconnectIfIdle,
     )
   }
 
@@ -107,17 +107,17 @@ export const playlistConfig = {
   timeoutFrames: 5 * 60 * 1000,
 }
 
-type PlaylistResult = { playlist: Playlist, results$: Observable<Result> }
+type PlaylistResult = { playlist: Playlist, results: Observable<Result> }
 
 const createPlaylist = (event: JEvent): Observable<PlaylistResult> => {
-  const playlist$ = event.factory.player.pipe(map(player => new Playlist(event, player)))
+  const playlist = event.factory.player.pipe(map(player => new Playlist(event, player)))
 
-  return playlist$.pipe(mergeMap(playlist => {
+  return playlist.pipe(mergeMap(playlist => {
     return event.store.object.pipe(mergeMap(store => {
       return store.put(PLAYLIST_KEY, playlist).pipe(map(() => {
         return {
           playlist,
-          results$: event.result({ playlist: 'created' }, playlist.results),
+          results: event.result({ playlist: 'created' }, playlist.results),
         }
       }))
     }))
@@ -144,7 +144,7 @@ export const removePlaylist = (event: JEvent) => {
 
 export const getOrCreatePlaylist = (event: JEvent): Observable<PlaylistResult> => {
   return getPlaylist(event).pipe(
-    map(playlist => of({ playlist, results$: event.result({ playlist: 'found' }) })),
+    map(playlist => of({ playlist, results: event.result({ playlist: 'found' }) })),
     defaultIfEmpty(createPlaylist(event)),
     mergeAll(),
   )

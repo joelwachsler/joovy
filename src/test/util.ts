@@ -27,14 +27,14 @@ beforeEach(() => {
   player = new PlayerFake(sandbox.scheduler)
 })
 
-export const handle = (source$: Observable<any>) => sandbox.getMessages(handleMessage(source$).pipe(map(r => r.result)))
+export const handle = (source: Observable<any>) => sandbox.getMessages(handleMessage(source).pipe(map(r => r.result)))
 
 class JMessageFake implements JMessage {
 
   channelId: string
   author: JMessage['author']
   content: string
-  reactions: string[] = []
+  private _reactions: string[] = []
 
   constructor(input?: Partial<JMessage>) {
     this.channelId = input?.channelId ?? 'testChannelId'
@@ -47,14 +47,14 @@ class JMessageFake implements JMessage {
     this.content = input?.content ?? 'testContent'
   }
 
-  get clearReactions$(): Observable<JMessage> {
+  get clearReactions(): Observable<JMessage> {
     return defer(() => {
-      this.reactions = []
+      this._reactions = []
       return of(this)
     })
   }
 
-  get reactions$(): Observable<JReaction> {
+  get reactions(): Observable<JReaction> {
     return of()
   }
 
@@ -64,7 +64,7 @@ class JMessageFake implements JMessage {
 
   react(reaction: string): Observable<JMessage> {
     return defer(() => {
-      this.reactions.push(reaction)
+      this._reactions.push(reaction)
       return of(this)
     })
   }
