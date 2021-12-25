@@ -3,6 +3,7 @@
 set -ex
 
 git config core.editor "vim"
+git config pull.rebase true
 
 mkdir -p /home/node/.config/fish
 cat <<EOF > /home/node/.config/fish/config.fish
