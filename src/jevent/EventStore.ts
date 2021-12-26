@@ -1,5 +1,5 @@
 import { Observable } from 'rxjs'
-import { ObjectStore, StringStore } from '../Store'
+import { ObjectStore, StringStore } from '../store/Store'
 
 export interface EventStore {
   readonly store: {
