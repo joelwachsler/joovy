@@ -1,4 +1,4 @@
-import { getOrCreateObjectStore, getOrCreateStringStore, StoreProvider } from '../../Store'
+import { getOrCreateObjectStore, getOrCreateStringStore, StoreProvider } from '../../store/Store'
 import { BaseConstructor } from '../JEvent'
 import { EventStore } from '../EventStore'
 
