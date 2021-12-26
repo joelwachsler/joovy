@@ -45,6 +45,7 @@ jobs:
           cache-from: type=registry,ref=${{ secrets.REGISTRY }}:latest
           cache-to: type=inline
           build-args: REGISTRY=${{ secrets.REGISTRY_BASE }}/proxy/library/
+          context: ./core
 
   deploy:
     needs: release
