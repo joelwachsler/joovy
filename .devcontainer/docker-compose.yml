@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  app:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # Update 'VARIANT' to pick an LTS version of Node.js: 16, 14, 12.
+        # Append -bullseye or -buster to pin to an OS version.
+        # Use -bullseye variants on local arm64/Apple Silicon.
+        VARIANT: 16-bullseye
+
+    volumes:
+      - "..:/workspace:cached"
+      - "/run/docker.sock:/run/docker.sock"
+      - "$HOME/.kube/:/home/node/.kube/"
+      
+    # Overrides default command so things don't shut down after the process ends.
+    command: sleep infinity
+
+    # network_mode: service:db
+
+    # Uncomment the next line to use a non-root user for all processes.
+    # user: node
+
+    # Use "forwardPorts" in **devcontainer.json** to forward an app port locally. 
+    # (Adding the "ports" property to this file will not forward from a Codespace.)
+
+  kafka:
+    # Bitnami kafka is the best variant around imo
+    image: bitnami/kafka:2.8.1
+    restart: unless-stopped
+    environment:
+      ALLOW_PLAINTEXT_LISTENER: "yes"
