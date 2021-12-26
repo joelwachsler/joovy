@@ -8,6 +8,9 @@ on:
 jobs:
   test:
     runs-on: self-hosted
+    defaults:
+      run:
+        working-directory: ./core
     steps:
       - name: Setup build tools
         run: |
@@ -27,7 +30,6 @@ jobs:
 
       - name: Setup cache
         uses: actions/cache@v2
-        working-directory: ./core
         id: yarn-cache
         with:
           path: '**/node_modules'
@@ -35,15 +37,16 @@ jobs:
 
       - name: Install dependencies
         if: steps.yarn-cache.outputs.cache-hit != 'true'
-        working-directory: ./core
         run: yarn
 
       - name: Run tests
-        working-directory: ./core
         run: yarn test
 
   lint:
     runs-on: self-hosted
+    defaults:
+      run:
+        working-directory: ./core
     steps:
       - name: Setup build tools
         run: |
@@ -63,7 +66,6 @@ jobs:
 
       - name: Setup cache
         uses: actions/cache@v2
-        working-directory: ./core
         id: yarn-cache
         with:
           path: '**/node_modules'
@@ -71,9 +73,7 @@ jobs:
 
       - name: Install dependencies
         if: steps.yarn-cache.outputs.cache-hit != 'true'
-        working-directory: ./core
         run: yarn
 
       - name: Lint
-        working-directory: ./core
         run: yarn lint
