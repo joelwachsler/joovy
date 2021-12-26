@@ -11,4 +11,4 @@ set fish_greeting
 set -gx FORCE_COLOR true
 EOF
 
-yarn
+cd core && yarn
