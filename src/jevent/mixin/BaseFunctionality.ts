@@ -1,5 +1,5 @@
 import JMessage from '../../JMessage'
-import { StoreProvider } from '../../store/Store'
+import { StoreProvider } from '../../store/impl/InMemoryStore'
 import { Base } from '../JEvent'
 import WithEventStore from './EventStore'
 import WithResult from './Result'

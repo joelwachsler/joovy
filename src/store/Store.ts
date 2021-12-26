@@ -1,5 +1,4 @@
-import { Observable, of } from 'rxjs'
-import { getOrCreateInMemoryStore, GetStoreArgs } from './impl/InMemoryStore'
+import { Observable } from 'rxjs'
 
 export default interface Store<T> {
   put(key: string, value: T): Observable<T>
@@ -10,13 +9,3 @@ export default interface Store<T> {
 export type StringStore = Store<string>
 
 export type ObjectStore = Store<any>
-
-export type StoreProvider = () => Map<string, any>
-
-export const getOrCreateStringStore = (args: GetStoreArgs): Observable<StringStore> => {
-  return of(getOrCreateInMemoryStore(args))
-}
-
-export const getOrCreateObjectStore = (args: GetStoreArgs): Observable<ObjectStore> => {
-  return of(getOrCreateInMemoryStore(args))
-}
