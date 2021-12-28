@@ -20,4 +20,6 @@ const throwError = (error: string) => {
   if (process.env.NODE_ENV === 'production') {
     throw Error(error)
   }
+
+  return ''
 }
