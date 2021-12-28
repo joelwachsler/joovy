@@ -1,6 +1,7 @@
 import levelup from 'levelup'
 import rocksdb from 'rocksdb'
 import { defer, Observable, of } from 'rxjs'
+import config from '../../config'
 import Store from '../Store'
 
 class LevelStore implements Store<string> {
@@ -23,10 +24,11 @@ class LevelStore implements Store<string> {
     return new Observable(subscribe => {
       this.store.get(key, (err, val) => {
         if (err) {
-          return subscribe.error(err)
+          // key was probably not found
+        } else {
+          subscribe.next(val.toString())
         }
 
-        subscribe.next(val.toString())
         subscribe.complete()
       })
     })
@@ -47,7 +49,7 @@ class LevelStore implements Store<string> {
 }
 
 const createStore = () => {
-  return levelup(rocksdb('./mydb'))
+  return levelup(rocksdb(config.dbLocation))
 }
 
 export const getOrCreateStore = (): Observable<Store<string>> => {
