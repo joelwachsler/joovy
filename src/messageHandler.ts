@@ -15,7 +15,7 @@ export const handleMessage = (event: Observable<JEvent>): Observable<Result> => 
       } else {
         return handle(event).pipe(
           filter(r => !(r instanceof EmptyResult)),
-          catchError(errorHandler),
+          catchError(err => errorHandler(event, err)),
         )
       }
     }),
