@@ -4,12 +4,14 @@ import { defer, delay, map, Observable, ObservableInput, of, timeout } from 'rxj
 import { TimeoutConfig, TimeoutInfo } from 'rxjs/internal/operators/timeout'
 import JEvent from '../jevent/JEvent'
 import { WithBaseFunctionality } from '../jevent/mixin/BaseFunctionality'
+import { StoreOverride } from '../jevent/mixin/EventStore'
 import { sendMessage } from '../jevent/mixin/SendMessage'
 import { Result } from '../jevent/Result'
 import { YtSearchResult } from '../jevent/YtSearchResult'
 import JMessage, { JReaction, MessageContent } from '../JMessage'
 import { handleMessage } from '../messageHandler'
 import Player from '../player/Player'
+import { getOrCreateStringStore } from '../store/impl/InMemoryStore'
 import { PlayerFake } from './PlayerFake'
 
 export let sandbox: RxSandboxInstance
@@ -18,6 +20,7 @@ export let hot: RxSandboxInstance['hot']
 export let store: Map<string, unknown>
 export let player: Player
 export const date = new Date(2000, 1, 1)
+let uuidCounter: number
 
 beforeEach(() => {
   sandbox = rxSandbox.create(true)
@@ -25,6 +28,7 @@ beforeEach(() => {
   hot = sandbox.hot
   store = new Map()
   player = new PlayerFake(sandbox.scheduler)
+  uuidCounter = 0
 })
 
 export const handle = (source: Observable<any>) => sandbox.getMessages(handleMessage(source).pipe(map(r => r.result)))
@@ -76,9 +80,11 @@ class JMessageFake implements JMessage {
 
 export const createTestEvent = (input?: Partial<JMessage>): JEvent => {
   const message = new JMessageFake(input)
-  return new class EventFake extends WithBaseFunctionality(message, () => store, date.getTime()) {
+  const storeOverride: StoreOverride = { persistentString: getOrCreateStringStore({ message, storeProvider: () => store }) }
+  return new class EventFake extends WithBaseFunctionality(message, () => store, date.getTime(), storeOverride) {
     get factory() {
       return {
+        uuid: () => `totally-random-uuid-${uuidCounter++}`,
         player: of(player),
         delay: <T>(ms: number) => delay<T>(ms, sandbox.scheduler),
         timeout: <T, O extends ObservableInput<any>, M>(

@@ -1,4 +1,3 @@
-import { randomUUID } from 'crypto'
 import { catchError, concat, defaultIfEmpty, map, mapTo, mergeAll, mergeMap, Observable, of } from 'rxjs'
 import { errorHandler } from '../errorHandler'
 import JEvent from '../jevent/JEvent'
@@ -9,7 +8,7 @@ export const trackPlaylist = (event: JEvent, playlist: Playlist) => {
   const events = event.store.persistentString.pipe(
     map(store => createRepositories(store)),
     mergeMap(repos => {
-      const playlistId = randomUUID()
+      const playlistId = event.factory.uuid()
       const { channelId } = event.message
 
       const createPlaylist = repos.channel.getOrCreate(event, channelId).pipe(
@@ -46,7 +45,7 @@ export const trackPlaylist = (event: JEvent, playlist: Playlist) => {
       )
 
       return tracking.pipe(
-        mergeMap(e => event.complexResult({ result: { playlist: 'trackingEvent' }, item: e })),
+        mergeMap(e => event.complexResult({ result: TRACKING_EVENT, item: e })),
       )
     }),
   )
@@ -56,6 +55,8 @@ export const trackPlaylist = (event: JEvent, playlist: Playlist) => {
     catchError(err => errorHandler(event, err)),
   )
 }
+
+export const TRACKING_EVENT = { playlist: 'trackingEvent' }
 
 abstract class Repository<Entity extends Version, ID extends string = string> {
   constructor(private store: StringStore) { }
