@@ -5,6 +5,12 @@ export default interface Track {
   name: string
   link: string
   removed: boolean
+  author: Author
+}
+
+interface Author {
+  id: string
+  username: string
 }
 
 interface TrackArgs {
@@ -17,5 +23,6 @@ export const from = ({ event, info }: TrackArgs): Track => {
     link: info.url,
     name: `[${info.title} (${info.timestamp})](${info.url}) [<@${event.message.author.id}>]`,
     removed: false,
+    author: event.message.author,
   }
 }
