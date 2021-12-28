@@ -2,7 +2,7 @@ import * as dotenv from 'dotenv'
 
 export type Config = ReturnType<typeof init>
 
-export const init = () => {
+const init = () => {
   // init config from .env
   dotenv.config()
 
@@ -13,6 +13,8 @@ export const init = () => {
     dbLocation: process.env.DB_LOCATION ?? './db',
   }
 }
+
+export default init()
 
 const throwError = (error: string) => {
   throw Error(error)

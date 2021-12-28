@@ -1,11 +1,12 @@
 import { randomUUID } from 'crypto'
-import { concat, defaultIfEmpty, map, mapTo, mergeAll, mergeMap, Observable, of } from 'rxjs'
+import { catchError, concat, defaultIfEmpty, map, mapTo, mergeAll, mergeMap, Observable, of } from 'rxjs'
+import { errorHandler } from '../errorHandler'
 import JEvent from '../jevent/JEvent'
 import { StringStore } from '../store/Store'
 import { Playlist } from './Playlist'
 
 export const trackPlaylist = (event: JEvent, playlist: Playlist) => {
-  return event.store.persistentString.pipe(
+  const events = event.store.persistentString.pipe(
     map(store => createRepositories(store)),
     mergeMap(repos => {
       const playlistId = randomUUID()
@@ -49,13 +50,18 @@ export const trackPlaylist = (event: JEvent, playlist: Playlist) => {
       )
     }),
   )
+
+  return events.pipe(
+    // prevent whole play-session from crashing if something goes bad here
+    catchError(err => errorHandler(event, err)),
+  )
 }
 
 abstract class Repository<Entity extends Version, ID extends string = string> {
   constructor(private store: StringStore) { }
 
   get(id: ID): Observable<Entity> {
-    return this.store.get(id).pipe(map(e => JSON.stringify(e) as unknown as Entity))
+    return this.store.get(id).pipe(map(e => JSON.parse(e) as unknown as Entity))
   }
 
   put(id: ID, entity: Entity): Observable<Entity> {
