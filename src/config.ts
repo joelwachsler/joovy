@@ -17,5 +17,7 @@ const init = () => {
 export default init()
 
 const throwError = (error: string) => {
-  throw Error(error)
+  if (process.env.NODE_ENV === 'production') {
+    throw Error(error)
+  }
 }

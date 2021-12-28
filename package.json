@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "start": "node --unhandled-rejections=strict -r ts-node/register/transpile-only src/main.ts",
+    "start": "NODE_ENV=production node --unhandled-rejections=strict -r ts-node/register/transpile-only src/main.ts",
     "test": "jest",
     "lint": "eslint **/*.ts"
   },
