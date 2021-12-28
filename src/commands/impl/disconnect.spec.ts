@@ -8,7 +8,7 @@ test('should disconnect if connected to channel', () => {
     content: '/disconnect',
   })
 
-  const messages = handle(hot('ab|', { a: play, b: disconnect }))
+  const messages = handle(hot('ab', { a: play, b: disconnect }))
   expect(messages).toMatchSnapshot()
 })
 
@@ -20,7 +20,7 @@ test('should disconnect, reconnect and disconnect again without any problem', ()
     content: '/disconnect',
   })
 
-  const messages = handle(hot('aba|', { a: play, b: disconnect }))
+  const messages = handle(hot('aba', { a: play, b: disconnect }))
   expect(messages).toMatchSnapshot()
 })
 
