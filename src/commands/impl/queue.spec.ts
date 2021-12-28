@@ -94,6 +94,10 @@ describe('reactions', () => {
       link: 'testLink',
       name: 'testName',
       removed: false,
+      author: {
+        id: 'authorId',
+        username: 'testusername',
+      },
       ...input,
     }
   }

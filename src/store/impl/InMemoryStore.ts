@@ -2,7 +2,7 @@ import { defer, EMPTY, Observable, of } from 'rxjs'
 import JMessage from '../../JMessage'
 import Store, { ObjectStore, StringStore } from '../Store'
 
-export default class InMemoryStore<T> implements Store<T> {
+class InMemoryStore<T> implements Store<T> {
   private storage = new Map<string, T>()
 
   put(key: string, value: T) {
