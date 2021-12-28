@@ -101,12 +101,6 @@ Array [
       },
     },
   },
-  TestMessageValue {
-    "frame": 2,
-    "notification": Object {
-      "kind": "C",
-    },
-  },
 ]
 `;
 
