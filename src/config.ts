@@ -14,8 +14,6 @@ const init = () => {
   }
 }
 
-export default init()
-
 const throwError = (error: string) => {
   if (process.env.NODE_ENV === 'production') {
     throw Error(error)
@@ -23,3 +21,5 @@ const throwError = (error: string) => {
 
   return ''
 }
+
+export default init()
