@@ -9,6 +9,7 @@ mkdir -p /home/node/.config/fish
 cat <<EOF > /home/node/.config/fish/config.fish
 set fish_greeting
 set -gx FORCE_COLOR true
+set -Ua fish_user_paths /home/node/.cargo/bin
 EOF
 
-yarn
+cd core && yarn

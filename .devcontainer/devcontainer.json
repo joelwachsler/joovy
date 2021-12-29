@@ -22,7 +22,9 @@
 		"orta.vscode-jest",
 		"ms-kubernetes-tools.vscode-kubernetes-tools",
 		"eamodio.gitlens",
-		"ms-azuretools.vscode-docker"
+		"ms-azuretools.vscode-docker",
+		"matklad.rust-analyzer",
+		"vadimcn.vscode-lldb"
 	],
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
