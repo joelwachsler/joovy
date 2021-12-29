@@ -1,8 +1,22 @@
+use std::process::Command;
+
 fn main() {
-    println!("Hello, world!");
-    my_other_function()
+    let res = Command::new("find")
+        .arg(".")
+        .arg("-type")
+        .arg("f")
+        .spawn()
+        .expect("failed to run command")
+        .wait();
+
+    let res_unwrap = res.unwrap();
+    println!("Got this: {}", res_unwrap);
 }
 
-fn my_other_function() {
-    println!("My other function was called!")
+#[cfg(test)]
+mod tests {
+  #[test]
+  fn testing() {
+    assert_eq!(2 + 2, 4);
+  }
 }
