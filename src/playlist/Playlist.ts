@@ -145,14 +145,14 @@ export class Playlist {
   remove(index: number) {
     return defer(() => {
       const { queue, currentTrack } = this.currentQueue
-      const queueLength = queue.length
+      const maxQueueIndex = queue.length - 1
 
       if (index < 0) {
         throw Error(`Index cannot be less than zero, got: ${index}`)
       }
 
-      if (index > queueLength) {
-        throw Error(`Index cannot be greater than the queue length, got: ${index}, and the queue length is: ${queueLength}`)
+      if (index > maxQueueIndex) {
+        throw Error(`Index cannot be greater than the maximum queue index, got: ${index}, and the max queue index is: ${maxQueueIndex}`)
       }
 
       const removedTrack = queue[index]
