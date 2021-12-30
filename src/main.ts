@@ -26,7 +26,7 @@ const main = async () => {
       })
   })
 
-  client.login(config.token)
+  client.login(config().token)
   logger.info('Done creating client!')
 }
 
