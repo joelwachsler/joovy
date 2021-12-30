@@ -6,6 +6,7 @@ import Disconnect from './impl/Disconnect'
 import Help from './impl/Help'
 import Play from './impl/Play'
 import Queue from './impl/Queue'
+import Remove from './impl/Remove'
 import RemoveLatest from './impl/RemoveLatest'
 import Skip from './impl/Skip'
 
@@ -32,6 +33,7 @@ const cmds = [
   new Queue(),
   new Skip(),
   new RemoveLatest(),
+  new Remove(),
 ]
 
 const help = new Help(cmds)
