@@ -25,6 +25,33 @@ Array [
     "notification": Object {
       "kind": "N",
       "value": Object {
+        "playlist": "trackingEvent",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 0,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "playlist": "trackingEvent",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 0,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "playlist": "trackingEvent",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 0,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
         "messageSent": "{
   \\"title\\": null,
   \\"type\\": \\"rich\\",
@@ -150,6 +177,33 @@ Array [
     "notification": Object {
       "kind": "N",
       "value": Object {
+        "playlist": "trackingEvent",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 0,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "playlist": "trackingEvent",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 0,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "playlist": "trackingEvent",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 0,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
         "messageSent": "{
   \\"title\\": null,
   \\"type\\": \\"rich\\",
@@ -210,6 +264,15 @@ Array [
     "notification": Object {
       "kind": "N",
       "value": Object {
+        "playlist": "trackingEvent",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 1,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
         "messageSent": "{
   \\"title\\": null,
   \\"type\\": \\"rich\\",
@@ -241,6 +304,15 @@ Array [
       "kind": "N",
       "value": Object {
         "playlist": "found",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 2,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "playlist": "trackingEvent",
       },
     },
   },
@@ -434,6 +506,33 @@ Array [
     "notification": Object {
       "kind": "N",
       "value": Object {
+        "playlist": "trackingEvent",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 0,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "playlist": "trackingEvent",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 0,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "playlist": "trackingEvent",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 0,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
         "messageSent": "{
   \\"title\\": null,
   \\"type\\": \\"rich\\",
@@ -551,6 +650,33 @@ Array [
       "kind": "N",
       "value": Object {
         "playlist": "created",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 0,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "playlist": "trackingEvent",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 0,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "playlist": "trackingEvent",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 0,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "playlist": "trackingEvent",
       },
     },
   },
