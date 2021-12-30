@@ -3,6 +3,7 @@ import JEvent from '../jevent/JEvent'
 import { Result } from '../jevent/Result'
 import Player from '../player/Player'
 import Track from '../player/Track'
+import { trackPlaylist } from './PlaylistTracker'
 
 export class Playlist {
   private _queue = new Subject<Track>()
@@ -21,6 +22,7 @@ export class Playlist {
     return merge(
       this.addedToQueueEvent(),
       this.disconnectIfIdleEvent(this.playerEvents()),
+      trackPlaylist(this.event, this),
     )
   }
 
@@ -119,6 +121,10 @@ export class Playlist {
       currentTrack: this._currentTrack.getValue(),
       queue: this._currentQueue.getValue(),
     }
+  }
+
+  get internalCurrentQueue() {
+    return this._currentQueue
   }
 
   skipCurrentTrack() {

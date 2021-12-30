@@ -1,14 +1,6 @@
 import { defer, EMPTY, Observable, of } from 'rxjs'
-import JMessage from './JMessage'
-
-export default interface Store<T> {
-  put(key: string, value: T): Observable<T>
-  get(key: string): Observable<T>
-  remove(key: string): Observable<void>
-}
-
-export type StringStore = Store<string>
-export type ObjectStore = Store<any>
+import JMessage from '../../JMessage'
+import Store, { ObjectStore, StringStore } from '../Store'
 
 class InMemoryStore<T> implements Store<T> {
   private storage = new Map<string, T>()
@@ -37,17 +29,7 @@ class InMemoryStore<T> implements Store<T> {
   }
 }
 
-export type StoreProvider = () => Map<string, any>
-
-type GetStoreArgs = { message: JMessage, storeProvider: StoreProvider }
-
-export const getOrCreateStringStore = (args: GetStoreArgs): Observable<StringStore> => {
-  return of(getOrCreateInMemoryStore(args))
-}
-
-export const getOrCreateObjectStore = (args: GetStoreArgs): Observable<ObjectStore> => {
-  return of(getOrCreateInMemoryStore(args))
-}
+export type GetStoreArgs = { message: JMessage, storeProvider: StoreProvider }
 
 export const getOrCreateInMemoryStore = (args: GetStoreArgs): Store<any> => {
   const { message, storeProvider } = { ...args, storeProvider: args.storeProvider }
@@ -62,4 +44,14 @@ export const getOrCreateInMemoryStore = (args: GetStoreArgs): Store<any> => {
 
 const throwError = (err: string) => {
   throw Error(err)
+}
+
+export type StoreProvider = () => Map<string, any>
+
+export const getOrCreateStringStore = (args: GetStoreArgs): Observable<StringStore> => {
+  return of(getOrCreateInMemoryStore(args))
+}
+
+export const getOrCreateObjectStore = (args: GetStoreArgs): Observable<ObjectStore> => {
+  return of(getOrCreateInMemoryStore(args))
 }

@@ -1,7 +1,7 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
 // https://github.com/microsoft/vscode-dev-containers/tree/v0.205.2/containers/typescript-node
 {
-	"name": "Node.js & TypeScript",
+	"name": "Joovy dev environment",
 	"build": {
 		"dockerfile": "Dockerfile",
 		// Update 'VARIANT' to pick a Node version: 16, 14, 12.
@@ -21,7 +21,8 @@
 		"dbaeumer.vscode-eslint",
 		"orta.vscode-jest",
 		"ms-kubernetes-tools.vscode-kubernetes-tools",
-		"eamodio.gitlens"
+		"eamodio.gitlens",
+		"ms-azuretools.vscode-docker"
 	],
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.

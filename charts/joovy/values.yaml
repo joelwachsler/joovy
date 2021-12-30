@@ -24,3 +24,8 @@ resources: {}
   # requests:
   #   cpu: 100m
   #   memory: 128Mi
+
+persistence: {}
+  # size: 1Gi
+  # storageClass: csi-rbd-ssd
+  # accessModes: ReadWriteOnce
