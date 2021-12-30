@@ -9,6 +9,7 @@ envConfig: |
   TOKEN=${TOKEN}
   APPLICATION_ID=${APPLICATION_ID}
   TEST_GUILD_ID=${TEST_GUILD_ID}
+  DB_LOCATION=/mnt/data
 
 resources:
   requests:

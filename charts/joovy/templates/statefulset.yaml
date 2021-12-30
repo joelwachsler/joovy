@@ -8,6 +8,7 @@ spec:
   selector:
     matchLabels:
       {{- include "joovy.selectorLabels" . | nindent 6 }}
+  serviceName: {{ include "joovy.fullname" . }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
