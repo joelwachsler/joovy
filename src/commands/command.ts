@@ -6,7 +6,7 @@ import Disconnect from './impl/Disconnect'
 import Help from './impl/Help'
 import Play from './impl/Play'
 import Queue from './impl/Queue'
-import RemoveLatests from './impl/RemoveLatest'
+import RemoveLatest from './impl/RemoveLatest'
 import Skip from './impl/Skip'
 
 export default interface Command {
@@ -31,7 +31,7 @@ const cmds = [
   new Disconnect(),
   new Queue(),
   new Skip(),
-  new RemoveLatests(),
+  new RemoveLatest(),
 ]
 
 const help = new Help(cmds)
