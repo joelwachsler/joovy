@@ -5,7 +5,7 @@ import { getPlaylist } from '../../playlist/Playlist'
 import ArgParser from '../ArgParser'
 import Command from '../command'
 
-export default class RemoveLatests implements Command {
+export default class RemoveLatest implements Command {
   argument = ArgParser.create('removelatest')
   helpText = 'Removes the last added track.'
 
