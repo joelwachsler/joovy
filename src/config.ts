@@ -15,11 +15,15 @@ const init = () => {
 }
 
 const throwError = (error: string) => {
-  if (process.env.NODE_ENV === 'production') {
-    throw Error(error)
-  }
-
-  return ''
+  throw Error(error)
 }
 
-export default init()
+let config: Config
+
+export default () => {
+  if (!config) {
+    config = init()
+  }
+
+  return config
+}

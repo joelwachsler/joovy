@@ -49,7 +49,7 @@ class LevelStore implements Store<string> {
 }
 
 const createStore = () => {
-  return levelup(rocksdb(config.dbLocation))
+  return levelup(rocksdb(config().dbLocation))
 }
 
 export const getOrCreateStore = (): Observable<Store<string>> => {
