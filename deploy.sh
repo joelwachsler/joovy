@@ -17,4 +17,10 @@ resources:
   limits:
     memory: "512Mi"
     cpu: "2000m"
+
+persistence:
+  size: 1Gi
+  storageClass: csi-rbd-ssd
+  accessModes: ReadWriteOnce
+
 EOF

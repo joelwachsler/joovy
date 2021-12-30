@@ -1,6 +1,6 @@
-import { DiscordAPIError } from 'discord.js'
 import { catchError, filter, mergeMap, Observable } from 'rxjs'
 import { handle } from './commands/command'
+import { errorHandler } from './errorHandler'
 import JEvent from './jevent/JEvent'
 import { EmptyResult, Result } from './jevent/Result'
 
@@ -21,21 +21,3 @@ export const handleMessage = (event: Observable<JEvent>): Observable<Result> => 
     }),
   )
 }
-
-const errorHandler = (event: JEvent, err: any) => {
-  if (!event) {
-    throw err
-  }
-
-  if (err instanceof DiscordAPIError) {
-    const customErrMsg = customErrorMessages.get(err.code)
-    if (customErrMsg) {
-      return event.sendMessage(customErrMsg)
-    }
-  }
-
-  return event.sendMessage(err.message)
-}
-
-const customErrorMessages = new Map<number, string>()
-customErrorMessages.set(50013, 'Couldn\'t remove reactions, does the bot have the \'Manage Messages\' permission?')
