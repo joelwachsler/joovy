@@ -15,7 +15,7 @@ export const handleMessage = (event: Observable<JEvent>): Observable<Result> => 
       } else {
         return handle(event).pipe(
           filter(r => !(r instanceof EmptyResult)),
-          catchError(errorHandler),
+          catchError(err => errorHandler(event, err)),
         )
       }
     }),
@@ -23,6 +23,10 @@ export const handleMessage = (event: Observable<JEvent>): Observable<Result> => 
 }
 
 const errorHandler = (event: JEvent, err: any) => {
+  if (!event) {
+    throw err
+  }
+
   if (err instanceof DiscordAPIError) {
     const customErrMsg = customErrorMessages.get(err.code)
     if (customErrMsg) {

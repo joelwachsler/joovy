@@ -1,4 +1,4 @@
-import { BehaviorSubject, concat, concatMap, concatMapTo, defaultIfEmpty, defer, map, merge, mergeAll, mergeMap, mergeMapTo, Observable, of, Subject, switchMap, takeUntil, tap } from 'rxjs'
+import { BehaviorSubject, concat, concatMap, concatMapTo, defaultIfEmpty, defer, map, mapTo, merge, mergeAll, mergeMap, mergeMapTo, Observable, of, Subject, switchMap, takeUntil, tap } from 'rxjs'
 import JEvent from '../jevent/JEvent'
 import { Result } from '../jevent/Result'
 import Player from '../player/Player'
@@ -18,59 +18,99 @@ export class Playlist {
   }
 
   get results(): Observable<Result> {
-    const player = this._queue.pipe(
-      concatMap(track => {
-        const sendMsg = this.event.sendMessage(`Now playing: ${track.name}`)
-        const playTrack = this.player.play(track).pipe(concatMapTo(sendMsg))
-
-        const waitForPlayerIdle = this.player.idle(this._skipTrack, this.isEndOfPlaylist.bind(this)).pipe(
-          concatMapTo(this.event.result({ player: 'idle' })),
-          tap(() => this._currentTrack.next(this._currentTrack.getValue() + 1)),
-        )
-
-        return merge(waitForPlayerIdle, playTrack)
-      }),
-      takeUntil(this._cancelled),
+    return merge(
+      this.addedToQueueEvent(),
+      this.disconnectIfIdleEvent(this.playerEvents()),
     )
+  }
 
-    const addedToQueue = this._queue.pipe(
+  private addedToQueueEvent() {
+    return this._queue.pipe(
       tap(track => {
         const queue = this._currentQueue.getValue()
         this._currentQueue.next([...queue, track])
       }),
       mergeMap(track => this.event.sendMessage(`${track.name} has been added to the queue`)),
     )
+  }
 
-    const disconnectIfIdle = player.pipe(
+  private incrementCurrentTrack() {
+    const { currentTrack, queue } = this.currentQueue
+    if (currentTrack > queue.length - 1) {
+      return this._currentTrack.next(queue.length)
+    } else {
+      return this._currentTrack.next(currentTrack + 1)
+    }
+  }
+
+  private playerEvents() {
+    return this._queue.pipe(
+      concatMap(track => {
+        if (track.removed) {
+          return concat(this.removed(track), this.createIdleEvent())
+        } else {
+          return merge(this.waitForPlayerIdle(), this.playTrack(track))
+        }
+      }),
+      takeUntil(this._cancelled),
+    )
+  }
+
+  private createIdleEvent() {
+    return this.event.result({ player: 'idle' })
+  }
+
+  private waitForPlayerIdle() {
+    return this.player.idle(this._skipTrack, this.isEndOfPlaylist.bind(this)).pipe(
+      concatMapTo(this.createIdleEvent()),
+      tap(() => this.incrementCurrentTrack()),
+    )
+  }
+
+  private removed(track: Track) {
+    return this.event.complexResult({
+      item: track,
+      result: { track: 'was removed, skipping' },
+    }).pipe(tap(() => this.incrementCurrentTrack()))
+  }
+
+  private playTrack(track: Track) {
+    const sendMsg = this.event.sendMessage(`Now playing: ${track.name}`)
+    return this.player.play(track).pipe(concatMapTo(sendMsg))
+  }
+
+  private disconnectIfIdleEvent(player: ReturnType<Playlist['playerEvents']>) {
+    return player.pipe(
       switchMap(res => {
-        const result = res.result
+        const { result } = res
         if (typeof result === 'string' || result.player !== 'idle' || !this.isEndOfPlaylist()) {
           return of(res)
         }
 
-        const disconnectWhenIdle = this.event.sendMessage('End of playlist, will disconnect in 5 minutes.').pipe(
-          mergeMap(res => {
-            return concat(
-              of(res),
-              of(undefined).pipe(
-                this.event.factory.delay(playlistConfig.timeoutFrames),
-                concatMap(() => {
-                  return removePlaylist(this.event).pipe(
-                    mergeMapTo(this.event.result({ player: 'disconnected because idle' })),
-                  )
-                }),
-              ),
-            )
-          }),
-        )
-
-        return concat(of(res), disconnectWhenIdle)
+        return concat(of(res), this.disconnectWhenIdle())
       }),
     )
+  }
 
-    return merge(
-      addedToQueue,
-      disconnectIfIdle,
+  private disconnectWhenIdle() {
+    return this.event.sendMessage('End of playlist, will disconnect in 5 minutes.').pipe(
+      mergeMap(res => concat(
+        of(res),
+        this.disconnectPlaylistAfterFrames(playlistConfig.timeoutFrames),
+      )),
+    )
+  }
+
+  private disconnectPlaylistAfterFrames(frames: number) {
+    return of(undefined).pipe(
+      this.event.factory.delay(frames),
+      concatMapTo(this.disconnectPlaylist('disconnected because idle')),
+    )
+  }
+
+  private disconnectPlaylist(reason: string) {
+    return removePlaylist(this.event).pipe(
+      mergeMapTo(this.event.result({ player: reason })),
     )
   }
 
@@ -95,6 +135,39 @@ export class Playlist {
     })
   }
 
+  get queueLength() {
+    return this.currentQueue.queue.length
+  }
+
+  /**
+   * Removes the track in queue with the provided index.
+   */
+  remove(index: number) {
+    return defer(() => {
+      const { queue, currentTrack } = this.currentQueue
+      const queueLength = queue.length
+
+      if (index < 0) {
+        throw Error(`Index cannot be less than zero, got: ${index}`)
+      }
+
+      if (index > queueLength) {
+        throw Error(`Index cannot be greater than the queue length, got: ${index}, and the queue length is: ${queueLength}`)
+      }
+
+      const removedTrack = queue[index]
+      removedTrack.removed = true
+
+      if (currentTrack === index) {
+        return this.skipCurrentTrack().pipe(
+          mapTo(removedTrack),
+        )
+      }
+
+      return of(removedTrack)
+    })
+  }
+
   disconnect() {
     this._queue.complete()
     this.player.disconnect()
@@ -114,14 +187,16 @@ const createPlaylist = (event: JEvent): Observable<PlaylistResult> => {
   const playlist = event.factory.player.pipe(map(player => new Playlist(event, player)))
 
   return playlist.pipe(mergeMap(playlist => {
-    return event.store.object.pipe(mergeMap(store => {
-      return store.put(PLAYLIST_KEY, playlist).pipe(map(() => {
-        return {
-          playlist,
-          results: event.result({ playlist: 'created' }, playlist.results),
-        }
-      }))
-    }))
+    const savePlaylist = event.store.object.pipe(
+      mergeMap(store => store.put(PLAYLIST_KEY, playlist)),
+    )
+
+    return savePlaylist.pipe(
+      mapTo({
+        playlist,
+        results: event.result({ playlist: 'created' }, playlist.results),
+      }),
+    )
   }))
 }
 
