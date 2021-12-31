@@ -1,11 +1,12 @@
 [package]
-name = "rust-testing"
+name = "ytsearch"
 version = "0.1.0"
-authors = ["Joel <joel@wachsler.se>"]
-edition = "2018"
+edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+dotenv = "0.15.0"
+log = "0.4.14"
 reqwest = "0.11.8"
 tokio = { version = "1.15.0", features = ["full"] }
