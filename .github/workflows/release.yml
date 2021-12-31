@@ -45,7 +45,6 @@ jobs:
           cache-from: type=registry,ref=${{ secrets.REGISTRY }}:latest
           cache-to: type=inline
           build-args: REGISTRY=${{ secrets.REGISTRY_BASE }}/proxy/library/
-          context: ./core
 
   deploy:
     needs: release
@@ -79,4 +78,4 @@ jobs:
           APPLICATION_ID: ${{ secrets.APPLICATION_ID }}
           TEST_GUILD_ID: ${{ secrets.TEST_GUILD_ID }}
           TAG: ${{ steps.vars.outputs.result }}
-        run: ./core/deploy.sh
+        run: ./deploy.sh
