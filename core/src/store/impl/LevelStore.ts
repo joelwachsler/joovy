@@ -2,9 +2,10 @@ import levelup from 'levelup'
 import rocksdb from 'rocksdb'
 import { defer, Observable, of } from 'rxjs'
 import config from '../../config'
+import logger from '../../logger'
 import Store from '../Store'
 
-class LevelStore implements Store<string> {
+export class LevelStore implements Store<string> {
   constructor(private store: StoreType) { }
 
   put(key: string, value: string): Observable<string> {
@@ -46,13 +47,29 @@ class LevelStore implements Store<string> {
       })
     })
   }
+
+  dump(): Observable<KeyValue> {
+    return new Observable(subscribe => {
+      this.store.createReadStream()
+        .on('data', data => {
+          logger.info(`Got data: ${data.key}=${data.value}`)
+          subscribe.next(data)
+        })
+        .on('end', () => subscribe.complete())
+    })
+  }
+} 
+
+interface KeyValue {
+  key: Uint8Array
+  value: Uint8Array
 }
 
 const createStore = () => {
   return levelup(rocksdb(config().dbLocation))
 }
 
-export const getOrCreateStore = (): Observable<Store<string>> => {
+export const getOrCreateStore = (): Observable<LevelStore> => {
   return defer(() => {
     if (!store) {
       store = createStore()

@@ -4,6 +4,7 @@ import config from './config'
 import * as Event from './jevent/JEvent'
 import logger from './logger'
 import { handleMessage } from './messageHandler'
+import apolloInit from './apollo/apollo'
 
 const main = async () => {
   logger.info('Creating client...')
@@ -28,6 +29,8 @@ const main = async () => {
 
   client.login(config().token)
   logger.info('Done creating client!')
+
+  apolloInit()
 }
 
 if (require.main === module) {
