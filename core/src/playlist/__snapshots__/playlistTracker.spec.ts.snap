@@ -39,10 +39,13 @@ Array [
           "timestamp": 949363200000,
         },
         "item": Object {
+          "meta": Object {
+            "name": "channel",
+            "version": "1",
+          },
           "playlists": Array [
             "totally-random-uuid-0",
           ],
-          "version": "1",
         },
         "result": Object {
           "playlist": "trackingEvent",
@@ -70,8 +73,11 @@ Array [
         },
         "item": Object {
           "date": 949363200000,
+          "meta": Object {
+            "name": "playlist",
+            "version": "1",
+          },
           "tracks": Array [],
-          "version": "1",
         },
         "result": Object {
           "playlist": "trackingEvent",
@@ -99,19 +105,28 @@ Array [
         },
         "item": Object {
           "date": 949363200000,
+          "meta": Object {
+            "name": "playlist",
+            "version": "1",
+          },
           "tracks": Array [
             Object {
               "author": Object {
                 "id": "testAuthorId",
+                "meta": Object {
+                  "name": "author",
+                  "version": "1",
+                },
                 "username": "testuser",
-                "version": "1",
               },
               "link": "https://test.com",
+              "meta": Object {
+                "name": "track",
+                "version": "1",
+              },
               "name": "[test (1:10)](https://test.com) [<@testAuthorId>]",
-              "version": "1",
             },
           ],
-          "version": "1",
         },
         "result": Object {
           "playlist": "trackingEvent",
@@ -233,10 +248,13 @@ Array [
           "timestamp": 949363200000,
         },
         "item": Object {
+          "meta": Object {
+            "name": "channel",
+            "version": "1",
+          },
           "playlists": Array [
             "totally-random-uuid-0",
           ],
-          "version": "1",
         },
         "result": Object {
           "playlist": "trackingEvent",
@@ -264,8 +282,11 @@ Array [
         },
         "item": Object {
           "date": 949363200000,
+          "meta": Object {
+            "name": "playlist",
+            "version": "1",
+          },
           "tracks": Array [],
-          "version": "1",
         },
         "result": Object {
           "playlist": "trackingEvent",
@@ -293,19 +314,28 @@ Array [
         },
         "item": Object {
           "date": 949363200000,
+          "meta": Object {
+            "name": "playlist",
+            "version": "1",
+          },
           "tracks": Array [
             Object {
               "author": Object {
                 "id": "testAuthorId",
+                "meta": Object {
+                  "name": "author",
+                  "version": "1",
+                },
                 "username": "testuser",
-                "version": "1",
               },
               "link": "https://test.com",
+              "meta": Object {
+                "name": "track",
+                "version": "1",
+              },
               "name": "[test (1:10)](https://test.com) [<@testAuthorId>]",
-              "version": "1",
             },
           ],
-          "version": "1",
         },
         "result": Object {
           "playlist": "trackingEvent",
@@ -431,11 +461,14 @@ Array [
           "timestamp": 949363200000,
         },
         "item": Object {
+          "meta": Object {
+            "name": "channel",
+            "version": "1",
+          },
           "playlists": Array [
             "totally-random-uuid-0",
             "totally-random-uuid-1",
           ],
-          "version": "1",
         },
         "result": Object {
           "playlist": "trackingEvent",
@@ -463,8 +496,11 @@ Array [
         },
         "item": Object {
           "date": 949363200000,
+          "meta": Object {
+            "name": "playlist",
+            "version": "1",
+          },
           "tracks": Array [],
-          "version": "1",
         },
         "result": Object {
           "playlist": "trackingEvent",
@@ -492,19 +528,28 @@ Array [
         },
         "item": Object {
           "date": 949363200000,
+          "meta": Object {
+            "name": "playlist",
+            "version": "1",
+          },
           "tracks": Array [
             Object {
               "author": Object {
                 "id": "testAuthorId",
+                "meta": Object {
+                  "name": "author",
+                  "version": "1",
+                },
                 "username": "testuser",
-                "version": "1",
               },
               "link": "https://test.com",
+              "meta": Object {
+                "name": "track",
+                "version": "1",
+              },
               "name": "[test (1:10)](https://test.com) [<@testAuthorId>]",
-              "version": "1",
             },
           ],
-          "version": "1",
         },
         "result": Object {
           "playlist": "trackingEvent",
@@ -626,10 +671,13 @@ Array [
           "timestamp": 949363200000,
         },
         "item": Object {
+          "meta": Object {
+            "name": "channel",
+            "version": "1",
+          },
           "playlists": Array [
             "totally-random-uuid-0",
           ],
-          "version": "1",
         },
         "result": Object {
           "playlist": "trackingEvent",
@@ -657,8 +705,11 @@ Array [
         },
         "item": Object {
           "date": 949363200000,
+          "meta": Object {
+            "name": "playlist",
+            "version": "1",
+          },
           "tracks": Array [],
-          "version": "1",
         },
         "result": Object {
           "playlist": "trackingEvent",
@@ -686,19 +737,28 @@ Array [
         },
         "item": Object {
           "date": 949363200000,
+          "meta": Object {
+            "name": "playlist",
+            "version": "1",
+          },
           "tracks": Array [
             Object {
               "author": Object {
                 "id": "testAuthorId",
+                "meta": Object {
+                  "name": "author",
+                  "version": "1",
+                },
                 "username": "testuser",
-                "version": "1",
               },
               "link": "https://test.com",
+              "meta": Object {
+                "name": "track",
+                "version": "1",
+              },
               "name": "[test (1:10)](https://test.com) [<@testAuthorId>]",
-              "version": "1",
             },
           ],
-          "version": "1",
         },
         "result": Object {
           "playlist": "trackingEvent",
@@ -786,29 +846,44 @@ Array [
         },
         "item": Object {
           "date": 949363200000,
+          "meta": Object {
+            "name": "playlist",
+            "version": "1",
+          },
           "tracks": Array [
             Object {
               "author": Object {
                 "id": "testAuthorId",
+                "meta": Object {
+                  "name": "author",
+                  "version": "1",
+                },
                 "username": "testuser",
-                "version": "1",
               },
               "link": "https://test.com",
+              "meta": Object {
+                "name": "track",
+                "version": "1",
+              },
               "name": "[test (1:10)](https://test.com) [<@testAuthorId>]",
-              "version": "1",
             },
             Object {
               "author": Object {
                 "id": "testAuthorId",
+                "meta": Object {
+                  "name": "author",
+                  "version": "1",
+                },
                 "username": "testuser",
-                "version": "1",
               },
               "link": "https://test2.com",
+              "meta": Object {
+                "name": "track",
+                "version": "1",
+              },
               "name": "[test2 (1:10)](https://test2.com) [<@testAuthorId>]",
-              "version": "1",
             },
           ],
-          "version": "1",
         },
         "result": Object {
           "playlist": "trackingEvent",
