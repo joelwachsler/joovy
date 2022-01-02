@@ -1,6 +1,7 @@
 import { buildSubgraphSchema } from '@apollo/federation'
 import { ApolloServer, gql, ServerInfo } from 'apollo-server'
 import { Observable } from 'rxjs'
+import config from '../config'
 import logger from '../logger'
 import { BackupV1, backupV1, restoreV1 } from '../playlist/PlaylistTracker'
 
@@ -41,14 +42,14 @@ const init = () => {
   })
 
   const info = new Observable<ServerInfo>(subscribe => {
-    server.listen({ port: '3000' }).then(serverInfo => {
+    server.listen({ port: config().graphQLPort }).then(serverInfo => {
       subscribe.next(serverInfo)
     })
   })
 
   info.subscribe(info => {
     logger.info(`GraphQL available at: ${info.url}`)
-    logger.info(`Health available at: ${info.url}.well-known/apollo/server-health`)
+    logger.info(`Health check available at: ${info.url}.well-known/apollo/server-health`)
   })
 }
 

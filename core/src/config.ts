@@ -11,6 +11,7 @@ const init = () => {
     applicationId: process.env.APPLICATION_ID ?? throwError('Application id is not defined...'),
     testGuildId: process.env.TEST_GUILD_ID,
     dbLocation: process.env.DB_LOCATION ?? './db',
+    graphQLPort: process.env.GRAPHQL_PORT ?? '3001',
   }
 }
 
