@@ -2,13 +2,13 @@
 
 set -e
 
-DUMP_FILE='dumpV1.txt'
+BACKUP_FILE='backupV1.txt'
 HOST='http://localhost:3000/graphql'
 
-echo "Restoring: ${DUMP_FILE} to: ${HOST}"
+echo "Restoring: ${BACKUP_FILE} to: ${HOST}"
 
-DUMP_FILE_DATA=$(cat $DUMP_FILE)
-MUTATION="mutation {restoreV1(restore: $DUMP_FILE_DATA)}"
+BACKUP_FILE_DATA=$(cat $BACKUP_FILE)
+MUTATION="mutation {restoreV1(backup: $BACKUP_FILE_DATA)}"
 QUERY=$(jq -n --arg mutation "$MUTATION" '{query: $mutation}')
 
 curl $HOST \

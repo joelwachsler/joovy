@@ -48,7 +48,7 @@ export class LevelStore implements Store<string> {
     })
   }
 
-  dump(): Observable<KeyValue> {
+  backup(): Observable<KeyValue> {
     return new Observable(subscribe => {
       this.store.createReadStream()
         .on('data', data => {

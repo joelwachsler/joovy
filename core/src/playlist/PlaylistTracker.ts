@@ -103,15 +103,15 @@ const createRepositories = (store: StringStore) => {
   }
 }
 
-export const restoreV1 = async (dump: DumpV1): Promise<boolean> => {
+export const restoreV1 = async (backup: BackupV1): Promise<boolean> => {
   return new Promise(resolve => {
     getOrCreateStore().pipe(mergeMap(store => {
-      const restoreChannels = of(dump.channels).pipe(
+      const restoreChannels = of(backup.channels).pipe(
         mergeAll(),
         mergeMap(channel => store.put(channel.key, JSON.stringify(channel.channel)).pipe(mapTo(channel))),
       )
 
-      const restorePlaylists = of(dump.playlists).pipe(
+      const restorePlaylists = of(backup.playlists).pipe(
         mergeAll(),
         mergeMap(playlist => store.put(playlist.key, JSON.stringify(playlist.playlist)).pipe(mapTo(playlist))),
       )
@@ -124,25 +124,25 @@ export const restoreV1 = async (dump: DumpV1): Promise<boolean> => {
   })
 }
 
-export const dumpV1 = (): Promise<DumpV1> => {
+export const backupV1 = (): Promise<BackupV1> => {
   return new Promise(resolve => {
-    const dump: DumpV1 = {
+    const backup: BackupV1 = {
       channels: [],
       playlists: [],
     }
 
-    getOrCreateStore().pipe(mergeMap(store => store.dump())).subscribe({
+    getOrCreateStore().pipe(mergeMap(store => store.backup())).subscribe({
       next: keyValue => {
         const { key, value } = keyValue
         const item = JSON.parse(value.toString()) as Meta
 
         if (isChannel(item)) {
-          dump.channels.push({
+          backup.channels.push({
             key: key.toString(),
             channel: item,
           })
         } else if (isPlaylist(item)) {
-          dump.playlists.push({
+          backup.playlists.push({
             key: key.toString(),
             playlist: item,
           })
@@ -150,7 +150,7 @@ export const dumpV1 = (): Promise<DumpV1> => {
           throw Error(`Unknown object: ${item}`)
         }
       },
-      complete: () => resolve(dump),
+      complete: () => resolve(backup),
     })
   })
 }
@@ -182,12 +182,12 @@ const isPlaylist = (item: Meta): item is PlaylistV1 => {
   return item.meta.name === Type.Playlist
 }
 
-export interface DumpV1 {
-  channels: ChannelDumpV1[]
-  playlists: PlaylistDumpV1[]
+export interface BackupV1 {
+  channels: ChannelBackupV1[]
+  playlists: PlaylistBackupV1[]
 }
 
-interface ChannelDumpV1 {
+interface ChannelBackupV1 {
   key: string
   channel: ChannelV1
 }
@@ -198,7 +198,7 @@ interface ChannelV1 extends Meta<Type.Channel, Version.v1> {
 
 type PlaylistIdentifier = string
 
-interface PlaylistDumpV1 {
+interface PlaylistBackupV1 {
   key: string
   playlist: PlaylistV1
 }
