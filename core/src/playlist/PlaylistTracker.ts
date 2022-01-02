@@ -1,6 +1,7 @@
-import { catchError, concat, defaultIfEmpty, map, mapTo, mergeAll, mergeMap, Observable, of } from 'rxjs'
+import { catchError, concat, defaultIfEmpty, map, mapTo, merge, mergeAll, mergeMap, Observable, of } from 'rxjs'
 import { errorHandler } from '../errorHandler'
 import JEvent from '../jevent/JEvent'
+import logger from '../logger'
 import Track from '../player/Track'
 import { getOrCreateStore } from '../store/impl/LevelStore'
 import { StringStore } from '../store/Store'
@@ -102,6 +103,27 @@ const createRepositories = (store: StringStore) => {
   }
 }
 
+export const restoreV1 = async (dump: DumpV1): Promise<boolean> => {
+  return new Promise(resolve => {
+    getOrCreateStore().pipe(mergeMap(store => {
+      const restoreChannels = of(dump.channels).pipe(
+        mergeAll(),
+        mergeMap(channel => store.put(channel.key, JSON.stringify(channel.channel)).pipe(mapTo(channel))),
+      )
+
+      const restorePlaylists = of(dump.playlists).pipe(
+        mergeAll(),
+        mergeMap(playlist => store.put(playlist.key, JSON.stringify(playlist.playlist)).pipe(mapTo(playlist))),
+      )
+
+      return merge(restoreChannels, restorePlaylists)
+    })).subscribe({
+      complete: () => resolve(true),
+      next: item => logger.info(`${JSON.stringify(item)} has been restored`),
+    })
+  })
+}
+
 export const dumpV1 = (): Promise<DumpV1> => {
   return new Promise(resolve => {
     const dump: DumpV1 = {
@@ -120,7 +142,10 @@ export const dumpV1 = (): Promise<DumpV1> => {
             channel: item,
           })
         } else if (isPlaylist(item)) {
-          dump.playlists.push(item)
+          dump.playlists.push({
+            key: key.toString(),
+            playlist: item,
+          })
         } else {
           throw Error(`Unknown object: ${item}`)
         }
@@ -157,9 +182,9 @@ const isPlaylist = (item: Meta): item is PlaylistV1 => {
   return item.meta.name === Type.Playlist
 }
 
-interface DumpV1 {
+export interface DumpV1 {
   channels: ChannelDumpV1[]
-  playlists: PlaylistV1[]
+  playlists: PlaylistDumpV1[]
 }
 
 interface ChannelDumpV1 {
@@ -172,6 +197,11 @@ interface ChannelV1 extends Meta<Type.Channel, Version.v1> {
 }
 
 type PlaylistIdentifier = string
+
+interface PlaylistDumpV1 {
+  key: string
+  playlist: PlaylistV1
+}
 
 interface PlaylistV1 extends Meta<Type.Playlist, Version.v1> {
   date: number

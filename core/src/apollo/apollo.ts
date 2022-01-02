@@ -2,41 +2,15 @@ import { buildFederatedSchema } from '@apollo/subgraph/dist/buildSubgraphSchema'
 import { ApolloServer, gql, ServerInfo } from 'apollo-server'
 import { Observable } from 'rxjs'
 import logger from '../logger'
-import { dumpV1 } from '../playlist/PlaylistTracker'
+import { DumpV1, dumpV1, restoreV1 } from '../playlist/PlaylistTracker'
 
 const typeDefs = gql`
-type DumpV1 {
-  channels: [ChannelDumpV1!]!
-  playlists: [PlaylistV1!]!
-}
-
-type ChannelDumpV1 {
-  key: String!
-  channel: ChannelV1!
-}
-
-type ChannelV1 {
-  playlists: [String!]!
-}
-
-type PlaylistV1 {
-  date: Float!
-  tracks: [TrackV1!]!
-}
-
-type TrackV1 {
-  author: AuthorV1!
-  name: String!
-  link: String!
-}
-
-type AuthorV1 {
-  id: String!
-  username: String!
-}
-
 type Query {
-  dumpV1: DumpV1!
+  dumpV1: String!
+}
+
+type Mutation {
+  restoreV1(restore: String!): Boolean
 }
 `
 
@@ -47,7 +21,15 @@ const init = () => {
         typeDefs,
         resolvers: {
           Query: {
-            dumpV1: () => dumpV1(),
+            async dumpV1() {
+              const res = await dumpV1()
+              return JSON.stringify(res)
+            },
+          },
+          Mutation: {
+            restoreV1(_: any, { restore }: { restore: string }) {
+              return restoreV1(JSON.parse(restore) as DumpV1)
+            },
           },
         },
       },

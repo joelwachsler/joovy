@@ -23,5 +23,4 @@ persistence:
   size: 1Gi
   storageClass: csi-rbd-ssd
   accessModes: ReadWriteOnce
-
 EOF
