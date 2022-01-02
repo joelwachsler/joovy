@@ -1,4 +1,4 @@
-import { buildFederatedSchema } from '@apollo/subgraph/dist/buildSubgraphSchema'
+import { buildSubgraphSchema } from '@apollo/federation'
 import { ApolloServer, gql, ServerInfo } from 'apollo-server'
 import { Observable } from 'rxjs'
 import logger from '../logger'
@@ -16,7 +16,7 @@ type Mutation {
 
 const init = () => {
   const server = new ApolloServer({
-    schema: buildFederatedSchema([
+    schema: buildSubgraphSchema([
       {
         typeDefs,
         resolvers: {
