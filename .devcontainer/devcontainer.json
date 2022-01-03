@@ -16,7 +16,11 @@
 		"ms-kubernetes-tools.vscode-kubernetes-tools",
 		"eamodio.gitlens",
 		"ms-azuretools.vscode-docker",
-		"graphql.vscode-graphql"
+		"graphql.vscode-graphql",
+		"matklad.rust-analyzer",
+		"vadimcn.vscode-lldb",
+		"serayuzgur.crates",
+		"bungcip.better-toml",
 	],
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
