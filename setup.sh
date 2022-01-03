@@ -2,7 +2,7 @@
 
 set -ex
 
-git config core.editor "vim"
+git config core.editor "code"
 git config pull.rebase true
 
 mkdir -p /home/node/.config/fish
