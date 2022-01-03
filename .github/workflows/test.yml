@@ -132,7 +132,7 @@ jobs:
       - name: Build and push image
         uses: docker/build-push-action@v2
         with:
-          tags: ${{ secrets.REGISTRY }}/core:${{ GITHUB_SHA }}
+          tags: ${{ secrets.REGISTRY }}/core:${{ github.sha }}
           cache-from: type=registry,ref=${{ secrets.REGISTRY }}/core:latest
           cache-to: type=inline
           context: ./core
@@ -155,7 +155,7 @@ jobs:
       - name: Build and push image
         uses: docker/build-push-action@v2
         with:
-          tags: ${{ secrets.REGISTRY }}/gateway:${{ GITHUB_SHA }}
+          tags: ${{ secrets.REGISTRY }}/gateway:${{ github.sha }}
           cache-from: type=registry,ref=${{ secrets.REGISTRY }}/gateway:latest
           cache-to: type=inline
           context: ./gateway
