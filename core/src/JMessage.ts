@@ -8,16 +8,22 @@ import { QueueReactions } from './commands/impl/Queue'
 export default interface JMessage {
   channelId: string
   author: {
+    id: string
     username: string
     bot: boolean
-    id: string
   }
   content: string
   clearReactions: Observable<JMessage>
   reactions: Observable<JReaction>
+  messageKey: MessageKey
   edit(update: MessageContent): Observable<JMessage>
   react(reaction: string): Observable<JMessage>
   send(message: MessageContent): Observable<JMessage>
+}
+
+export interface MessageKey {
+  channelId: string
+  messageId: string
 }
 
 export type MessageContent = string | MessagePayload | MessageOptions
@@ -26,6 +32,13 @@ export type JReaction = string
 
 class JMessageImpl implements JMessage {
   constructor(private message: Message) { }
+
+  get messageKey(): MessageKey {
+    return {
+      channelId: this.message.channelId,
+      messageId: this.message.id,
+    }
+  }
 
   get channelId() {
     return this.message.channelId

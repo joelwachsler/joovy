@@ -23,4 +23,5 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
 USER node
 
 # Install rust
-RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
+RUN curl https://sh.rustup.rs -sSf | sh -s -- -y \
+    && $HOME/.cargo/bin/cargo install cargo-edit

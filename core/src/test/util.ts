@@ -2,13 +2,14 @@ import { MessageEmbed } from 'discord.js'
 import { rxSandbox, RxSandboxInstance } from 'rx-sandbox'
 import { defer, delay, map, Observable, ObservableInput, of, timeout } from 'rxjs'
 import { TimeoutConfig, TimeoutInfo } from 'rxjs/internal/operators/timeout'
+import { YtSearchFactory } from '../jevent/Factory'
 import JEvent from '../jevent/JEvent'
 import { WithBaseFunctionality } from '../jevent/mixin/BaseFunctionality'
 import { StoreOverride } from '../jevent/mixin/EventStore'
 import { sendMessage } from '../jevent/mixin/SendMessage'
 import { Result } from '../jevent/Result'
 import { YtSearchResult } from '../jevent/YtSearchResult'
-import JMessage, { JReaction, MessageContent } from '../JMessage'
+import JMessage, { JReaction, MessageContent, MessageKey } from '../JMessage'
 import { handleMessage } from '../messageHandler'
 import Player from '../player/Player'
 import { getOrCreateStringStore } from '../store/impl/InMemoryStore'
@@ -21,6 +22,7 @@ export let store: Map<string, unknown>
 export let player: Player
 export const date = new Date(2000, 1, 1)
 let uuidCounter: number
+let messageCounter: number
 
 beforeEach(() => {
   sandbox = rxSandbox.create(true)
@@ -29,6 +31,7 @@ beforeEach(() => {
   store = new Map()
   player = new PlayerFake(sandbox.scheduler)
   uuidCounter = 0
+  messageCounter = 0
 })
 
 export const handle = (source: Observable<any>) => sandbox.getMessages(handleMessage(source).pipe(map(r => r.result)))
@@ -49,6 +52,13 @@ class JMessageFake implements JMessage {
     }
     this.author = input?.author ?? defaultAuthor
     this.content = input?.content ?? 'testContent'
+  }
+
+  get messageKey(): MessageKey {
+    return {
+      channelId: this.channelId,
+      messageId: `${messageCounter++}`,
+    }
   }
 
   get clearReactions(): Observable<JMessage> {
@@ -97,6 +107,9 @@ export const createTestEvent = (input?: Partial<JMessage>): JEvent => {
             timestamp: '1:10',
           })
         },
+        kafka: defer(() => {
+          return of()
+        }),
       }
     }
 

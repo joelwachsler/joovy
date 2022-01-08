@@ -1,5 +1,6 @@
-import { Message } from 'discord.js'
-import { map, Observable } from 'rxjs'
+import { Client, Message, TextChannel } from 'discord.js'
+import { defer, from, map, mergeMap, Observable, of } from 'rxjs'
+import JMessage, { from as jMessageFrom, MessageKey } from '../JMessage'
 import { EventStore } from './EventStore'
 import { Factory } from './Factory'
 import { WithBaseFunctionality } from './mixin/BaseFunctionality'
@@ -7,7 +8,6 @@ import WithFactory from './mixin/Factory'
 import WithSendMessage from './mixin/SendMessage'
 import { ResultFactory } from './Result'
 import { SendMessage } from './SendMessage'
-import JMessage, { from as jMessageFrom } from '../JMessage'
 
 /**
  * "JEvent" or "Joovy Event" represents an interaction a user or bot has created.
@@ -20,13 +20,24 @@ export default interface JEvent extends ResultFactory, Factory, EventStore, Send
   readonly timestamp: number,
 }
 
-export const from = (message: Observable<Message>): Observable<JEvent> => {
+export const fromMessage = (message: Observable<Message>): Observable<JEvent> => {
   const store = new Map<string, unknown>()
 
   return message.pipe(
     map(message => WithFactory(WithBaseFunctionality(jMessageFrom(message), () => store, message.createdTimestamp), message)),
     map(EventClass => WithSendMessage(EventClass)),
     map(EventClass => new EventClass()),
+  )
+}
+
+export const fromMessageKey = (client: Client, messageKey: MessageKey) => {
+  return defer(() => from(client.channels.fetch(messageKey.channelId))).pipe(
+    mergeMap(channel => channel ? [channel] : []),
+    mergeMap(channel => channel instanceof TextChannel ? [channel] : []),
+    mergeMap(textChannel => textChannel.messages.fetch()),
+    map(messages => messages.get(messageKey.messageId)),
+    mergeMap(message => message ? [message] : []),
+    mergeMap(message => fromMessage(of(message))),
   )
 }
 

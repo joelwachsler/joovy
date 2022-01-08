@@ -47,6 +47,6 @@ export const sendMessage = ({ message, messageSender, event, indent }: SendMessa
   )
 }
 
-type MessageSender  = (message: MessageEmbed) => Observable<JMessage>
+type MessageSender = (message: MessageEmbed) => Observable<JMessage>
 
 export default WithSendMessage

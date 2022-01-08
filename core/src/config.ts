@@ -12,6 +12,10 @@ const init = () => {
     testGuildId: process.env.TEST_GUILD_ID,
     dbLocation: process.env.DB_LOCATION ?? './db',
     graphQLPort: process.env.GRAPHQL_PORT ?? '3001',
+    kafka: {
+      clientId: process.env.KAFKA_CLIENT_ID ?? 'joovy-core',
+      brokers: [process.env.KAFKA_BROKERS ?? 'kafka:9092'],
+    },
   }
 }
 
@@ -21,10 +25,12 @@ const throwError = (error: string) => {
 
 let config: Config
 
-export default () => {
+const initConfig = () => {
   if (!config) {
     config = init()
   }
 
   return config
 }
+
+export default initConfig
