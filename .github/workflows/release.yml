@@ -41,7 +41,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: true
-          tags: ${{ secrets.REGISTRY }}/core:${{ steps.vars.outputs.result }},${{ secrets.REGISTRY }}:latest
+          tags: ${{ secrets.REGISTRY }}/core:${{ steps.vars.outputs.result }},${{ secrets.REGISTRY }}/core:latest
           cache-from: type=registry,ref=${{ secrets.REGISTRY }}/core:latest
           cache-to: type=inline
           context: ./core
@@ -83,7 +83,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: true
-          tags: ${{ secrets.REGISTRY }}/gateway:${{ steps.vars.outputs.result }},${{ secrets.REGISTRY }}:latest
+          tags: ${{ secrets.REGISTRY }}/gateway:${{ steps.vars.outputs.result }},${{ secrets.REGISTRY }}/gateway:latest
           cache-from: type=registry,ref=${{ secrets.REGISTRY }}/gateway:latest
           cache-to: type=inline
           context: ./gateway
