@@ -15,7 +15,7 @@ type Mutation {
 }
 `
 
-const init = () => {
+const apolloInit = () => {
   const server = new ApolloServer({
     schema: buildSubgraphSchema([
       {
@@ -53,4 +53,4 @@ const init = () => {
   })
 }
 
-export default init
+export default apolloInit
