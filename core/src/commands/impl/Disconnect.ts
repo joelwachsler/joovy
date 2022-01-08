@@ -1,7 +1,8 @@
-import { concat, mergeMap, Observable, of } from 'rxjs'
+import { mergeMap, Observable } from 'rxjs'
+import { createDisconnectMessage } from '../../disconnect'
 import JEvent from '../../jevent/JEvent'
 import { Result } from '../../jevent/Result'
-import { removePlaylist } from '../../playlist/Playlist'
+import { createProducer, Topics } from '../../kafka/kafka'
 import ArgParser from '../ArgParser'
 import Command from '../command'
 
@@ -10,7 +11,12 @@ export default class Disconnect implements Command {
   helpText = 'Disconnects the bot from the current channel.'
 
   handleMessage(event: JEvent): Observable<Result> {
-    return removePlaylist(event)
-      .pipe(mergeMap(msg => concat(of(msg), event.sendMessage('Bye!'))))
+    return createProducer().pipe(mergeMap(producer => {
+      return producer.send({
+        topic: Topics.Disconnect,
+        event,
+        message: createDisconnectMessage(event),
+      })
+    }))
   }
 }

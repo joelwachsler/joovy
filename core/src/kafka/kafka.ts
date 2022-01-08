@@ -30,6 +30,7 @@ export interface KafkaProducer {
 
 export enum Topics {
   NewMessage = 'joovy-new-message',
+  Disconnect = 'joovy-disconnect',
 }
 
 export interface SendArgs<Message = KMessage> {

@@ -20,11 +20,30 @@ export default interface JEvent extends ResultFactory, Factory, EventStore, Send
   readonly timestamp: number,
 }
 
-export const fromMessage = (message: Observable<Message>): Observable<JEvent> => {
-  const store = new Map<string, unknown>()
+const messageStore = new Map<string, Map<string, unknown>>()
 
+const getOrCreateStore = (id: string) => {
+  let store = messageStore.get(id)
+  if (!store) {
+    store = new Map()
+    messageStore.set(id, store)
+  }
+
+  return store
+}
+
+export const removeObjectStore = (event: JEvent) => {
+  return defer(() => {
+    const channelId = event.message.channelId
+    messageStore.delete(channelId)
+
+    return event.result({ store: { event: 'removed', id: channelId } })
+  })
+}
+
+export const fromMessage = (message: Observable<Message>): Observable<JEvent> => {
   return message.pipe(
-    map(message => WithFactory(WithBaseFunctionality(jMessageFrom(message), () => store, message.createdTimestamp), message)),
+    map(message => WithFactory(WithBaseFunctionality(jMessageFrom(message), () => getOrCreateStore(message.channelId), message.createdTimestamp), message)),
     map(EventClass => WithSendMessage(EventClass)),
     map(EventClass => new EventClass()),
   )

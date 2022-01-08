@@ -2,6 +2,7 @@ import { Client, Intents, Message } from 'discord.js'
 import { fromEvent, Observable } from 'rxjs'
 import apolloInit from './apollo/apollo'
 import config from './config'
+import { handleDisconnects } from './disconnect'
 import * as Event from './jevent/JEvent'
 import logger from './logger'
 import { handleMessageEvents, sendMessageEvent } from './messageHandler'
@@ -22,6 +23,7 @@ const main = async () => {
     logger.info('Client is ready!')
 
     handleMessageEvents(client)
+    handleDisconnects(client)
 
     const msgEvent = fromEvent(client, 'messageCreate') as Observable<Message>
     logResult('main', sendMessageEvent(msgEvent.pipe(Event.fromMessage)))
