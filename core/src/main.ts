@@ -1,10 +1,11 @@
 import { Client, Intents, Message } from 'discord.js'
 import { fromEvent, Observable } from 'rxjs'
+import apolloInit from './apollo/apollo'
 import config from './config'
 import * as Event from './jevent/JEvent'
 import logger from './logger'
-import { handleMessage } from './messageHandler'
-import apolloInit from './apollo/apollo'
+import { handleMessageEvents, sendMessageEvent } from './messageHandler'
+import { logResult } from './resultLogger'
 
 const main = async () => {
   logger.info('Creating client...')
@@ -20,11 +21,10 @@ const main = async () => {
   client.once('ready', () => {
     logger.info('Client is ready!')
 
+    handleMessageEvents(client)
+
     const msgEvent = fromEvent(client, 'messageCreate') as Observable<Message>
-    handleMessage(msgEvent.pipe(Event.fromMessage))
-      .subscribe(({ result, event }) => {
-        logger.info(`${event.message.content} by ${event.message.author.id} (${event.message.author.username}) has been handled with result: ${result ? JSON.stringify(result) : result}`)
-      })
+    logResult('main', sendMessageEvent(msgEvent.pipe(Event.fromMessage)))
   })
 
   client.login(config().token)

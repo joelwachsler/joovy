@@ -40,12 +40,14 @@ export interface SendArgs<Message = KMessage> {
 }
 
 export interface KMessage<Name = string, Version = string> {
-  meta: {
-    name: Name
-    version: Version
-    messageKey: MessageKey
-  }
+  meta: KMeta<Name, Version>
   [props: string]: unknown
+}
+
+export interface KMeta<Name = string, Version = string> {
+  name: Name
+  version: Version
+  messageKey: MessageKey
 }
 
 let kafka: Kafka
@@ -117,7 +119,6 @@ export const createConsumer = <T extends KMessage = KMessage>(args: CreateConsum
           logger.info(`New incoming message: ${JSON.stringify(msgAsString)} on topic: ${topic}`)
 
           subscribe.next(JSON.parse(msgAsString))
-          logger.info('Complete')
         },
       })
     })
