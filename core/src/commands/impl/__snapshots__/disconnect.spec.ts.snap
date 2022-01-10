@@ -113,9 +113,19 @@ Array [
               "name": "disconnect",
               "version": "1",
             },
+            "reason": "manual disconnect by: {\\"username\\":\\"testuser\\",\\"bot\\":false,\\"id\\":\\"testAuthorId\\"}",
           },
           "topic": "joovy-disconnect",
         },
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 2,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "disconnect": "test",
       },
     },
   },
@@ -307,6 +317,7 @@ Array [
               "name": "disconnect",
               "version": "1",
             },
+            "reason": "manual disconnect by: {\\"username\\":\\"testuser\\",\\"bot\\":false,\\"id\\":\\"testAuthorId\\"}",
           },
           "topic": "joovy-disconnect",
         },
@@ -318,6 +329,15 @@ Array [
 
 exports[`should not crash if disconnecting when not connected 1`] = `
 Array [
+  TestMessageValue {
+    "frame": 0,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
+        "disconnect": "test",
+      },
+    },
+  },
   TestMessageValue {
     "frame": 0,
     "notification": Object {

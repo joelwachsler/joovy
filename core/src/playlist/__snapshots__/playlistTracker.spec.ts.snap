@@ -390,6 +390,15 @@ Array [
     "notification": Object {
       "kind": "N",
       "value": Object {
+        "disconnect": "test",
+      },
+    },
+  },
+  TestMessageValue {
+    "frame": 1,
+    "notification": Object {
+      "kind": "N",
+      "value": Object {
         "playlist": "disconnected",
       },
     },

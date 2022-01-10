@@ -555,7 +555,20 @@ Array [
     "notification": Object {
       "kind": "N",
       "value": Object {
-        "player": "disconnected because idle",
+        "kafka": Object {
+          "message": Object {
+            "meta": Object {
+              "messageKey": Object {
+                "channelId": "testChannelId",
+                "messageId": "0",
+              },
+              "name": "disconnect",
+              "version": "1",
+            },
+            "reason": "disconnected because idle",
+          },
+          "topic": "joovy-disconnect",
+        },
       },
     },
   },
@@ -704,7 +717,20 @@ Array [
     "notification": Object {
       "kind": "N",
       "value": Object {
-        "player": "disconnected because idle",
+        "kafka": Object {
+          "message": Object {
+            "meta": Object {
+              "messageKey": Object {
+                "channelId": "testChannelId",
+                "messageId": "0",
+              },
+              "name": "disconnect",
+              "version": "1",
+            },
+            "reason": "disconnected because idle",
+          },
+          "topic": "joovy-disconnect",
+        },
       },
     },
   },
@@ -722,25 +748,7 @@ Array [
     "notification": Object {
       "kind": "N",
       "value": Object {
-        "playlist": "created",
-      },
-    },
-  },
-  TestMessageValue {
-    "frame": 6,
-    "notification": Object {
-      "kind": "N",
-      "value": Object {
-        "playlist": "trackingEvent",
-      },
-    },
-  },
-  TestMessageValue {
-    "frame": 6,
-    "notification": Object {
-      "kind": "N",
-      "value": Object {
-        "playlist": "trackingEvent",
+        "playlist": "found",
       },
     },
   },
@@ -830,7 +838,20 @@ Array [
     "notification": Object {
       "kind": "N",
       "value": Object {
-        "player": "disconnected because idle",
+        "kafka": Object {
+          "message": Object {
+            "meta": Object {
+              "messageKey": Object {
+                "channelId": "testChannelId",
+                "messageId": "1",
+              },
+              "name": "disconnect",
+              "version": "1",
+            },
+            "reason": "disconnected because idle",
+          },
+          "topic": "joovy-disconnect",
+        },
       },
     },
   },
@@ -1039,7 +1060,20 @@ Array [
     "notification": Object {
       "kind": "N",
       "value": Object {
-        "player": "disconnected because idle",
+        "kafka": Object {
+          "message": Object {
+            "meta": Object {
+              "messageKey": Object {
+                "channelId": "testChannelId",
+                "messageId": "0",
+              },
+              "name": "disconnect",
+              "version": "1",
+            },
+            "reason": "disconnected because idle",
+          },
+          "topic": "joovy-disconnect",
+        },
       },
     },
   },

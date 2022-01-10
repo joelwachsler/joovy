@@ -26,7 +26,7 @@ test('should differentiate tracking between playlists', () => {
   const disconnect = createTestEvent({ content: '/disconnect' })
 
   const messages = handleTrackingMessages(hot('a-a', { a: play }))
-  const messages2 = disconnectFromChannel(hot('-b-', { b: disconnect })).pipe(
+  const messages2 = disconnectFromChannel(hot('-b-', { b: { event: disconnect, reason: 'test' } })).pipe(
     map(msg => msg.result),
   )
 

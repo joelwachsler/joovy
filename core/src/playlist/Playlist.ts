@@ -1,4 +1,5 @@
 import { BehaviorSubject, concat, concatMap, concatMapTo, defaultIfEmpty, defer, map, mapTo, merge, mergeAll, mergeMap, mergeMapTo, Observable, of, Subject, switchMap, takeUntil, tap } from 'rxjs'
+import { sendDisconnectMessage } from '../commands/impl/Disconnect'
 import JEvent from '../jevent/JEvent'
 import { Result } from '../jevent/Result'
 import Player from '../player/Player'
@@ -106,13 +107,7 @@ export class Playlist {
   private disconnectPlaylistAfterFrames(frames: number) {
     return of(undefined).pipe(
       this.event.factory.delay(frames),
-      concatMapTo(this.disconnectPlaylist('disconnected because idle')),
-    )
-  }
-
-  private disconnectPlaylist(reason: string) {
-    return removePlaylist(this.event).pipe(
-      mergeMapTo(this.event.result({ player: reason })),
+      concatMapTo(sendDisconnectMessage(this.event, 'disconnected because idle')),
     )
   }
 
