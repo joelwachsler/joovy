@@ -1,10 +1,12 @@
-import { createTestEvent, e, handle, hot } from '../../test/util'
+import { merge } from 'rxjs'
+import { handleMessage } from '../../messageHandler'
+import { createTestEvent, handle, hot, resultAndMessages } from '../../test/util'
+import { disconnectFromChannel } from './Disconnect'
 
-test('should disconnect if connected to channel', () => {
-  const play = createTestEvent({ content: '/play test' })
+test('should emit disconnect event', () => {
   const disconnect = createTestEvent({ content: '/disconnect' })
 
-  const messages = handle(hot('ab', { a: play, b: disconnect }))
+  const messages = handle(hot('a', { a: disconnect }))
   expect(messages).toMatchSnapshot()
 })
 
@@ -12,17 +14,14 @@ test('should disconnect, reconnect and disconnect again without any problem', ()
   const play = createTestEvent({ content: '/play test' })
   const disconnect = createTestEvent({ content: '/disconnect' })
 
-  const messages = handle(hot('aba', { a: play, b: disconnect }))
-  expect(messages).toMatchSnapshot()
+  const messages = handleMessage(hot(         'ab-a', { a: play, b: disconnect }))
+  const messages2 = disconnectFromChannel(hot('--b-', { b: disconnect }))
+  expect(resultAndMessages(merge(messages, messages2))).toMatchSnapshot()
 })
 
-test('should not do anything if not connected to channel', () => {
+test('should not crash if disconnecting when not connected', () => {
   const disconnect = createTestEvent({ content: '/disconnect' })
 
-  const messages = handle(hot('a', { a: disconnect }))
-  expect(messages).toMatchObject(e('a', {
-    a: {
-      commandCalled: '/disconnect',
-    },
-  }))
+  const messages = resultAndMessages(disconnectFromChannel(hot('a', { a: disconnect })))
+  expect(messages).toMatchSnapshot()
 })

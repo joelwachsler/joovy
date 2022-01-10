@@ -9,6 +9,7 @@ import { sendMessage } from '../jevent/mixin/SendMessage'
 import { Result } from '../jevent/Result'
 import { YtSearchResult } from '../jevent/YtSearchResult'
 import JMessage, { JReaction, MessageContent, MessageKey } from '../JMessage'
+import { KafkaProducerFake } from '../kafka/impl/KafkaProducerFake'
 import { handleMessage } from '../messageHandler'
 import Player from '../player/Player'
 import { getOrCreateStringStore } from '../store/impl/InMemoryStore'
@@ -33,7 +34,11 @@ beforeEach(() => {
   messageCounter = 0
 })
 
-export const handle = (source: Observable<any>) => sandbox.getMessages(handleMessage(source).pipe(map(r => r.result)))
+export const handle = (source: Observable<any>) => resultAndMessages(handleMessage(source))
+
+export const results = <T extends Observable<{ result: any }>>(source: T) => source.pipe(map(s => s.result))
+
+export const resultAndMessages = <T extends Observable<{ result: any }>>(source: T) => sandbox.getMessages(results(source))
 
 class JMessageFake implements JMessage {
 
@@ -106,9 +111,7 @@ export const createTestEvent = (input?: Partial<JMessage>): JEvent => {
             timestamp: '1:10',
           })
         },
-        kafka: defer(() => {
-          return of()
-        }),
+        kafkaProducer: () => of(new KafkaProducerFake()),
       }
     }
 

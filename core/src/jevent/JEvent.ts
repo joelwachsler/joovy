@@ -1,6 +1,7 @@
 import { Client, Message, TextChannel } from 'discord.js'
 import { defer, from, map, mergeMap, Observable, of } from 'rxjs'
 import JMessage, { from as jMessageFrom, MessageKey } from '../JMessage'
+import { getOrCreateObjectStore } from '../store/util'
 import { EventStore } from './EventStore'
 import { Factory } from './Factory'
 import { WithBaseFunctionality } from './mixin/BaseFunctionality'
@@ -20,30 +21,16 @@ export default interface JEvent extends ResultFactory, Factory, EventStore, Send
   readonly timestamp: number,
 }
 
-const messageStore = new Map<string, Map<string, unknown>>()
-
-const getOrCreateStore = (id: string) => {
-  let store = messageStore.get(id)
-  if (!store) {
-    store = new Map()
-    messageStore.set(id, store)
-  }
-
-  return store
-}
-
-export const removeObjectStore = (event: JEvent) => {
-  return defer(() => {
-    const channelId = event.message.channelId
-    messageStore.delete(channelId)
-
-    return event.result({ store: { event: 'removed', id: channelId } })
-  })
-}
-
 export const fromMessage = (message: Observable<Message>): Observable<JEvent> => {
   return message.pipe(
-    map(message => WithFactory(WithBaseFunctionality(jMessageFrom(message), () => getOrCreateStore(message.channelId), message.createdTimestamp), message)),
+    map(message => {
+      const Base = WithBaseFunctionality(
+        jMessageFrom(message),
+        () => getOrCreateObjectStore(message.channelId),
+        message.createdTimestamp,
+      )
+      return WithFactory(Base, message)
+    }),
     map(EventClass => WithSendMessage(EventClass)),
     map(EventClass => new EventClass()),
   )

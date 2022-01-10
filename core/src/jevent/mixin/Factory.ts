@@ -2,7 +2,7 @@ import { Message } from 'discord.js'
 import * as Player from '../../player/Player'
 import { Factory } from '../Factory'
 import { delayFactoryImpl } from '../impl/delay'
-import { kafkaFactoryImpl } from '../impl/kafka'
+import { kafkaProducerFactoryImpl } from '../impl/kafka'
 import { timeoutFactoryImpl } from '../impl/timeout'
 import { UUIDFactoryImpl } from '../impl/uuid'
 import { ytSearchFactoryImpl } from '../impl/ytSearch'
@@ -30,8 +30,8 @@ const WithFactory = <TBase extends Constructor>(Base: TBase, message: Message) =
       return UUIDFactoryImpl
     }
 
-    get kafka() {
-      return kafkaFactoryImpl
+    get kafkaProducer() {
+      return kafkaProducerFactoryImpl
     }
 
     get factory() {

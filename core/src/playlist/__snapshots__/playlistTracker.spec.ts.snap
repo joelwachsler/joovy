@@ -390,7 +390,7 @@ Array [
     "notification": Object {
       "kind": "N",
       "value": Object {
-        "commandCalled": "/disconnect",
+        "playlist": "disconnected",
       },
     },
   },
@@ -399,7 +399,10 @@ Array [
     "notification": Object {
       "kind": "N",
       "value": Object {
-        "playlist": "disconnected",
+        "store": Object {
+          "event": "removed",
+          "id": "testChannelId",
+        },
       },
     },
   },

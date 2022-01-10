@@ -4,12 +4,13 @@ import { handle } from './commands/command'
 import { errorHandler } from './errorHandler'
 import JEvent, { fromMessageKey } from './jevent/JEvent'
 import { EmptyResult, Result } from './jevent/Result'
-import { createConsumer, createProducer, KMessage, Topics } from './kafka/kafka'
+import { KMessage, Topics } from './kafka/kafka'
+import { createConsumer } from './kafka/util'
 import { logResult } from './resultLogger'
 
 export const sendMessageEvent = (event: Observable<JEvent>): Observable<Result> => {
-  return createProducer().pipe(mergeMap(producer => {
-    return event.pipe(mergeMap(event => {
+  return event.pipe(mergeMap(event => {
+    return event.factory.kafkaProducer().pipe(mergeMap(producer => {
       return producer.send({
         event,
         message: createMessageEvent(event),
