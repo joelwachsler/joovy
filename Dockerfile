@@ -1,6 +1,6 @@
 FROM node:16-alpine
 
-RUN apk add ffmpeg make
+RUN apk add ffmpeg make libtool autoconf automake g++ gcc python3
 RUN mkdir -p /server
 WORKDIR /server
 
