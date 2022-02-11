@@ -1,6 +1,6 @@
-FROM node:16-alpine
+FROM node:16
 
-RUN apk add ffmpeg make libtool autoconf automake g++ gcc python3
+RUN apt-get update && apt-get install -y ffmpeg
 RUN mkdir -p /server
 WORKDIR /server
 
