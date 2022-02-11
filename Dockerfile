@@ -1,6 +1,6 @@
-FROM node:17
+FROM node:16-alpine
 
-RUN apt-get update && apt-get install -y ffmpeg
+RUN apk add ffmpeg
 RUN mkdir -p /server
 WORKDIR /server
 
