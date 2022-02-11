@@ -1,6 +1,6 @@
 FROM node:16-alpine
 
-RUN apk add ffmpeg
+RUN apk add ffmpeg make
 RUN mkdir -p /server
 WORKDIR /server
 
