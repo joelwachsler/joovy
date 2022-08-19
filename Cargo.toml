@@ -1,11 +1,14 @@
+[workspace]
+members = [".", "logger", "search"]
+
 [package]
 name = "joovy"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-anyhow = "1.0.61"
-dotenv = "0.15.0"
+anyhow = "1.0"
+dotenv = "0.15"
 serenity = "0.11.5"
 songbird = "0.3.0"
 tokio = { version = "1.20.1", features = ["full"] }
