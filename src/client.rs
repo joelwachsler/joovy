@@ -28,21 +28,15 @@ impl EventHandler for Handler {
 
 #[command]
 #[only_in(guilds)]
-async fn play(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
+async fn play(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     join(ctx, msg).await?;
 
-    let url = match args.single::<String>() {
-        Ok(url) => url,
-        Err(_) => {
-            msg.reply_log(ctx, "Please provide a valid URL").await?;
-            return Ok(());
-        }
+    let query = args.message();
+    let query = if query.starts_with("http") {
+        query.to_string()
+    } else {
+        format!("ytsearch:{}", query)
     };
-
-    if !url.starts_with("http") {
-        msg.reply_log(ctx, "Invalid url").await?;
-        return Ok(());
-    }
 
     let guild = msg.guild(ctx).unwrap();
     let guild_id = guild.id;
@@ -52,9 +46,9 @@ async fn play(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     if let Some(handler_lock) = manager.get(guild_id) {
         let mut handler = handler_lock.lock().await;
 
-        msg.reply_log(ctx, format!("Trying to start: {}", url))
+        msg.reply_log(ctx, format!("Trying to start: {}", query))
             .await?;
-        let source = match songbird::ytdl(&url).await {
+        let source = match songbird::ytdl(&query).await {
             Ok(source) => source,
             Err(e) => {
                 msg.reply_log(ctx, format!("Error starting source: {}", e))
@@ -64,7 +58,7 @@ async fn play(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         };
 
         handler.play_source(source);
-        msg.reply_log(ctx, format!("Now playing {}", url)).await?;
+        msg.reply_log(ctx, format!("Now playing {}", query)).await?;
     }
 
     Ok(())
