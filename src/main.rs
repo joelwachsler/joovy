@@ -1,7 +1,7 @@
 mod client;
 
-use std::env;
 use anyhow::Result;
+use std::env;
 
 #[tokio::main]
 async fn main() -> Result<()> {
