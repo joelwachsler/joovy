@@ -53,7 +53,9 @@ mod tests {
 
     #[tokio::test]
     async fn query_http() {
-        let res = search("https://www.youtube.com/watch?v=ZnkRg-6zFfI").await.unwrap();
+        let res = search("https://www.youtube.com/watch?v=ZnkRg-6zFfI")
+            .await
+            .unwrap();
         assert_eq!(res.title(), "Neovaii - Chase Pop");
         assert_eq!(res.url(), "https://www.youtube.com/watch?v=ZnkRg-6zFfI");
     }
