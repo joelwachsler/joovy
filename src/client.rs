@@ -31,13 +31,6 @@ impl EventHandler for Handler {
 async fn play(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     join(ctx, msg).await?;
 
-    let query = args.message();
-    let query = if query.starts_with("http") {
-        query.to_string()
-    } else {
-        format!("ytsearch:{}", query)
-    };
-
     let guild = msg.guild(ctx).unwrap();
     let guild_id = guild.id;
 
@@ -46,19 +39,16 @@ async fn play(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     if let Some(handler_lock) = manager.get(guild_id) {
         let mut handler = handler_lock.lock().await;
 
-        msg.reply_log(ctx, format!("Trying to start: {}", query))
-            .await?;
-        let source = match songbird::ytdl(&query).await {
-            Ok(source) => source,
-            Err(e) => {
-                msg.reply_log(ctx, format!("Error starting source: {}", e))
-                    .await?;
-                return Ok(());
-            }
-        };
+        let query = args.message();
+        let search_result = search::search(query).await?;
 
-        handler.play_source(source);
-        msg.reply_log(ctx, format!("Now playing {}", query)).await?;
+        msg.reply_log(ctx, format!("Trying to start: {}", search_result.title()))
+            .await?;
+
+        let input = songbird::ytdl(search_result.url()).await?;
+        handler.play_source(input);
+        msg.reply_log(ctx, format!("Now playing {}", search_result.title()))
+            .await?;
     }
 
     Ok(())

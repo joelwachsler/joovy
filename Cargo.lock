@@ -642,6 +642,7 @@ dependencies = [
  "anyhow",
  "dotenv",
  "logger",
+ "search",
  "serenity",
  "songbird",
  "tokio",
