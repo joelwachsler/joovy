@@ -10,10 +10,10 @@ type SendableJoovyCommand = dyn JoovyCommand + Send + Sync;
 const COMMANDS: &[&SendableJoovyCommand] =
     &[&crate::commands::play::Play, &crate::commands::ping::Ping];
 
-pub struct Handler;
+pub struct CommandHandler;
 
 #[async_trait]
-impl EventHandler for Handler {
+impl EventHandler for CommandHandler {
     async fn ready(&self, ctx: Context, ready: Ready) {
         info!("{} is connected!", ready.user.name);
         info!("Registering slash commands...");

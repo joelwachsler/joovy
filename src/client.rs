@@ -7,7 +7,7 @@ use serenity::prelude::*;
 use songbird::SerenityInit;
 use tracing::{info, instrument};
 
-use crate::handler::Handler;
+use crate::command_handler::CommandHandler;
 
 #[instrument]
 pub async fn run() -> Result<()> {
@@ -15,7 +15,7 @@ pub async fn run() -> Result<()> {
     let intents = GatewayIntents::non_privileged() | GatewayIntents::MESSAGE_CONTENT;
 
     let mut client = Client::builder(token, intents)
-        .event_handler(Handler)
+        .event_handler(CommandHandler)
         // not used by harder to hand pick features than to just register a framework
         .framework(StandardFramework::new())
         .register_songbird()
