@@ -1,6 +1,7 @@
 mod client;
 mod commands;
 mod command_handler;
+mod command_context;
 
 use anyhow::Result;
 use tracing::instrument;

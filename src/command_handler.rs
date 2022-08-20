@@ -3,7 +3,8 @@ use serenity::{async_trait, model::prelude::*, prelude::*};
 use std::env;
 use tracing::{debug, error, info};
 
-use crate::commands::{CommandContext, JoovyCommand};
+use crate::command_context::CommandContext;
+use crate::commands::JoovyCommand;
 
 type SendableJoovyCommand = dyn JoovyCommand + Send + Sync;
 

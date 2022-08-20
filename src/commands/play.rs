@@ -3,7 +3,9 @@ use serenity::async_trait;
 use serenity::builder::CreateApplicationCommand;
 use serenity::model::prelude::command;
 
-use super::{CommandContext, JoovyCommand};
+use crate::command_context::CommandContext;
+
+use super::JoovyCommand;
 
 #[derive(Default)]
 pub struct Play;
@@ -35,7 +37,7 @@ impl JoovyCommand for Play {
 
         let handler = ctx.songbird().await;
 
-        if let Some(handler_lock) = handler.get(ctx.interaction.guild_id.unwrap()) {
+        if let Some(handler_lock) = handler.get(ctx.interaction().guild_id.unwrap()) {
             let mut handler = handler_lock.lock().await;
 
             let query = ctx.value();
