@@ -1,4 +1,6 @@
 use anyhow::{bail, Result};
+use serenity::model::prelude::ChannelId;
+use serenity::model::voice::VoiceState;
 use std::{fmt::Display, sync::Arc};
 use tracing::{error, info};
 
@@ -33,8 +35,9 @@ impl<'a> CommandContext<'a> {
             .expect("Songbird Voice client failed")
     }
 
-    pub async fn reply(&self, msg: impl Display) -> Result<()> {
-        info!("{}", msg);
+    /// Should only be used once per slash command to acknowledge the command.
+    pub async fn reply_ack(&self, msg: impl Display) -> Result<()> {
+        info!("Reply ack with: {}", msg);
         let _ = self
             .interaction
             .create_interaction_response(self.ctx, |response| {
@@ -44,6 +47,24 @@ impl<'a> CommandContext<'a> {
             })
             .await
             .map_err(|why| error!("Failed to create response: {}", why));
+
+        Ok(())
+    }
+
+    pub async fn reply(&self, msg: impl Display) -> Result<()> {
+        info!("Replying with: {}", msg);
+        self.interaction
+            .create_followup_message(self.ctx, |message| message.content(msg))
+            .await?;
+
+        Ok(())
+    }
+
+    pub async fn send(&self, msg: impl Display) -> Result<()> {
+        self.channel_id()
+            .await?
+            .send_message(self.ctx, |message| message.content(msg))
+            .await?;
 
         Ok(())
     }
@@ -61,24 +82,23 @@ impl<'a> CommandContext<'a> {
         Ok(cached_guild)
     }
 
-    pub async fn join_voice(&self) -> Result<()> {
+    async fn channel_id(&self) -> Result<ChannelId> {
         let guild = self.guild()?;
         let author_id = self.interaction.user.id;
         let voice_state = match guild.voice_states.get(&author_id) {
             Some(state) => state,
-            None => {
-                self.reply("Not in a voice channel").await?;
-                return Ok(());
-            }
+            None => bail!("Not in a voice channel"),
         };
 
-        let channel_id = match voice_state.channel_id {
-            Some(channel) => channel,
-            None => {
-                error!("Failed to get channel id");
-                return Ok(());
-            }
-        };
+        match voice_state.channel_id {
+            Some(channel) => Ok(channel),
+            None => bail!("Failed to get channel id"),
+        }
+    }
+
+    pub async fn join_voice(&self) -> Result<()> {
+        let guild = self.guild()?;
+        let channel_id = self.channel_id().await?;
 
         let manager = self.songbird().await;
         let _ = manager.join(guild.id, channel_id).await;

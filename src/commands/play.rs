@@ -2,7 +2,6 @@ use anyhow::Result;
 use serenity::async_trait;
 use serenity::builder::CreateApplicationCommand;
 use serenity::model::prelude::command;
-use tracing::info;
 
 use super::{CommandContext, JoovyCommand};
 
@@ -32,23 +31,25 @@ impl JoovyCommand for Play {
     }
 
     async fn execute<'a>(&self, ctx: CommandContext<'a>) -> Result<()> {
+        ctx.reply_ack("this is a reply ack").await?;
+        ctx.reply("this is a reply").await?;
+        ctx.send("this is a send").await?;
         ctx.join_voice().await?;
 
         let handler = ctx.songbird().await;
 
         if let Some(handler_lock) = handler.get(ctx.interaction.guild_id.unwrap()) {
             let mut handler = handler_lock.lock().await;
-            let options = &ctx.interaction.data.options;
 
             let query = ctx.value();
             let search_result = search::search(&query).await?;
 
-            ctx.reply(format!("Trying to start: {}", search_result.title()))
+            ctx.send(format!("Trying to start: {}", search_result.title()))
                 .await?;
 
             let input = songbird::ytdl(search_result.url()).await?;
             handler.play_source(input);
-            ctx.reply(format!("Now playing {}", search_result.title()))
+            ctx.send(format!("Now playing {}", search_result.title()))
                 .await?;
         }
 
