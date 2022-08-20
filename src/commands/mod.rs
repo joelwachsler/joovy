@@ -1,6 +1,5 @@
 use anyhow::{bail, Result};
 use serenity::model::prelude::ChannelId;
-use serenity::model::voice::VoiceState;
 use std::{fmt::Display, sync::Arc};
 use tracing::{error, info};
 
@@ -17,6 +16,7 @@ use serenity::{
 use songbird::Songbird;
 
 // mod disconnect;
+pub mod ping;
 pub mod play;
 
 pub struct CommandContext<'a> {
@@ -43,7 +43,9 @@ impl<'a> CommandContext<'a> {
             .create_interaction_response(self.ctx, |response| {
                 response
                     .kind(InteractionResponseType::ChannelMessageWithSource)
-                    .interaction_response_data(|message| message.content(msg))
+                    .interaction_response_data(|message| {
+                        message.embed(|embed| embed.description(msg))
+                    })
             })
             .await
             .map_err(|why| error!("Failed to create response: {}", why));
@@ -54,16 +56,21 @@ impl<'a> CommandContext<'a> {
     pub async fn reply(&self, msg: impl Display) -> Result<()> {
         info!("Replying with: {}", msg);
         self.interaction
-            .create_followup_message(self.ctx, |message| message.content(msg))
+            .create_followup_message(self.ctx, |message| {
+                message.embed(|embed| embed.description(msg))
+            })
             .await?;
 
         Ok(())
     }
 
     pub async fn send(&self, msg: impl Display) -> Result<()> {
-        self.channel_id()
-            .await?
-            .send_message(self.ctx, |message| message.content(msg))
+        info!("Sending: {}", msg);
+        self.text_channel_id()
+            .await
+            .send_message(self.ctx, |message| {
+                message.embed(|embed| embed.description(msg))
+            })
             .await?;
 
         Ok(())
@@ -82,7 +89,7 @@ impl<'a> CommandContext<'a> {
         Ok(cached_guild)
     }
 
-    async fn channel_id(&self) -> Result<ChannelId> {
+    async fn voice_channel_id(&self) -> Result<ChannelId> {
         let guild = self.guild()?;
         let author_id = self.interaction.user.id;
         let voice_state = match guild.voice_states.get(&author_id) {
@@ -96,9 +103,13 @@ impl<'a> CommandContext<'a> {
         }
     }
 
+    async fn text_channel_id(&self) -> ChannelId {
+        self.interaction.channel_id
+    }
+
     pub async fn join_voice(&self) -> Result<()> {
         let guild = self.guild()?;
-        let channel_id = self.channel_id().await?;
+        let channel_id = self.voice_channel_id().await?;
 
         let manager = self.songbird().await;
         let _ = manager.join(guild.id, channel_id).await;
@@ -122,5 +133,5 @@ pub trait JoovyCommand {
         command: &'a mut CreateApplicationCommand,
     ) -> &'a mut CreateApplicationCommand;
 
-    async fn execute<'a>(&self, ctx: CommandContext<'a>) -> anyhow::Result<()>;
+    async fn execute<'a>(&self, ctx: &CommandContext<'a>) -> anyhow::Result<()>;
 }

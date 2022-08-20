@@ -1,13 +1,14 @@
 use serenity::model::prelude::interaction::Interaction;
 use serenity::{async_trait, model::prelude::*, prelude::*};
 use std::env;
-use tracing::{debug, error, info, warn};
+use tracing::{debug, error, info};
 
-use crate::commands::{play, CommandContext, JoovyCommand};
+use crate::commands::{CommandContext, JoovyCommand};
 
 type SendableJoovyCommand = dyn JoovyCommand + Send + Sync;
 
-const COMMANDS: &[&SendableJoovyCommand] = &[&play::Play];
+const COMMANDS: &[&SendableJoovyCommand] =
+    &[&crate::commands::play::Play, &crate::commands::ping::Ping];
 
 pub struct Handler;
 
@@ -44,16 +45,22 @@ impl EventHandler for Handler {
                 cmd_name,
                 found_cmd.map(|m| m.name())
             );
+            let cmd_context = CommandContext::new(&ctx, &command);
 
             if let Some(res) = found_cmd {
-                let cmd_context = CommandContext::new(&ctx, &command);
+                let _ = cmd_context.reply_ack("Processing...").await;
 
-                let _ = res
-                    .execute(cmd_context)
-                    .await
-                    .map_err(|why| error!("Failed to execute: {}, reason: {}", cmd_name, why));
+                let exec_res = res.execute(&cmd_context).await;
+                if let Err(why) = exec_res {
+                    let _ = cmd_context
+                        .reply(format!("Failed to execute: {}, reason: {}", cmd_name, why))
+                        .await;
+                };
             } else {
-                warn!("No command named: {}, was found", cmd_name);
+                let _ = cmd_context
+                    .reply(format!("No command named: {}, was found", cmd_name))
+                    .await
+                    .map_err(|why| error!("Failed to reply: {}", why));
             }
         } else {
             error!("Unhandled interaction: {:?}", interaction);

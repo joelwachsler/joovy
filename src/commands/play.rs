@@ -30,10 +30,7 @@ impl JoovyCommand for Play {
             })
     }
 
-    async fn execute<'a>(&self, ctx: CommandContext<'a>) -> Result<()> {
-        ctx.reply_ack("this is a reply ack").await?;
-        ctx.reply("this is a reply").await?;
-        ctx.send("this is a send").await?;
+    async fn execute<'a>(&self, ctx: &CommandContext<'a>) -> Result<()> {
         ctx.join_voice().await?;
 
         let handler = ctx.songbird().await;
