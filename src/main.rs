@@ -1,13 +1,15 @@
 mod client;
+mod commands;
+mod handler;
 
 use anyhow::Result;
-use std::env;
+use tracing::instrument;
 
 #[tokio::main]
+#[instrument]
 async fn main() -> Result<()> {
     logger::init().expect("Failed to init logger");
-    let token = env::var("DISCORD_TOKEN").expect("DISCORD_TOKEN not set");
-    client::run(token).await?;
+    client::run().await?;
 
     Ok(())
 }

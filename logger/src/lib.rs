@@ -4,8 +4,6 @@ use anyhow::Result;
 use tracing::metadata::LevelFilter;
 use tracing_subscriber::{fmt, layer::SubscriberExt, util::SubscriberInitExt, Layer};
 
-pub use tracing::{debug, error, info, trace, warn};
-
 pub fn init() -> Result<()> {
     dotenv::dotenv().ok();
     let console_level = std::env::var("RUST_LOG")
