@@ -22,16 +22,19 @@ pub async fn run() -> Result<()> {
         .await
         .expect("Error creating client");
 
+    let shard_manager = client.shard_manager.clone();
+
     tokio::spawn(async move {
-        client
-            .start()
+        tokio::signal::ctrl_c()
             .await
-            .map_err(|why| info!("Client ended: {:?}", why))
-            .unwrap();
+            .expect("Could not register ctrl+c handler");
+        shard_manager.lock().await.shutdown_all().await;
     });
 
-    let _ = tokio::signal::ctrl_c().await;
-    info!("Ctrl-C received, shutting down...");
+    let _ = client
+        .start()
+        .await
+        .map_err(|why| info!("Client error: {:?}", why));
 
     Ok(())
 }
