@@ -12,7 +12,8 @@ use serenity::{
     prelude::Context,
 };
 
-use crate::store::guild_stores::{GuildStoreAction, HasGuildStores};
+use crate::store::guild_store_action::GuildStoreAction;
+use crate::store::guild_stores::HasGuildStores;
 
 pub struct CommandContext {
     ctx: Context,

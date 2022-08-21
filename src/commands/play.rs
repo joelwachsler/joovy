@@ -7,7 +7,7 @@ use serenity::model::prelude::command;
 
 use crate::{
     command_context::CommandContext,
-    store::guild_stores::{GuildStoreAction, HasGuildStores},
+    store::{guild_store_action::GuildStoreAction, guild_stores::HasGuildStores},
 };
 
 use super::JoovyCommand;
