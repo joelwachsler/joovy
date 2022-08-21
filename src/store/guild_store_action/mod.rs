@@ -13,6 +13,7 @@ mod disconnect;
 mod play_next_track;
 mod remove;
 mod remove_current_track;
+mod print_queue;
 
 pub enum GuildStoreAction {
     AddToQueue(Arc<CommandContext>, String),
@@ -21,6 +22,7 @@ pub enum GuildStoreAction {
     Disconnect(Arc<CommandContext>),
     // first u32 is from second is to
     Remove(Arc<CommandContext>, u64, Option<u64>),
+    PrintQueue(Arc<CommandContext>),
 }
 
 pub struct GuildStoresActionHandler {
@@ -63,6 +65,11 @@ impl GuildStoresActionHandler {
                         let _ = ctx.send(format!("Remove error: {}", why)).await;
                     }
                 }
+                GuildStoreAction::PrintQueue(ctx) => {
+                    if let Err(why) = self.print_queue(ctx.clone()).await {
+                        let _ = ctx.send(format!("Print queue error: {}", why)).await;
+                    }
+                },
             }
         }
     }

@@ -2,7 +2,7 @@ use anyhow::Result;
 
 use crate::command_context::CommandContext;
 
-#[derive(Clone)]
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub struct QueuedTrack {
     title: String,
     url: String,
@@ -57,5 +57,21 @@ impl QueuedTrack {
 
     pub fn should_skip(&self) -> bool {
         self.skip
+    }
+
+    #[cfg(test)]
+    pub fn title(&self) -> &str {
+        &self.title
+    }
+
+    #[cfg(test)]
+    pub fn create_for_test(title: &str) -> QueuedTrack {
+        QueuedTrack {
+            title: title.into(),
+            url: "url".into(),
+            author: 1,
+            duration: 1,
+            skip: false,
+        }
     }
 }

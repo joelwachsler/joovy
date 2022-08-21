@@ -3,7 +3,7 @@ use std::fmt::Display;
 use tracing::{error, info};
 
 use super::CommandContext;
-use serenity::model::application::interaction::InteractionResponseType;
+use serenity::{builder::CreateEmbed, model::application::interaction::InteractionResponseType};
 
 impl CommandContext {
     /// Should only be used once per slash command to acknowledge the command.
@@ -31,6 +31,18 @@ impl CommandContext {
             .create_followup_message(&self.ctx, |message| {
                 message.embed(|embed| embed.description(msg))
             })
+            .await?;
+
+        Ok(())
+    }
+
+    pub async fn reply_embed<F>(&self, msg: F) -> Result<()>
+    where
+        F: Fn(&mut CreateEmbed) -> &mut CreateEmbed,
+    {
+        info!("Replying using reply embed");
+        self.interaction
+            .create_followup_message(&self.ctx, |message| message.embed(|embed| msg(embed)))
             .await?;
 
         Ok(())

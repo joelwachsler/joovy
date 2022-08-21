@@ -13,11 +13,13 @@ use crate::command_context::CommandContext;
 use self::disconnect::Disconnect;
 use self::ping::Ping;
 use self::play::Play;
+use self::queue::Queue;
 use self::skip::Skip;
 
 mod disconnect;
 mod ping;
 mod play;
+mod queue;
 mod skip;
 
 #[async_trait]
@@ -37,6 +39,7 @@ pub enum JoovyCommands {
     Ping(Ping),
     Disconnect(Disconnect),
     Skip(Skip),
+    Queue(Queue),
 }
 
 // the command registration could be simplified using a macro
@@ -50,6 +53,7 @@ impl JoovyCommands {
             JoovyCommands::Ping(cmd) => cmd.create_application_command(command),
             JoovyCommands::Disconnect(cmd) => cmd.create_application_command(command),
             JoovyCommands::Skip(cmd) => cmd.create_application_command(command),
+            JoovyCommands::Queue(cmd) => cmd.create_application_command(command),
         }
     }
 
@@ -59,6 +63,7 @@ impl JoovyCommands {
             JoovyCommands::Ping(cmd) => cmd.execute(ctx).await,
             JoovyCommands::Disconnect(cmd) => cmd.execute(ctx).await,
             JoovyCommands::Skip(cmd) => cmd.execute(ctx).await,
+            JoovyCommands::Queue(cmd) => cmd.execute(ctx).await,
         }
     }
 
