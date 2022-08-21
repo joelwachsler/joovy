@@ -51,7 +51,11 @@ impl QueuedTrack {
         format!("{mins}:{secs}")
     }
 
-    pub fn skip(&mut self) {
+    pub fn skip_track(&mut self) {
         self.skip = true;
+    }
+
+    pub fn should_skip(&self) -> bool {
+        self.skip
     }
 }

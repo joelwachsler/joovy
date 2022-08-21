@@ -16,7 +16,19 @@ impl GuildStoresActionHandler {
             return Ok(());
         }
 
-        if let Some(next_track) = store.next_track_in_queue() {
+        let mut next_track = || {
+            while let Some(next_track) = store.next_track_in_queue() {
+                if !next_track.should_skip() {
+                    return Some(next_track);
+                } else {
+                    info!("Skipping {}", next_track.name());
+                }
+            }
+
+            None
+        };
+
+        if let Some(next_track) = next_track() {
             let handler_lock = ctx.songbird_call_lock().await?;
 
             let mut handler = handler_lock.lock().await;

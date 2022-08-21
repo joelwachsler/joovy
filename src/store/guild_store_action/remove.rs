@@ -24,7 +24,7 @@ impl GuildStoresActionHandler {
         let store = self.get_or_create_store(&ctx).await?;
         for i in from..to.unwrap_or(from + 1) {
             if let Some(track) = store.edit_track(i as usize) {
-                track.skip();
+                track.skip_track();
                 ctx.send(format!("{} has been removed", track.name()))
                     .await?;
             }
