@@ -1,6 +1,7 @@
 use serenity::model::prelude::interaction::Interaction;
 use serenity::{async_trait, model::prelude::*, prelude::*};
 use std::env;
+use std::sync::Arc;
 use tracing::{debug, error, info};
 
 use crate::command_context::CommandContext;
@@ -46,12 +47,12 @@ impl EventHandler for CommandHandler {
                 cmd_name,
                 found_cmd.map(|m| m.name())
             );
-            let cmd_context = CommandContext::new(&ctx, &command);
+            let cmd_context = Arc::new(CommandContext::new(ctx.clone(), command.clone()));
 
             if let Some(res) = found_cmd {
                 let _ = cmd_context.reply_ack("Processing...").await;
 
-                let exec_res = res.execute(&cmd_context).await;
+                let exec_res = res.execute(cmd_context.clone()).await;
                 if let Err(why) = exec_res {
                     let _ = cmd_context
                         .reply(format!("Failed to execute: {}, reason: {}", cmd_name, why))

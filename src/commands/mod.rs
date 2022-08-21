@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use serenity::{async_trait, builder::CreateApplicationCommand};
 
 use crate::command_context::CommandContext;
@@ -14,5 +16,5 @@ pub trait JoovyCommand {
         command: &'a mut CreateApplicationCommand,
     ) -> &'a mut CreateApplicationCommand;
 
-    async fn execute<'a>(&self, ctx: &CommandContext<'a>) -> anyhow::Result<()>;
+    async fn execute(&self, ctx: Arc<CommandContext>) -> anyhow::Result<()>;
 }

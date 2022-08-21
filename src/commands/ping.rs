@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use anyhow::Result;
 use serenity::async_trait;
 use serenity::builder::CreateApplicationCommand;
@@ -20,7 +22,7 @@ impl JoovyCommand for Ping {
         command.name("ping").description("Ping!")
     }
 
-    async fn execute<'a>(&self, ctx: &CommandContext<'a>) -> Result<()> {
+    async fn execute(&self, ctx: Arc<CommandContext>) -> Result<()> {
         ctx.send("Pong!").await?;
         Ok(())
     }

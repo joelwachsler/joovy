@@ -1,9 +1,13 @@
+use std::sync::Arc;
+
 use anyhow::Result;
+use search::SearchResult;
 use serenity::async_trait;
 use serenity::builder::CreateApplicationCommand;
 use serenity::model::prelude::command;
+use songbird::{input::Input, Event, EventContext, EventHandler, TrackEvent};
 
-use crate::command_context::CommandContext;
+use crate::{command_context::CommandContext, guild_store::QueuedTrack};
 
 use super::JoovyCommand;
 
@@ -32,26 +36,73 @@ impl JoovyCommand for Play {
             })
     }
 
-    async fn execute<'a>(&self, ctx: &CommandContext<'a>) -> Result<()> {
+    async fn execute(&self, ctx: Arc<CommandContext>) -> Result<()> {
+        let mut store = ctx.guild_store().await;
         ctx.join_voice().await?;
 
-        let handler = ctx.songbird().await;
+        let manager = ctx.songbird().await;
+        let handler_lock = match manager.get(ctx.interaction().guild_id.unwrap()) {
+            Some(lock) => lock,
+            None => return Ok(()),
+        };
 
-        if let Some(handler_lock) = handler.get(ctx.interaction().guild_id.unwrap()) {
-            let mut handler = handler_lock.lock().await;
+        let mut handler = handler_lock.lock().await;
 
-            let query = ctx.value();
-            let search_result = search::search(&query).await?;
+        let query = ctx.value();
+        store.add_to_queue(&ctx, &query).await?;
+        // let search_result = search::search(&query).await?;
 
-            ctx.send(format!("Trying to start: {}", search_result.title()))
-                .await?;
+        if !store.is_playing() {
+            if let Some(next_track) = store.next_track_in_queue() {
+                let next_track_as_input = next_track.to_input().await?;
+                let handle = handler.play_source(next_track_as_input);
+                let _ = handle.add_event(
+                    Event::Track(TrackEvent::End),
+                    SongEndNotifier::new(ctx.clone()),
+                );
 
-            let input = songbird::ytdl(search_result.url()).await?;
-            handler.play_source(input);
-            ctx.send(format!("Now playing {}", search_result.title()))
-                .await?;
+                ctx.send(format!("Now playing {}", next_track.title()))
+                    .await?;
+            }
         }
 
         Ok(())
+    }
+}
+
+#[async_trait]
+trait IntoInput {
+    async fn to_input(&self) -> Result<Input>;
+}
+
+#[async_trait]
+impl IntoInput for QueuedTrack {
+    async fn to_input(&self) -> Result<Input> {
+        let res = songbird::ytdl(self.url()).await?;
+        Ok(res)
+    }
+}
+
+struct SongEndNotifier {
+    ctx: Arc<CommandContext>,
+}
+
+impl SongEndNotifier {
+    fn new(ctx: Arc<CommandContext>) -> Self {
+        Self { ctx }
+    }
+}
+
+#[async_trait]
+impl EventHandler for SongEndNotifier {
+    async fn act(&self, ctx: &EventContext<'_>) -> Option<Event> {
+        if let EventContext::Track(track_list) = ctx {
+            let _ = self
+                .ctx
+                .send(format!("Song has ended, track list: {:#?}", track_list))
+                .await;
+        }
+
+        None
     }
 }

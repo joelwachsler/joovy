@@ -1,4 +1,4 @@
-use std::env;
+use std::{collections::HashMap, env, sync::Arc};
 
 use anyhow::Result;
 
@@ -7,7 +7,7 @@ use serenity::prelude::*;
 use songbird::SerenityInit;
 use tracing::{info, instrument};
 
-use crate::command_handler::CommandHandler;
+use crate::{command_handler::CommandHandler, guild_store::GuildStores};
 
 #[instrument]
 pub async fn run() -> Result<()> {
@@ -30,6 +30,11 @@ pub async fn run() -> Result<()> {
             .expect("Could not register ctrl+c handler");
         shard_manager.lock().await.shutdown_all().await;
     });
+
+    {
+        let mut data = client.data.write().await;
+        data.insert::<GuildStores>(Arc::new(GuildStores::new()));
+    }
 
     let _ = client
         .start()

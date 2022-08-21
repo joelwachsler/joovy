@@ -13,22 +13,31 @@ use serenity::{
 };
 use songbird::Songbird;
 
-pub struct CommandContext<'a> {
-    ctx: &'a Context,
-    interaction: &'a ApplicationCommandInteraction,
+use crate::guild_store::{GuildStore, GuildStores};
+
+pub struct CommandContext {
+    ctx: Context,
+    interaction: ApplicationCommandInteraction,
 }
 
-impl<'a> CommandContext<'a> {
-    pub fn new(ctx: &'a Context, interaction: &'a ApplicationCommandInteraction) -> Self {
+impl CommandContext {
+    pub fn new(ctx: Context, interaction: ApplicationCommandInteraction) -> Self {
         Self { ctx, interaction }
     }
 
     pub fn interaction(&self) -> &ApplicationCommandInteraction {
-        self.interaction
+        &self.interaction
+    }
+
+    pub async fn guild_store(&self) -> Arc<GuildStore> {
+        let data_read = self.ctx.data.read().await;
+        let guild_stores = data_read.get::<GuildStores>().unwrap().clone();
+        let channel_id = self.text_channel_id().await;
+        guild_stores.get_or_create_store(channel_id.0).await
     }
 
     pub async fn songbird(&self) -> Arc<Songbird> {
-        songbird::get(self.ctx)
+        songbird::get(&self.ctx)
             .await
             .expect("Songbird Voice client failed")
     }
@@ -38,7 +47,7 @@ impl<'a> CommandContext<'a> {
         info!("Reply ack with: {}", msg);
         let _ = self
             .interaction
-            .create_interaction_response(self.ctx, |response| {
+            .create_interaction_response(&self.ctx, |response| {
                 response
                     .kind(InteractionResponseType::ChannelMessageWithSource)
                     .interaction_response_data(|message| {
@@ -54,7 +63,7 @@ impl<'a> CommandContext<'a> {
     pub async fn reply(&self, msg: impl Display) -> Result<()> {
         info!("Replying with: {}", msg);
         self.interaction
-            .create_followup_message(self.ctx, |message| {
+            .create_followup_message(&self.ctx, |message| {
                 message.embed(|embed| embed.description(msg))
             })
             .await?;
@@ -66,7 +75,7 @@ impl<'a> CommandContext<'a> {
         info!("Sending: {}", msg);
         self.text_channel_id()
             .await
-            .send_message(self.ctx, |message| {
+            .send_message(&self.ctx, |message| {
                 message.embed(|embed| embed.description(msg))
             })
             .await?;
@@ -79,7 +88,7 @@ impl<'a> CommandContext<'a> {
             Some(g) => g,
             None => bail!("Guild not found"),
         };
-        let cached_guild = match guild.to_guild_cached(self.ctx) {
+        let cached_guild = match guild.to_guild_cached(&self.ctx) {
             Some(g) => g,
             None => bail!("Guild not found in cache"),
         };
