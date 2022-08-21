@@ -4,11 +4,10 @@ use anyhow::Result;
 use serenity::async_trait;
 use serenity::builder::CreateApplicationCommand;
 use serenity::model::prelude::command;
-use songbird::{input::Input, Event, EventContext, EventHandler, TrackEvent};
 
 use crate::{
-    command_context::CommandContext,
-    store::{guild_store::HasGuildStore, queued_track::QueuedTrack},
+    command_context::{voice::play_next_track, CommandContext},
+    store::guild_store::HasGuildStore,
 };
 
 use super::JoovyCommand;
@@ -40,70 +39,13 @@ impl JoovyCommand for Play {
 
     async fn execute(&self, ctx: Arc<CommandContext>) -> Result<()> {
         let store = ctx.guild_store().await;
-        ctx.join_voice().await?;
-
-        let manager = ctx.songbird().await;
-        let handler_lock = match manager.get(ctx.interaction().guild_id.unwrap()) {
-            Some(lock) => lock,
-            None => return Ok(()),
-        };
-
-        let mut handler = handler_lock.lock().await;
-
         let query = ctx.command_value();
         store.add_to_queue(&ctx, &query).await?;
 
         if !store.is_playing().await {
-            if let Some(next_track) = store.next_track_in_queue().await {
-                let next_track_as_input = next_track.to_input().await?;
-                let handle = handler.play_source(next_track_as_input);
-                let _ = handle.add_event(
-                    Event::Track(TrackEvent::End),
-                    SongEndNotifier::new(ctx.clone()),
-                );
-
-                ctx.send(format!("Now playing {}", next_track.title()))
-                    .await?;
-            }
+            play_next_track(ctx).await?;
         }
 
         Ok(())
-    }
-}
-
-#[async_trait]
-trait IntoInput {
-    async fn to_input(&self) -> Result<Input>;
-}
-
-#[async_trait]
-impl IntoInput for QueuedTrack {
-    async fn to_input(&self) -> Result<Input> {
-        let res = songbird::ytdl(self.url()).await?;
-        Ok(res)
-    }
-}
-
-struct SongEndNotifier {
-    ctx: Arc<CommandContext>,
-}
-
-impl SongEndNotifier {
-    fn new(ctx: Arc<CommandContext>) -> Self {
-        Self { ctx }
-    }
-}
-
-#[async_trait]
-impl EventHandler for SongEndNotifier {
-    async fn act(&self, ctx: &EventContext<'_>) -> Option<Event> {
-        if let EventContext::Track(track_list) = ctx {
-            let _ = self
-                .ctx
-                .send(format!("Song has ended, track list: {:#?}", track_list))
-                .await;
-        }
-
-        None
     }
 }

@@ -51,8 +51,10 @@ impl HasGuildStore for CommandContext {
     async fn guild_store(&self) -> Arc<GuildStore> {
         let data_read = self.ctx().data.read().await;
         let guild_stores = data_read.get::<GuildStores>().unwrap().clone();
-        let channel_id = self.text_channel_id().await;
-        guild_stores.get_or_create_store(channel_id.0).await
+        guild_stores
+            .get_or_create_store(self)
+            .await
+            .expect("Failed to create guild store")
     }
 }
 

@@ -1,8 +1,8 @@
 mod messaging;
+pub mod voice;
 
 use anyhow::{bail, Result};
 use serenity::model::prelude::ChannelId;
-use std::sync::Arc;
 
 use serenity::{
     model::{
@@ -11,7 +11,6 @@ use serenity::{
     },
     prelude::Context,
 };
-use songbird::Songbird;
 
 pub struct CommandContext {
     ctx: Context,
@@ -29,12 +28,6 @@ impl CommandContext {
 
     pub fn ctx(&self) -> &Context {
         &self.ctx
-    }
-
-    pub async fn songbird(&self) -> Arc<Songbird> {
-        songbird::get(&self.ctx)
-            .await
-            .expect("Songbird Voice client failed")
     }
 
     pub fn guild(&self) -> Result<Guild> {
@@ -66,16 +59,6 @@ impl CommandContext {
 
     pub async fn text_channel_id(&self) -> ChannelId {
         self.interaction.channel_id
-    }
-
-    pub async fn join_voice(&self) -> Result<()> {
-        let guild = self.guild()?;
-        let channel_id = self.voice_channel_id().await?;
-
-        let manager = self.songbird().await;
-        let _ = manager.join(guild.id, channel_id).await;
-
-        Ok(())
     }
 
     pub fn command_value(&self) -> String {
