@@ -44,6 +44,10 @@ impl GuildStore {
         self.current_track.is_some()
     }
 
+    pub fn current_track(&self) -> Option<QueuedTrack> {
+        self.current_track.clone()
+    }
+
     pub fn edit_track(&mut self, index: usize) -> Option<&mut QueuedTrack> {
         self.queue.get_mut(index)
     }

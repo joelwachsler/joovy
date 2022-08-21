@@ -7,7 +7,7 @@ use serenity::model::prelude::command;
 
 use crate::{command_context::CommandContext, store::guild_store_action::GuildStoreAction};
 
-use super::JoovyCommand;
+use super::{JoovyCommand, JoovyCommands};
 
 #[derive(Default, Debug)]
 pub struct Play;
@@ -19,7 +19,7 @@ impl JoovyCommand for Play {
         command: &'a mut CreateApplicationCommand,
     ) -> &'a mut CreateApplicationCommand {
         command
-            .name("play")
+            .name(JoovyCommands::Play(Play).as_ref())
             .description("Tries to add the provided query or url to the queue")
             .create_option(|option| {
                 option

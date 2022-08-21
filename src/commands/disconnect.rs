@@ -6,7 +6,7 @@ use serenity::builder::CreateApplicationCommand;
 
 use crate::{command_context::CommandContext, store::guild_store_action::GuildStoreAction};
 
-use super::JoovyCommand;
+use super::{JoovyCommand, JoovyCommands};
 
 #[derive(Default, Debug)]
 pub struct Disconnect;
@@ -18,7 +18,7 @@ impl JoovyCommand for Disconnect {
         command: &'a mut CreateApplicationCommand,
     ) -> &'a mut CreateApplicationCommand {
         command
-            .name("disconnect")
+            .name(JoovyCommands::Disconnect(Disconnect).as_ref())
             .description("Disconnects from the voice channel")
     }
 

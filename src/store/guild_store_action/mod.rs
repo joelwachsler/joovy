@@ -16,7 +16,7 @@ mod remove_current_track;
 
 pub enum GuildStoreAction {
     AddToQueue(Arc<CommandContext>, String),
-    PlayNextTrack(Arc<CommandContext>),
+    PlayNextTrack(Arc<CommandContext>, bool),
     RemoveCurrentTrack(Arc<CommandContext>),
     Disconnect(Arc<CommandContext>),
     // first u32 is from second is to
@@ -43,8 +43,8 @@ impl GuildStoresActionHandler {
                         let _ = ctx.send(format!("AddToQueue error: {}", why)).await;
                     }
                 }
-                GuildStoreAction::PlayNextTrack(ctx) => {
-                    if let Err(why) = self.play_next_track(ctx.clone()).await {
+                GuildStoreAction::PlayNextTrack(ctx, force) => {
+                    if let Err(why) = self.play_next_track(ctx.clone(), force).await {
                         let _ = ctx.send(format!("PlayNextTrack error: {}", why)).await;
                     }
                 }

@@ -1,6 +1,7 @@
 use serenity::model::prelude::interaction::Interaction;
 use serenity::{async_trait, model::prelude::*, prelude::*};
 use std::env;
+use std::str::FromStr;
 use std::sync::Arc;
 use tracing::{debug, error, info};
 
@@ -34,7 +35,7 @@ impl EventHandler for CommandHandler {
     async fn interaction_create(&self, ctx: Context, interaction: Interaction) {
         if let Interaction::ApplicationCommand(command) = interaction {
             let cmd_name = command.data.name.as_str();
-            let found_cmd = JoovyCommands::from_str(cmd_name);
+            let found_cmd = JoovyCommands::from_str(cmd_name).ok();
             debug!("Trying to command {}, found: {:?}", cmd_name, found_cmd);
             let cmd_context = Arc::new(CommandContext::new(ctx.clone(), command.clone()));
 
@@ -49,7 +50,7 @@ impl EventHandler for CommandHandler {
                 };
             } else {
                 let _ = cmd_context
-                    .reply(format!("No command named: {}, was found", cmd_name))
+                    .reply_ack(format!("No command named: {}, was found", cmd_name))
                     .await
                     .map_err(|why| error!("Failed to reply: {}", why));
             }

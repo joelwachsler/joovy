@@ -4,7 +4,7 @@ use anyhow::Result;
 use serenity::async_trait;
 use serenity::builder::CreateApplicationCommand;
 
-use super::{CommandContext, JoovyCommand};
+use super::{CommandContext, JoovyCommand, JoovyCommands};
 
 #[derive(Default, Debug)]
 pub struct Ping;
@@ -15,7 +15,9 @@ impl JoovyCommand for Ping {
         &self,
         command: &'a mut CreateApplicationCommand,
     ) -> &'a mut CreateApplicationCommand {
-        command.name("ping").description("Ping!")
+        command
+            .name(JoovyCommands::Ping(Ping).as_ref())
+            .description("Ping!")
     }
 
     async fn execute(&self, ctx: Arc<CommandContext>) -> Result<()> {

@@ -10,7 +10,7 @@ impl GuildStoresActionHandler {
         store.add_to_queue(&ctx, query).await?;
 
         if !store.is_playing() {
-            ctx.send_action(GuildStoreAction::PlayNextTrack(ctx.clone()))
+            ctx.send_action(GuildStoreAction::PlayNextTrack(ctx.clone(), false))
                 .await?;
         }
 

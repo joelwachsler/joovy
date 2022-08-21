@@ -9,11 +9,14 @@ use super::{GuildStoreAction, GuildStoresActionHandler};
 use crate::command_context::{voice::IntoInput, CommandContext};
 
 impl GuildStoresActionHandler {
-    pub async fn play_next_track(&mut self, ctx: Arc<CommandContext>) -> Result<()> {
+    pub async fn play_next_track(&mut self, ctx: Arc<CommandContext>, force: bool) -> Result<()> {
         let store = self.get_or_create_store(&ctx).await?;
-        if store.is_playing() {
+        if store.is_playing() && !force {
             info!("Already playing a track, skipping.");
             return Ok(());
+        } else if let Some(current_track) = store.current_track() {
+            ctx.reply(format!("Skipping {}", current_track.name()))
+                .await?;
         }
 
         let mut next_track = || {
@@ -58,7 +61,7 @@ impl SongbirdEventHandler for SongEndNotifier {
             .await;
         let _ = self
             .ctx
-            .send_action(GuildStoreAction::PlayNextTrack(self.ctx.clone()))
+            .send_action(GuildStoreAction::PlayNextTrack(self.ctx.clone(), false))
             .await;
 
         None
