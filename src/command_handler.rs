@@ -22,7 +22,7 @@ impl EventHandler for CommandHandler {
 
         let guild_id = GuildId(
             env::var("GUILD_ID")
-                .expect("GUILD_ID must bed defined")
+                .expect("GUILD_ID must be defined")
                 .parse()
                 .expect("GUILD_ID must be an integer"),
         );
