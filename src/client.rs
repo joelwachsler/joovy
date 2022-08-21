@@ -1,4 +1,4 @@
-use std::{env, sync::Arc};
+use std::env;
 
 use anyhow::Result;
 
@@ -33,7 +33,7 @@ pub async fn run() -> Result<()> {
 
     {
         let mut data = client.data.write().await;
-        data.insert::<GuildStores>(Arc::new(GuildStores::new()));
+        data.insert::<GuildStores>(GuildStores::init_store());
     }
 
     let _ = client

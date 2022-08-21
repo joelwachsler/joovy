@@ -1,73 +1,46 @@
-use anyhow::Result;
-use serenity::{async_trait, prelude::*};
-use std::sync::Arc;
+use std::collections::VecDeque;
 
-use super::{guild_stores::GuildStores, queued_track::QueuedTrack};
+use anyhow::Result;
+
+use super::queued_track::QueuedTrack;
 use crate::command_context::CommandContext;
 
 /// The current state of a single guild.
 pub struct GuildStore {
-    state: RwLock<GuildStoreState>,
+    current_track: Option<QueuedTrack>,
+    queue: VecDeque<QueuedTrack>,
 }
 
 impl GuildStore {
-    pub fn new() -> Self {
-        Self {
-            state: RwLock::new(GuildStoreState::new()),
-        }
+    pub async fn new(ctx: &CommandContext) -> Result<Self> {
+        ctx.join_voice().await?;
+
+        Ok(Self {
+            current_track: None,
+            queue: VecDeque::new(),
+        })
     }
 
-    pub async fn next_track_in_queue(&self) -> Option<QueuedTrack> {
-        let mut state = self.state.write().await;
-        let next_item = state.queue.pop();
-        state.current_track = next_item;
-        state.current_track.clone()
+    pub fn next_track_in_queue(&mut self) -> Option<QueuedTrack> {
+        let next_item = self.queue.pop_front();
+        self.current_track = next_item;
+        self.current_track.clone()
     }
 
-    pub async fn add_to_queue(&self, ctx: &CommandContext, query: &str) -> Result<()> {
-        let mut state = self.state.write().await;
+    pub async fn add_to_queue(&mut self, ctx: &CommandContext, query: &str) -> Result<()> {
         let new_track = QueuedTrack::try_from_query(query).await?;
-        // should probably not write this while the store is locked
         ctx.send(format!("{} has been added to the queue", new_track.title()))
             .await?;
-        state.queue.push(new_track);
+        self.queue.push_back(new_track);
 
         Ok(())
     }
 
-    pub async fn is_playing(&self) -> bool {
-        let state = self.state.read().await;
-        state.current_track.is_some()
+    pub fn remove_current_track(&mut self) {
+        self.current_track = None;
     }
-}
 
-#[async_trait]
-pub trait HasGuildStore {
-    async fn guild_store(&self) -> Arc<GuildStore>;
-}
-
-#[async_trait]
-impl HasGuildStore for CommandContext {
-    async fn guild_store(&self) -> Arc<GuildStore> {
-        let data_read = self.ctx().data.read().await;
-        let guild_stores = data_read.get::<GuildStores>().unwrap().clone();
-        guild_stores
-            .get_or_create_store(self)
-            .await
-            .expect("Failed to create guild store")
-    }
-}
-
-struct GuildStoreState {
-    current_track: Option<QueuedTrack>,
-    queue: Vec<QueuedTrack>,
-}
-
-impl GuildStoreState {
-    fn new() -> Self {
-        Self {
-            current_track: None,
-            queue: vec![],
-        }
+    pub fn is_playing(&self) -> bool {
+        self.current_track.is_some()
     }
 }

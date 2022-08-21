@@ -12,6 +12,8 @@ use serenity::{
     prelude::Context,
 };
 
+use crate::store::guild_stores::{GuildStoreAction, HasGuildStores};
+
 pub struct CommandContext {
     ctx: Context,
     interaction: ApplicationCommandInteraction,
@@ -65,5 +67,11 @@ impl CommandContext {
         let options = &self.interaction.data.options;
         let value = options.get(0).unwrap().value.clone();
         value.unwrap().as_str().unwrap().to_string()
+    }
+
+    pub async fn send_action(&self, action: GuildStoreAction) -> Result<()> {
+        let _ = self.guild_stores().await.sender().send(action).await;
+
+        Ok(())
     }
 }

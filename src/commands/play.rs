@@ -6,8 +6,8 @@ use serenity::builder::CreateApplicationCommand;
 use serenity::model::prelude::command;
 
 use crate::{
-    command_context::{voice::play_next_track, CommandContext},
-    store::guild_store::HasGuildStore,
+    command_context::CommandContext,
+    store::guild_stores::{GuildStoreAction, HasGuildStores},
 };
 
 use super::JoovyCommand;
@@ -38,13 +38,13 @@ impl JoovyCommand for Play {
     }
 
     async fn execute(&self, ctx: Arc<CommandContext>) -> Result<()> {
-        let store = ctx.guild_store().await;
         let query = ctx.command_value();
-        store.add_to_queue(&ctx, &query).await?;
-
-        if !store.is_playing().await {
-            play_next_track(ctx).await?;
-        }
+        let _ = ctx
+            .guild_stores()
+            .await
+            .sender()
+            .send(GuildStoreAction::AddToQueue(ctx, query))
+            .await;
 
         Ok(())
     }
