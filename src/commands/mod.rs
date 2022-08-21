@@ -33,6 +33,7 @@ pub enum JoovyCommands {
     Disconnect(Disconnect),
 }
 
+// the command registration could be simplified using a macro
 impl JoovyCommands {
     pub fn from_str(str: &str) -> Option<JoovyCommands> {
         match str {
