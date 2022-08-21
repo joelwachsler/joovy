@@ -11,6 +11,7 @@ pub type GuildStoreReceiver = Receiver<GuildStoreAction>;
 mod add_track_to_queue;
 mod disconnect;
 mod play_next_track;
+mod remove;
 mod remove_current_track;
 
 pub enum GuildStoreAction {
@@ -18,6 +19,8 @@ pub enum GuildStoreAction {
     PlayNextTrack(Arc<CommandContext>),
     RemoveCurrentTrack(Arc<CommandContext>),
     Disconnect(Arc<CommandContext>),
+    // first u32 is from second is to
+    Remove(Arc<CommandContext>, u64, Option<u64>),
 }
 
 pub struct GuildStoresActionHandler {
@@ -37,22 +40,27 @@ impl GuildStoresActionHandler {
             match next_action {
                 GuildStoreAction::AddToQueue(ctx, query) => {
                     if let Err(why) = self.add_to_queue(ctx.clone(), &query).await {
-                        let _ = ctx.send(format!("AddToQueueError: {}", why)).await;
+                        let _ = ctx.send(format!("AddToQueue error: {}", why)).await;
                     }
                 }
                 GuildStoreAction::PlayNextTrack(ctx) => {
                     if let Err(why) = self.play_next_track(ctx.clone()).await {
-                        let _ = ctx.send(format!("PlayNextTrackError: {}", why)).await;
+                        let _ = ctx.send(format!("PlayNextTrack error: {}", why)).await;
                     }
                 }
                 GuildStoreAction::RemoveCurrentTrack(ctx) => {
                     if let Err(why) = self.remove_current_track(ctx.clone()).await {
-                        let _ = ctx.send(format!("RemoveCurrentTrackError: {}", why)).await;
+                        let _ = ctx.send(format!("RemoveCurrentTrack error: {}", why)).await;
                     }
                 }
                 GuildStoreAction::Disconnect(ctx) => {
                     if let Err(why) = self.disconnect(ctx.clone()).await {
-                        let _ = ctx.send(format!("DisconnectError: {}", why)).await;
+                        let _ = ctx.send(format!("Disconnect error: {}", why)).await;
+                    }
+                }
+                GuildStoreAction::Remove(ctx, from, to) => {
+                    if let Err(why) = self.remove(ctx.clone(), from, to).await {
+                        let _ = ctx.send(format!("Remove error: {}", why)).await;
                     }
                 }
             }

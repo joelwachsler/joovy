@@ -24,6 +24,7 @@ impl CommandContext {
         Ok(())
     }
 
+    /// Replies to the message which created this context.
     pub async fn reply(&self, msg: impl Display) -> Result<()> {
         info!("Replying with: {}", msg);
         self.interaction
@@ -35,6 +36,7 @@ impl CommandContext {
         Ok(())
     }
 
+    /// Sends a message to the channel where the originated message was sent.
     pub async fn send(&self, msg: impl Display) -> Result<()> {
         info!("Sending: {}", msg);
         self.text_channel_id()

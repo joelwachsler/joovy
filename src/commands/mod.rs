@@ -11,10 +11,12 @@ use crate::command_context::CommandContext;
 use self::disconnect::Disconnect;
 use self::ping::Ping;
 use self::play::Play;
+use self::remove::Remove;
 
 mod disconnect;
 mod ping;
 mod play;
+mod remove;
 
 #[async_trait]
 pub trait JoovyCommand {
@@ -31,6 +33,7 @@ pub enum JoovyCommands {
     Play(Play),
     Ping(Ping),
     Disconnect(Disconnect),
+    Remove(Remove),
 }
 
 // the command registration could be simplified using a macro
@@ -40,6 +43,7 @@ impl JoovyCommands {
             "play" => Some(Self::Play(Play)),
             "ping" => Some(Self::Ping(Ping)),
             "disconnect" => Some(Self::Disconnect(Disconnect)),
+            "remove" => Some(Self::Remove(Remove)),
             _ => None,
         }
     }
@@ -52,6 +56,7 @@ impl JoovyCommands {
             JoovyCommands::Play(cmd) => cmd.create_application_command(command),
             JoovyCommands::Ping(cmd) => cmd.create_application_command(command),
             JoovyCommands::Disconnect(cmd) => cmd.create_application_command(command),
+            JoovyCommands::Remove(cmd) => cmd.create_application_command(command),
         }
     }
 
@@ -60,6 +65,7 @@ impl JoovyCommands {
             JoovyCommands::Play(cmd) => cmd.execute(ctx).await,
             JoovyCommands::Ping(cmd) => cmd.execute(ctx).await,
             JoovyCommands::Disconnect(cmd) => cmd.execute(ctx).await,
+            JoovyCommands::Remove(cmd) => cmd.execute(ctx).await,
         }
     }
 

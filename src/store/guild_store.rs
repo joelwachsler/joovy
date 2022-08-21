@@ -43,4 +43,8 @@ impl GuildStore {
     pub fn is_playing(&self) -> bool {
         self.current_track.is_some()
     }
+
+    pub fn edit_track(&mut self, index: usize) -> Option<&mut QueuedTrack> {
+        self.queue.get_mut(index)
+    }
 }

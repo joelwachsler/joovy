@@ -8,6 +8,7 @@ pub struct QueuedTrack {
     url: String,
     author: u64,
     duration: u32,
+    skip: bool,
 }
 
 impl QueuedTrack {
@@ -22,6 +23,7 @@ impl QueuedTrack {
             url: res.url().into(),
             duration: res.duration(),
             author: *ctx.interaction().user.id.as_u64(),
+            skip: false,
         })
     }
 
@@ -47,5 +49,9 @@ impl QueuedTrack {
         };
 
         format!("{mins}:{secs}")
+    }
+
+    pub fn skip(&mut self) {
+        self.skip = true;
     }
 }
