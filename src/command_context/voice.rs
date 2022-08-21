@@ -11,7 +11,7 @@ use super::CommandContext;
 impl CommandContext {
     pub async fn songbird_call_lock(&self) -> Result<Arc<Mutex<songbird::Call>>> {
         let manager = self.songbird().await;
-        let handler_lock = match manager.get(self.interaction().guild_id.unwrap()) {
+        let handler_lock = match manager.get(self.songbird_guild_id()) {
             Some(lock) => lock,
             None => bail!("Failed to get handler lock"),
         };
@@ -29,10 +29,14 @@ impl CommandContext {
         Ok(())
     }
 
-    async fn songbird(&self) -> Arc<Songbird> {
+    pub async fn songbird(&self) -> Arc<Songbird> {
         songbird::get(&self.ctx)
             .await
             .expect("Songbird Voice client failed")
+    }
+
+    pub fn songbird_guild_id(&self) -> serenity::model::prelude::GuildId {
+        self.interaction().guild_id.unwrap()
     }
 }
 

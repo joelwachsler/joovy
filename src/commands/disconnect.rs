@@ -1,28 +1,61 @@
-use serenity::framework::standard::macros::command;
-use serenity::framework::standard::CommandResult;
-use serenity::model::channel::Message;
-use serenity::prelude::*;
+// use serenity::framework::standard::macros::command;
+// use serenity::framework::standard::CommandResult;
+// use serenity::model::channel::Message;
+// use serenity::prelude::*;
 
-use crate::has_songbird::HasSongbird;
-use crate::reply_and_log::ReplyAndLog;
+// use crate::has_songbird::HasSongbird;
+// use crate::reply_and_log::ReplyAndLog;
 
-#[command]
-#[only_in(guilds)]
-pub async fn disconnect(ctx: &Context, msg: &Message) -> CommandResult {
-    let guild = msg.guild(&ctx.cache).unwrap();
-    let guild_id = guild.id;
+// #[command]
+// #[only_in(guilds)]
+// pub async fn disconnect(ctx: &Context, msg: &Message) -> CommandResult {
+//     let guild = msg.guild(&ctx.cache).unwrap();
+//     let guild_id = guild.id;
 
-    let manager = ctx.songbird().await;
+//     let manager = ctx.songbird().await;
 
-    if manager.get(guild_id).is_some() {
-        if let Err(e) = manager.remove(guild_id).await {
-            msg.reply_log(ctx, format!("Failed to disconnect: {}", e))
-                .await?;
-        }
-    } else {
-        msg.reply_log(ctx, "Not in a voice channel").await?;
-        return Ok(());
+//     if manager.get(guild_id).is_some() {
+//         if let Err(e) = manager.remove(guild_id).await {
+//             msg.reply_log(ctx, format!("Failed to disconnect: {}", e))
+//                 .await?;
+//         }
+//     } else {
+//         msg.reply_log(ctx, "Not in a voice channel").await?;
+//         return Ok(());
+//     }
+
+//     Ok(())
+// }
+
+use std::sync::Arc;
+
+use anyhow::Result;
+use serenity::async_trait;
+use serenity::builder::CreateApplicationCommand;
+
+use crate::{command_context::CommandContext, store::guild_store_action::GuildStoreAction};
+
+use super::JoovyCommand;
+
+#[derive(Default, Debug)]
+pub struct Disconnect;
+
+#[async_trait]
+impl JoovyCommand for Disconnect {
+    fn create_application_command<'a>(
+        &self,
+        command: &'a mut CreateApplicationCommand,
+    ) -> &'a mut CreateApplicationCommand {
+        command
+            .name("disconnect")
+            .description("Disconnects from the voice channel")
     }
 
-    Ok(())
+    async fn execute(&self, ctx: Arc<CommandContext>) -> Result<()> {
+        let _ = ctx
+            .send_action(GuildStoreAction::Disconnect(ctx.clone()))
+            .await;
+
+        Ok(())
+    }
 }

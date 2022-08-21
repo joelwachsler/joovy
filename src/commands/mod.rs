@@ -8,12 +8,13 @@ use strum::IntoEnumIterator;
 
 use crate::command_context::CommandContext;
 
+use self::disconnect::Disconnect;
 use self::ping::Ping;
 use self::play::Play;
 
-pub mod ping;
-pub mod play;
-// pub mod disconnect;
+mod disconnect;
+mod ping;
+mod play;
 
 #[async_trait]
 pub trait JoovyCommand {
@@ -29,6 +30,7 @@ pub trait JoovyCommand {
 pub enum JoovyCommands {
     Play(Play),
     Ping(Ping),
+    Disconnect(Disconnect),
 }
 
 impl JoovyCommands {
@@ -36,6 +38,7 @@ impl JoovyCommands {
         match str {
             "play" => Some(Self::Play(Play)),
             "ping" => Some(Self::Ping(Ping)),
+            "disconnect" => Some(Self::Disconnect(Disconnect)),
             _ => None,
         }
     }
@@ -45,15 +48,17 @@ impl JoovyCommands {
         command: &'a mut CreateApplicationCommand,
     ) -> &'a mut CreateApplicationCommand {
         match self {
-            JoovyCommands::Play(p) => p.create_application_command(command),
-            JoovyCommands::Ping(p) => p.create_application_command(command),
+            JoovyCommands::Play(cmd) => cmd.create_application_command(command),
+            JoovyCommands::Ping(cmd) => cmd.create_application_command(command),
+            JoovyCommands::Disconnect(cmd) => cmd.create_application_command(command),
         }
     }
 
     pub async fn execute(&self, ctx: Arc<CommandContext>) -> anyhow::Result<()> {
         match self {
-            JoovyCommands::Play(p) => p.execute(ctx).await,
-            JoovyCommands::Ping(p) => p.execute(ctx).await,
+            JoovyCommands::Play(cmd) => cmd.execute(ctx).await,
+            JoovyCommands::Ping(cmd) => cmd.execute(ctx).await,
+            JoovyCommands::Disconnect(cmd) => cmd.execute(ctx).await,
         }
     }
 
