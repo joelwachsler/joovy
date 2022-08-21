@@ -5,6 +5,7 @@ use std::sync::Arc;
 use super::{guild_stores::GuildStores, queued_track::QueuedTrack};
 use crate::command_context::CommandContext;
 
+/// The current state of a single guild.
 pub struct GuildStore {
     state: RwLock<GuildStoreState>,
 }

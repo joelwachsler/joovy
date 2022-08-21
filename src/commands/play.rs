@@ -50,9 +50,8 @@ impl JoovyCommand for Play {
 
         let mut handler = handler_lock.lock().await;
 
-        let query = ctx.value();
+        let query = ctx.command_value();
         store.add_to_queue(&ctx, &query).await?;
-        // let search_result = search::search(&query).await?;
 
         if !store.is_playing().await {
             if let Some(next_track) = store.next_track_in_queue().await {

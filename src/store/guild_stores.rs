@@ -4,6 +4,7 @@ use serenity::prelude::{RwLock, TypeMapKey};
 
 use super::guild_store::GuildStore;
 
+/// The current state of all connected guilds.
 pub struct GuildStores {
     guilds: RwLock<HashMap<u64, Arc<GuildStore>>>,
 }

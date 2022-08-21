@@ -1,9 +1,9 @@
+mod messaging;
+
 use anyhow::{bail, Result};
 use serenity::model::prelude::ChannelId;
-use std::{fmt::Display, sync::Arc};
-use tracing::{error, info};
+use std::sync::Arc;
 
-use serenity::model::application::interaction::InteractionResponseType;
 use serenity::{
     model::{
         application::interaction::application_command::ApplicationCommandInteraction,
@@ -35,47 +35,6 @@ impl CommandContext {
         songbird::get(&self.ctx)
             .await
             .expect("Songbird Voice client failed")
-    }
-
-    /// Should only be used once per slash command to acknowledge the command.
-    pub async fn reply_ack(&self, msg: impl Display) -> Result<()> {
-        info!("Reply ack with: {}", msg);
-        let _ = self
-            .interaction
-            .create_interaction_response(&self.ctx, |response| {
-                response
-                    .kind(InteractionResponseType::ChannelMessageWithSource)
-                    .interaction_response_data(|message| {
-                        message.embed(|embed| embed.description(msg))
-                    })
-            })
-            .await
-            .map_err(|why| error!("Failed to create response: {}", why));
-
-        Ok(())
-    }
-
-    pub async fn reply(&self, msg: impl Display) -> Result<()> {
-        info!("Replying with: {}", msg);
-        self.interaction
-            .create_followup_message(&self.ctx, |message| {
-                message.embed(|embed| embed.description(msg))
-            })
-            .await?;
-
-        Ok(())
-    }
-
-    pub async fn send(&self, msg: impl Display) -> Result<()> {
-        info!("Sending: {}", msg);
-        self.text_channel_id()
-            .await
-            .send_message(&self.ctx, |message| {
-                message.embed(|embed| embed.description(msg))
-            })
-            .await?;
-
-        Ok(())
     }
 
     pub fn guild(&self) -> Result<Guild> {
@@ -119,7 +78,7 @@ impl CommandContext {
         Ok(())
     }
 
-    pub fn value(&self) -> String {
+    pub fn command_value(&self) -> String {
         let options = &self.interaction.data.options;
         let value = options.get(0).unwrap().value.clone();
         value.unwrap().as_str().unwrap().to_string()
