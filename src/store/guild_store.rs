@@ -28,8 +28,8 @@ impl GuildStore {
     }
 
     pub async fn add_to_queue(&mut self, ctx: &CommandContext, query: &str) -> Result<()> {
-        let new_track = QueuedTrack::try_from_query(query).await?;
-        ctx.send(format!("{} has been added to the queue", new_track.title()))
+        let new_track = QueuedTrack::try_from_query(ctx, query).await?;
+        ctx.send(format!("{} has been added to the queue", new_track.name()))
             .await?;
         self.queue.push_back(new_track);
 

@@ -5,6 +5,7 @@ use serde::Deserialize;
 pub struct SearchResult {
     fulltitle: String,
     webpage_url: String,
+    duration: u32,
 }
 
 impl SearchResult {
@@ -14,6 +15,10 @@ impl SearchResult {
 
     pub fn url(&self) -> &str {
         &self.webpage_url
+    }
+
+    pub fn duration(&self) -> u32 {
+        self.duration
     }
 }
 
@@ -49,6 +54,7 @@ mod tests {
         let res = search("chase pop").await.unwrap();
         assert_eq!(res.title(), "Neovaii - Chase Pop");
         assert_eq!(res.url(), "https://www.youtube.com/watch?v=ZnkRg-6zFfI");
+        assert_eq!(res.duration(), 211);
     }
 
     #[tokio::test]
@@ -58,5 +64,6 @@ mod tests {
             .unwrap();
         assert_eq!(res.title(), "Neovaii - Chase Pop");
         assert_eq!(res.url(), "https://www.youtube.com/watch?v=ZnkRg-6zFfI");
+        assert_eq!(res.duration(), 211);
     }
 }

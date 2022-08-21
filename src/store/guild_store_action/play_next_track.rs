@@ -27,7 +27,7 @@ impl GuildStoresActionHandler {
                 SongEndNotifier::new(ctx.clone()),
             );
 
-            ctx.send(format!("Now playing {}", next_track.title()))
+            ctx.send(format!("Now playing: {}", next_track.name()))
                 .await?;
         } else {
             let _ = ctx.send("End of playlist").await;
