@@ -6,15 +6,11 @@ use serenity::builder::CreateApplicationCommand;
 
 use super::{CommandContext, JoovyCommand};
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct Ping;
 
 #[async_trait]
 impl JoovyCommand for Ping {
-    fn name(&self) -> &str {
-        "ping"
-    }
-
     fn create_application_command<'a>(
         &self,
         command: &'a mut CreateApplicationCommand,

@@ -5,12 +5,7 @@ use std::sync::Arc;
 use tracing::{debug, error, info};
 
 use crate::command_context::CommandContext;
-use crate::commands::JoovyCommand;
-
-type SendableJoovyCommand = dyn JoovyCommand + Send + Sync;
-
-const COMMANDS: &[&SendableJoovyCommand] =
-    &[&crate::commands::play::Play, &crate::commands::ping::Ping];
+use crate::commands::JoovyCommands;
 
 pub struct CommandHandler;
 
@@ -28,9 +23,7 @@ impl EventHandler for CommandHandler {
         );
 
         let _ = GuildId::set_application_commands(&guild_id, ctx, |commands| {
-            COMMANDS.iter().fold(commands, |cmds, cmd| {
-                cmds.create_application_command(|command| cmd.create_application_command(command))
-            })
+            JoovyCommands::register_application_commands(commands)
         })
         .await
         .map_err(|why| error!("Failed to create slash commands: {}", why));
@@ -41,12 +34,8 @@ impl EventHandler for CommandHandler {
     async fn interaction_create(&self, ctx: Context, interaction: Interaction) {
         if let Interaction::ApplicationCommand(command) = interaction {
             let cmd_name = command.data.name.as_str();
-            let found_cmd = COMMANDS.iter().find(|command| command.name() == cmd_name);
-            debug!(
-                "Trying to command {}, found: {:?}",
-                cmd_name,
-                found_cmd.map(|m| m.name())
-            );
+            let found_cmd = JoovyCommands::from_str(cmd_name);
+            debug!("Trying to command {}, found: {:?}", cmd_name, found_cmd);
             let cmd_context = Arc::new(CommandContext::new(ctx.clone(), command.clone()));
 
             if let Some(res) = found_cmd {
