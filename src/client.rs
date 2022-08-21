@@ -1,4 +1,4 @@
-use std::{collections::HashMap, env, sync::Arc};
+use std::{env, sync::Arc};
 
 use anyhow::Result;
 
@@ -7,7 +7,7 @@ use serenity::prelude::*;
 use songbird::SerenityInit;
 use tracing::{info, instrument};
 
-use crate::{command_handler::CommandHandler, guild_store::GuildStores};
+use crate::{command_handler::CommandHandler, store::guild_stores::GuildStores};
 
 #[instrument]
 pub async fn run() -> Result<()> {

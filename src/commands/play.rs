@@ -1,13 +1,15 @@
 use std::sync::Arc;
 
 use anyhow::Result;
-use search::SearchResult;
 use serenity::async_trait;
 use serenity::builder::CreateApplicationCommand;
 use serenity::model::prelude::command;
 use songbird::{input::Input, Event, EventContext, EventHandler, TrackEvent};
 
-use crate::{command_context::CommandContext, guild_store::QueuedTrack};
+use crate::{
+    command_context::CommandContext,
+    store::{guild_store::HasGuildStore, queued_track::QueuedTrack},
+};
 
 use super::JoovyCommand;
 
@@ -37,7 +39,7 @@ impl JoovyCommand for Play {
     }
 
     async fn execute(&self, ctx: Arc<CommandContext>) -> Result<()> {
-        let mut store = ctx.guild_store().await;
+        let store = ctx.guild_store().await;
         ctx.join_voice().await?;
 
         let manager = ctx.songbird().await;
@@ -52,8 +54,8 @@ impl JoovyCommand for Play {
         store.add_to_queue(&ctx, &query).await?;
         // let search_result = search::search(&query).await?;
 
-        if !store.is_playing() {
-            if let Some(next_track) = store.next_track_in_queue() {
+        if !store.is_playing().await {
+            if let Some(next_track) = store.next_track_in_queue().await {
                 let next_track_as_input = next_track.to_input().await?;
                 let handle = handler.play_source(next_track_as_input);
                 let _ = handle.add_event(

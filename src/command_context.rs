@@ -13,8 +13,6 @@ use serenity::{
 };
 use songbird::Songbird;
 
-use crate::guild_store::{GuildStore, GuildStores};
-
 pub struct CommandContext {
     ctx: Context,
     interaction: ApplicationCommandInteraction,
@@ -29,11 +27,8 @@ impl CommandContext {
         &self.interaction
     }
 
-    pub async fn guild_store(&self) -> Arc<GuildStore> {
-        let data_read = self.ctx.data.read().await;
-        let guild_stores = data_read.get::<GuildStores>().unwrap().clone();
-        let channel_id = self.text_channel_id().await;
-        guild_stores.get_or_create_store(channel_id.0).await
+    pub fn ctx(&self) -> &Context {
+        &self.ctx
     }
 
     pub async fn songbird(&self) -> Arc<Songbird> {
@@ -110,7 +105,7 @@ impl CommandContext {
         }
     }
 
-    async fn text_channel_id(&self) -> ChannelId {
+    pub async fn text_channel_id(&self) -> ChannelId {
         self.interaction.channel_id
     }
 
