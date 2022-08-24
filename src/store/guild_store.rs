@@ -3,11 +3,26 @@ use anyhow::Result;
 use super::queued_track::QueuedTrack;
 use crate::command_context::CommandContext;
 
+#[derive(Debug)]
+enum CurrentTrack {
+    Last,
+    Index(usize),
+    None,
+}
+
 /// The current state of a single guild.
-#[derive(Default)]
 pub struct GuildStore {
-    current_track: Option<usize>,
+    current_track: CurrentTrack,
     queue: Vec<QueuedTrack>,
+}
+
+impl Default for GuildStore {
+    fn default() -> Self {
+        Self {
+            current_track: CurrentTrack::None,
+            queue: Default::default(),
+        }
+    }
 }
 
 impl GuildStore {
@@ -22,13 +37,16 @@ impl GuildStore {
         }
 
         match self.current_track {
-            Some(track) => {
-                self.current_track = Some(track + 1);
+            CurrentTrack::Last => {}
+            CurrentTrack::Index(track) => {
+                if self.queue.len() <= track {
+                    self.current_track = CurrentTrack::Last;
+                } else {
+                    self.current_track = CurrentTrack::Index(track + 1);
+                }
             }
-            None => {
-                self.current_track = Some(0);
-            }
-        };
+            CurrentTrack::None => self.current_track = CurrentTrack::Index(0),
+        }
 
         self.current_track()
     }
@@ -44,29 +62,28 @@ impl GuildStore {
     }
 
     fn add_to_queue_internal(&mut self, track: QueuedTrack) {
-        if let Some(track_index) = self.current_track {
-            if track_index >= self.queue.len() {
-                self.current_track = Some(self.queue.len() - 1);
-            }
-        };
+        if let CurrentTrack::Last = self.current_track {
+            self.current_track = CurrentTrack::Index(self.queue.len() - 1);
+        }
 
         self.queue.push(track);
     }
 
     pub fn current_track_index(&self) -> Option<usize> {
-        self.current_track
-    }
-
-    pub fn remove_current_track(&mut self) {
-        self.current_track = None;
+        match self.current_track {
+            CurrentTrack::Index(index) => Some(index),
+            _ => None,
+        }
     }
 
     pub fn is_playing(&self) -> bool {
-        self.current_track.is_some()
+        matches!(self.current_track, CurrentTrack::Index(_))
     }
 
     pub fn current_track(&self) -> Option<QueuedTrack> {
-        self.current_track.and_then(|i| self.queue.get(i)).cloned()
+        self.current_track_index()
+            .and_then(|i| self.queue.get(i))
+            .cloned()
     }
 
     pub fn edit_track(&mut self, index: usize) -> Option<&mut QueuedTrack> {

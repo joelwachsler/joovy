@@ -31,10 +31,10 @@ impl GuildStoresActionHandler {
             None
         };
 
-        if let Some(next_track) = next_track() {
-            let handler_lock = ctx.songbird_call_lock().await?;
+        let handler_lock = ctx.songbird_call_lock().await?;
+        let mut handler = handler_lock.lock().await;
 
-            let mut handler = handler_lock.lock().await;
+        if let Some(next_track) = next_track() {
             let next_input = next_track.to_input().await?;
             let handle = handler.play_only_source(next_input);
             let _ = handle.add_event(
@@ -45,6 +45,7 @@ impl GuildStoresActionHandler {
             ctx.send(format!("Now playing: {}", next_track.name()))
                 .await?;
         } else {
+            handler.stop();
             let _ = ctx.send("End of playlist").await;
         }
 
@@ -55,10 +56,6 @@ impl GuildStoresActionHandler {
 #[async_trait]
 impl SongbirdEventHandler for SongEndNotifier {
     async fn act(&self, _: &EventContext<'_>) -> Option<Event> {
-        let _ = self
-            .ctx
-            .send_action(GuildStoreAction::RemoveCurrentTrack(self.ctx.clone()))
-            .await;
         let _ = self
             .ctx
             .send_action(GuildStoreAction::PlayNextTrack(self.ctx.clone(), false))

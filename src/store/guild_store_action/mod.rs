@@ -11,16 +11,14 @@ pub type GuildStoreReceiver = Receiver<GuildStoreAction>;
 mod add_track_to_queue;
 mod disconnect;
 mod play_next_track;
-mod remove;
-mod remove_current_track;
 mod print_queue;
+mod remove;
 
 pub enum GuildStoreAction {
     AddToQueue(Arc<CommandContext>, String),
     PlayNextTrack(Arc<CommandContext>, bool),
-    RemoveCurrentTrack(Arc<CommandContext>),
     Disconnect(Arc<CommandContext>),
-    // first u32 is from second is to
+    // First u64 is from and second is to.
     Remove(Arc<CommandContext>, u64, Option<u64>),
     PrintQueue(Arc<CommandContext>),
 }
@@ -50,11 +48,6 @@ impl GuildStoresActionHandler {
                         let _ = ctx.send(format!("PlayNextTrack error: {}", why)).await;
                     }
                 }
-                GuildStoreAction::RemoveCurrentTrack(ctx) => {
-                    if let Err(why) = self.remove_current_track(ctx.clone()).await {
-                        let _ = ctx.send(format!("RemoveCurrentTrack error: {}", why)).await;
-                    }
-                }
                 GuildStoreAction::Disconnect(ctx) => {
                     if let Err(why) = self.disconnect(ctx.clone()).await {
                         let _ = ctx.send(format!("Disconnect error: {}", why)).await;
@@ -69,7 +62,7 @@ impl GuildStoresActionHandler {
                     if let Err(why) = self.print_queue(ctx.clone()).await {
                         let _ = ctx.send(format!("Print queue error: {}", why)).await;
                     }
-                },
+                }
             }
         }
     }
