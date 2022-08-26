@@ -5,12 +5,14 @@ use crate::command_context::CommandContext;
 
 #[derive(Debug)]
 enum CurrentTrack {
-    Last,
+    // the usize is the previous last index
+    Last(usize),
     Index(usize),
     None,
 }
 
 /// The current state of a single guild.
+#[derive(Debug)]
 pub struct GuildStore {
     current_track: CurrentTrack,
     queue: Vec<QueuedTrack>,
@@ -37,10 +39,14 @@ impl GuildStore {
         }
 
         match self.current_track {
-            CurrentTrack::Last => {}
+            CurrentTrack::Last(track) => {
+                if self.queue.len() != track {
+                    self.current_track = CurrentTrack::Index(track + 1);
+                }
+            }
             CurrentTrack::Index(track) => {
-                if self.queue.len() <= track {
-                    self.current_track = CurrentTrack::Last;
+                if self.queue.len() <= track + 1 {
+                    self.current_track = CurrentTrack::Last(track);
                 } else {
                     self.current_track = CurrentTrack::Index(track + 1);
                 }
@@ -53,19 +59,16 @@ impl GuildStore {
 
     pub async fn add_to_queue(&mut self, ctx: &CommandContext, query: &str) -> Result<()> {
         let new_track = QueuedTrack::try_from_query(ctx, query).await?;
-        ctx.send(format!("{} has been added to the queue", new_track.name()))
-            .await?;
-
+        let new_track_name = new_track.name();
         self.add_to_queue_internal(new_track);
+
+        ctx.send(format!("{} has been added to the queue", new_track_name))
+            .await?;
 
         Ok(())
     }
 
     fn add_to_queue_internal(&mut self, track: QueuedTrack) {
-        if let CurrentTrack::Last = self.current_track {
-            self.current_track = CurrentTrack::Index(self.queue.len() - 1);
-        }
-
         self.queue.push(track);
     }
 
@@ -124,12 +127,17 @@ mod tests {
     #[test]
     fn index_handling() {
         let mut store = GuildStore::default();
+
         assert_eq!(store.next_track_in_queue(), None);
+        assert_eq!(store.is_playing(), false);
         store.add_to_queue_internal(QueuedTrack::create_for_test("foo"));
+        assert_eq!(store.is_playing(), false);
         assert_eq!(store.next_track_in_queue().unwrap().title(), "foo");
+        assert_eq!(store.is_playing(), true);
         assert_eq!(store.next_track_in_queue(), None);
-        assert_eq!(store.next_track_in_queue(), None);
+        assert_eq!(store.is_playing(), false);
         store.add_to_queue_internal(QueuedTrack::create_for_test("bar"));
         assert_eq!(store.next_track_in_queue().unwrap().title(), "bar");
+        assert_eq!(store.is_playing(), true);
     }
 }
