@@ -25,7 +25,7 @@ impl GuildStoresActionHandler {
         for i in from..to.unwrap_or(from + 1) {
             if let Some(track) = store.edit_track(i as usize) {
                 track.skip_track();
-                ctx.send(format!("{} has been removed", track.name()))
+                ctx.send(format!("{} has been removed from the queue.", track.name()))
                     .await?;
             }
         }
