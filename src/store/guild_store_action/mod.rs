@@ -13,6 +13,7 @@ mod disconnect;
 mod play_next_track;
 mod print_queue;
 mod remove;
+mod remove_last;
 
 pub enum GuildStoreAction {
     AddToQueue(Arc<CommandContext>, String),
@@ -20,6 +21,7 @@ pub enum GuildStoreAction {
     Disconnect(Arc<CommandContext>),
     // First u64 is from and second is to.
     Remove(Arc<CommandContext>, u64, Option<u64>),
+    RemoveLast(Arc<CommandContext>),
     PrintQueue(Arc<CommandContext>),
 }
 
@@ -56,6 +58,11 @@ impl GuildStoresActionHandler {
                 GuildStoreAction::Remove(ctx, from, to) => {
                     if let Err(why) = self.remove(ctx.clone(), from, to).await {
                         let _ = ctx.send(format!("Remove error: {}", why)).await;
+                    }
+                }
+                GuildStoreAction::RemoveLast(ctx) => {
+                    if let Err(why) = self.remove_last(ctx.clone()).await {
+                        let _ = ctx.send(format!("RemoveLast error: {}", why)).await;
                     }
                 }
                 GuildStoreAction::PrintQueue(ctx) => {
