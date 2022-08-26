@@ -2,7 +2,7 @@ use anyhow::Result;
 
 use crate::command_context::CommandContext;
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq, Default)]
 pub struct QueuedTrack {
     title: String,
     url: String,
