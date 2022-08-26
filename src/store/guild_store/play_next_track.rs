@@ -5,22 +5,22 @@ use songbird::{EventContext, EventHandler as SongbirdEventHandler};
 use std::sync::Arc;
 use tracing::info;
 
-use super::{GuildStoreAction, GuildStoresActionHandler};
-use crate::command_context::{voice::IntoInput, CommandContext};
+use super::{GuildStore, GuildStoreAction};
+use crate::command_context::voice::IntoInput;
+use crate::command_context::CommandContext;
 
-impl GuildStoresActionHandler {
+impl GuildStore {
     pub async fn play_next_track(&mut self, ctx: Arc<CommandContext>, force: bool) -> Result<()> {
-        let store = self.get_or_create_store(&ctx).await?;
-        if store.is_playing() && !force {
+        if self.is_playing() && !force {
             info!("Already playing a track, skipping.");
             return Ok(());
-        } else if let Some(current_track) = store.current_track() {
+        } else if let Some(current_track) = self.current_track() {
             ctx.reply(format!("Skipping {}", current_track.name()))
                 .await?;
         }
 
         let mut next_track = || {
-            while let Some(next_track) = store.next_track_in_queue() {
+            while let Some(next_track) = self.next_track_in_queue() {
                 if !next_track.should_skip() {
                     return Some(next_track);
                 } else {

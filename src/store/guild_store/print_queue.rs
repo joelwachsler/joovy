@@ -1,16 +1,14 @@
 use anyhow::Result;
 use serenity::utils::Color;
-use std::sync::Arc;
 
-use super::GuildStoresActionHandler;
+use super::GuildStore;
 use crate::{command_context::CommandContext, store::queued_track::QueuedTrack};
 
-impl GuildStoresActionHandler {
-    pub async fn print_queue(&mut self, ctx: Arc<CommandContext>) -> Result<()> {
-        let store = self.get_or_create_store(&ctx).await?;
-        let queue = store.queue();
+impl GuildStore {
+    pub async fn print_queue(&mut self, ctx: &CommandContext) -> Result<()> {
+        let queue = self.queue();
 
-        let current_track_index = store.current_track_index().unwrap_or_default();
+        let current_track_index = self.current_track_index().unwrap_or_default();
         let output = match print_queue(queue, current_track_index) {
             Some(output) => output,
             None => {
