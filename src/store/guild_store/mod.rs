@@ -6,7 +6,7 @@ mod remove;
 mod remove_last;
 
 use anyhow::Result;
-use tracing::{error, info};
+use tracing::info;
 
 use super::{guild_store_action::GuildStoreReceiver, queued_track::QueuedTrack};
 use crate::{command_context::CommandContext, store::guild_store_action::GuildStoreAction};
@@ -27,9 +27,8 @@ pub async fn init_guild_store_receiver(
     let mut store = match GuildStore::new(initial_ctx).await {
         Ok(store) => store,
         Err(err) => {
-            error!("Failed to init store: {}...", err);
             let _ = initial_ctx
-                .send("Failed to initialize, are you in a voice channel?")
+                .send(format!("Failed to initialize: {}", err))
                 .await;
             return;
         }

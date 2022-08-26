@@ -46,7 +46,7 @@ impl CommandContext {
         Ok(cached_guild)
     }
 
-    async fn voice_channel_id(&self) -> Result<ChannelId> {
+    pub async fn voice_channel_id(&self) -> Result<ChannelId> {
         let guild = self.guild()?;
         let author_id = self.interaction.user.id;
         let voice_state = match guild.voice_states.get(&author_id) {
