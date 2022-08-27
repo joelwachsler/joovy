@@ -1,15 +1,23 @@
-mod add_track_to_queue;
-mod disconnect;
-mod play_next_track;
-mod print_queue;
-mod remove;
-mod remove_last;
+pub mod add_track_to_queue;
+pub mod disconnect;
+pub mod play_next_track;
+pub mod print_queue;
+pub mod remove;
+pub mod remove_last;
 
 use anyhow::Result;
 use tracing::info;
 
 use super::{guild_store_action::GuildStoreReceiver, queued_track::QueuedTrack};
-use crate::{command_context::CommandContext, store::guild_store_action::GuildStoreAction};
+use crate::{
+    command_context::CommandContext,
+    store::{
+        guild_store::{
+            add_track_to_queue::AddToQueue, play_next_track::PlayNextTrack, remove::Remove,
+        },
+        guild_store_action::{GuildStoreAction, HasCtx},
+    },
+};
 
 #[derive(Debug)]
 enum CurrentTrack {
@@ -39,12 +47,12 @@ pub async fn init_guild_store_receiver(
             let ctx = next_action.ctx();
 
             match next_action {
-                GuildStoreAction::AddToQueue(_, query) => {
+                GuildStoreAction::AddToQueue(AddToQueue { query, .. }) => {
                     if let Err(why) = store.add_to_queue(ctx.clone(), &query).await {
                         let _ = ctx.send(format!("AddToQueue error: {}", why)).await;
                     }
                 }
-                GuildStoreAction::PlayNextTrack(_, force) => {
+                GuildStoreAction::PlayNextTrack(PlayNextTrack { force, .. }) => {
                     if let Err(why) = store.play_next_track(ctx.clone(), force).await {
                         let _ = ctx.send(format!("PlayNextTrack error: {}", why)).await;
                     }
@@ -55,7 +63,7 @@ pub async fn init_guild_store_receiver(
                     }
                     break;
                 }
-                GuildStoreAction::Remove(_, from, to) => {
+                GuildStoreAction::Remove(Remove { from, to, .. }) => {
                     if let Err(why) = store.remove(&ctx, from, to).await {
                         let _ = ctx.send(format!("Remove error: {}", why)).await;
                     }

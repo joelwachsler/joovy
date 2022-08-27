@@ -1,36 +1,37 @@
 use anyhow::Result;
+use enum_dispatch::enum_dispatch;
 use std::{collections::HashMap, sync::Arc};
 use tokio::sync::mpsc::{self, Receiver, Sender};
 use tracing::info;
 
 use super::guild_store::init_guild_store_receiver;
 use crate::command_context::CommandContext;
+use crate::store::guild_store::add_track_to_queue::AddToQueue;
+use crate::store::guild_store::disconnect::Disconnect;
+use crate::store::guild_store::play_next_track::PlayNextTrack;
+use crate::store::guild_store::print_queue::PrintQueue;
+use crate::store::guild_store::remove::Remove;
+use crate::store::guild_store::remove_last::RemoveLast;
 
 pub type GuildStoreSender = Sender<GuildStoreAction>;
 pub type GuildStoreReceiver = Receiver<GuildStoreAction>;
 
+#[enum_dispatch]
 pub enum GuildStoreAction {
-    AddToQueue(Arc<CommandContext>, String),
-    PlayNextTrack(Arc<CommandContext>, bool),
-    Disconnect(Arc<CommandContext>),
-    // First u64 is from and second is to.
-    Remove(Arc<CommandContext>, u64, Option<u64>),
-    RemoveLast(Arc<CommandContext>),
-    PrintQueue(Arc<CommandContext>),
+    AddToQueue,
+    PlayNextTrack,
+    Disconnect,
+    Remove,
+    RemoveLast,
+    PrintQueue,
 }
 
-impl GuildStoreAction {
-    pub fn ctx(&self) -> Arc<CommandContext> {
-        let ctx = match self {
-            GuildStoreAction::AddToQueue(ctx, _) => ctx,
-            GuildStoreAction::PlayNextTrack(ctx, _) => ctx,
-            GuildStoreAction::Disconnect(ctx) => ctx,
-            GuildStoreAction::Remove(ctx, _, _) => ctx,
-            GuildStoreAction::RemoveLast(ctx) => ctx,
-            GuildStoreAction::PrintQueue(ctx) => ctx,
-        };
+#[enum_dispatch(GuildStoreAction)]
+pub trait HasCtx {
+    fn ctx_base(&self) -> Option<Arc<CommandContext>>;
 
-        ctx.clone()
+    fn ctx(&self) -> Arc<CommandContext> {
+        self.ctx_base().expect("Context is not defined")
     }
 }
 

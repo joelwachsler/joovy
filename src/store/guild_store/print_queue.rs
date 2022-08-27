@@ -1,8 +1,14 @@
+use std::sync::Arc;
+
 use anyhow::Result;
+use derive_builder::Builder;
 use serenity::utils::Color;
 
 use super::GuildStore;
-use crate::{command_context::CommandContext, store::queued_track::QueuedTrack};
+use crate::{
+    command_context::CommandContext,
+    store::{guild_store_action::HasCtx, queued_track::QueuedTrack},
+};
 
 impl GuildStore {
     pub async fn print_queue(&mut self, ctx: &CommandContext) -> Result<()> {
@@ -54,6 +60,18 @@ fn print_queue(queue: Vec<&QueuedTrack>, current_track_index: usize) -> Option<V
             });
 
     Some(output)
+}
+
+#[derive(Builder, Default)]
+#[builder(setter(into))]
+pub struct PrintQueue {
+    ctx: Option<Arc<CommandContext>>,
+}
+
+impl HasCtx for PrintQueue {
+    fn ctx_base(&self) -> Option<Arc<CommandContext>> {
+        self.ctx.clone()
+    }
 }
 
 #[cfg(test)]

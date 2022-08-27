@@ -70,8 +70,8 @@ impl CommandContext {
         value.unwrap().as_str().unwrap().to_string()
     }
 
-    pub async fn send_action(&self, action: GuildStoreAction) -> Result<()> {
-        let _ = self.guild_stores().await.sender().send(action).await;
+    pub async fn send_action(&self, action: impl Into<GuildStoreAction>) -> Result<()> {
+        let _ = self.guild_stores().await.sender().send(action.into()).await;
 
         Ok(())
     }

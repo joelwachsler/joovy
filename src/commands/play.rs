@@ -5,7 +5,9 @@ use serenity::async_trait;
 use serenity::builder::CreateApplicationCommand;
 use serenity::model::prelude::command;
 
-use crate::{command_context::CommandContext, store::guild_store_action::GuildStoreAction};
+use crate::{
+    command_context::CommandContext, store::guild_store::add_track_to_queue::AddToQueueBuilder,
+};
 
 use super::{JoovyCommand, JoovyCommands};
 
@@ -33,7 +35,13 @@ impl JoovyCommand for Play {
     async fn execute(&self, ctx: Arc<CommandContext>) -> Result<()> {
         let query = ctx.command_value();
         let _ = ctx
-            .send_action(GuildStoreAction::AddToQueue(ctx.clone(), query))
+            .send_action(
+                AddToQueueBuilder::default()
+                    .ctx(ctx.clone())
+                    .query(query)
+                    .build()
+                    .unwrap(),
+            )
             .await;
 
         Ok(())

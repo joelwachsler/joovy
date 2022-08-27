@@ -1,9 +1,10 @@
 use anyhow::Result;
+use derive_builder::Builder;
 use std::sync::Arc;
 
 use crate::{
     command_context::CommandContext,
-    store::{guild_store::GuildStore, queued_track::QueuedTrack},
+    store::{guild_store::GuildStore, guild_store_action::HasCtx, queued_track::QueuedTrack},
 };
 
 impl GuildStore {
@@ -24,6 +25,19 @@ impl GuildStore {
 
     fn add_to_queue_internal(&mut self, track: QueuedTrack) {
         self.queue.push(track);
+    }
+}
+
+#[derive(Builder, Default)]
+#[builder(setter(into))]
+pub struct AddToQueue {
+    ctx: Option<Arc<CommandContext>>,
+    pub query: String,
+}
+
+impl HasCtx for AddToQueue {
+    fn ctx_base(&self) -> Option<Arc<CommandContext>> {
+        self.ctx.clone()
     }
 }
 

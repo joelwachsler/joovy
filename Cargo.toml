@@ -17,3 +17,5 @@ search = { path = "search" }
 tracing = "0.1"
 strum = { version = "0.24", features = ["derive"] }
 strum_macros = "0.24"
+enum_dispatch = "0.3.8"
+derive_builder = "0.11.2"

@@ -4,7 +4,9 @@ use anyhow::Result;
 use serenity::builder::CreateApplicationCommand;
 use serenity::{async_trait, model::prelude::command::CommandOptionType::Integer};
 
-use crate::{command_context::CommandContext, store::guild_store_action::GuildStoreAction};
+use crate::command_context::CommandContext;
+use crate::store::guild_store::play_next_track::PlayNextTrackBuilder;
+use crate::store::guild_store::remove::RemoveBuilder;
 
 use super::{JoovyCommand, JoovyCommands};
 
@@ -51,12 +53,25 @@ impl JoovyCommand for Skip {
         if let Some(from) = get_int_opt(FROM) {
             let to = get_int_opt(TO);
 
-            ctx.send_action(GuildStoreAction::Remove(ctx.clone(), from, to))
-                .await?;
+            ctx.send_action(
+                RemoveBuilder::default()
+                    .ctx(ctx.clone())
+                    .from(from)
+                    .to(to)
+                    .build()
+                    .unwrap(),
+            )
+            .await?;
         } else {
             // from is not defined, let's skip the current track
-            ctx.send_action(GuildStoreAction::PlayNextTrack(ctx.clone(), true))
-                .await?;
+            ctx.send_action(
+                PlayNextTrackBuilder::default()
+                    .ctx(ctx.clone())
+                    .force(true)
+                    .build()
+                    .unwrap(),
+            )
+            .await?;
         }
 
         Ok(())

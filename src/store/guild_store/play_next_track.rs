@@ -1,13 +1,15 @@
 use anyhow::Result;
+use derive_builder::Builder;
 use serenity::async_trait;
 use songbird::{Event, TrackEvent};
 use songbird::{EventContext, EventHandler as SongbirdEventHandler};
 use std::sync::Arc;
 use tracing::info;
 
-use super::{GuildStore, GuildStoreAction};
+use super::GuildStore;
 use crate::command_context::voice::IntoInput;
 use crate::command_context::CommandContext;
+use crate::store::guild_store_action::HasCtx;
 
 impl GuildStore {
     pub async fn play_next_track(&mut self, ctx: Arc<CommandContext>, force: bool) -> Result<()> {
@@ -58,7 +60,12 @@ impl SongbirdEventHandler for SongEndNotifier {
     async fn act(&self, _: &EventContext<'_>) -> Option<Event> {
         let _ = self
             .ctx
-            .send_action(GuildStoreAction::PlayNextTrack(self.ctx.clone(), false))
+            .send_action(
+                PlayNextTrackBuilder::default()
+                    .ctx(self.ctx.clone())
+                    .build()
+                    .unwrap(),
+            )
             .await;
 
         None
@@ -72,5 +79,18 @@ struct SongEndNotifier {
 impl SongEndNotifier {
     fn new(ctx: Arc<CommandContext>) -> Self {
         Self { ctx }
+    }
+}
+
+#[derive(Builder, Default)]
+#[builder(setter(into))]
+pub struct PlayNextTrack {
+    ctx: Option<Arc<CommandContext>>,
+    pub force: bool,
+}
+
+impl HasCtx for PlayNextTrack {
+    fn ctx_base(&self) -> Option<Arc<CommandContext>> {
+        self.ctx.clone()
     }
 }
