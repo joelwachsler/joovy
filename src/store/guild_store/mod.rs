@@ -11,12 +11,7 @@ use tracing::info;
 use super::{guild_store_action::GuildStoreReceiver, queued_track::QueuedTrack};
 use crate::{
     command_context::CommandContext,
-    store::{
-        guild_store::{
-            add_track_to_queue::AddToQueue, play_next_track::PlayNextTrack, remove::Remove,
-        },
-        guild_store_action::{GuildStoreAction, HasCtx},
-    },
+    store::guild_store_action::{GuildStoreAction, HasCtx},
 };
 
 #[derive(Debug)]
@@ -47,34 +42,34 @@ pub async fn init_guild_store_receiver(
             let ctx = next_action.ctx();
 
             match next_action {
-                GuildStoreAction::AddToQueue(AddToQueue { query, .. }) => {
-                    if let Err(why) = store.add_to_queue(ctx.clone(), &query).await {
+                GuildStoreAction::AddToQueue(args) => {
+                    if let Err(why) = store.add_to_queue(args).await {
                         let _ = ctx.send(format!("AddToQueue error: {}", why)).await;
                     }
                 }
-                GuildStoreAction::PlayNextTrack(PlayNextTrack { force, .. }) => {
-                    if let Err(why) = store.play_next_track(ctx.clone(), force).await {
+                GuildStoreAction::PlayNextTrack(args) => {
+                    if let Err(why) = store.play_next_track(args).await {
                         let _ = ctx.send(format!("PlayNextTrack error: {}", why)).await;
                     }
                 }
-                GuildStoreAction::Disconnect(_) => {
-                    if let Err(why) = store.disconnect(&ctx).await {
+                GuildStoreAction::Disconnect(args) => {
+                    if let Err(why) = store.disconnect(args).await {
                         let _ = ctx.send(format!("Disconnect error: {}", why)).await;
                     }
                     break;
                 }
-                GuildStoreAction::Remove(Remove { from, to, .. }) => {
-                    if let Err(why) = store.remove(&ctx, from, to).await {
+                GuildStoreAction::Remove(args) => {
+                    if let Err(why) = store.remove(args).await {
                         let _ = ctx.send(format!("Remove error: {}", why)).await;
                     }
                 }
-                GuildStoreAction::RemoveLast(_) => {
-                    if let Err(why) = store.remove_last(&ctx).await {
+                GuildStoreAction::RemoveLast(args) => {
+                    if let Err(why) = store.remove_last(args).await {
                         let _ = ctx.send(format!("RemoveLast error: {}", why)).await;
                     }
                 }
-                GuildStoreAction::PrintQueue(_) => {
-                    if let Err(why) = store.print_queue(&ctx).await {
+                GuildStoreAction::PrintQueue(args) => {
+                    if let Err(why) = store.print_queue(args).await {
                         let _ = ctx.send(format!("Print queue error: {}", why)).await;
                     }
                 }

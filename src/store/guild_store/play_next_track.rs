@@ -12,7 +12,9 @@ use crate::command_context::CommandContext;
 use crate::store::guild_store_action::HasCtx;
 
 impl GuildStore {
-    pub async fn play_next_track(&mut self, ctx: Arc<CommandContext>, force: bool) -> Result<()> {
+    pub async fn play_next_track(&mut self, args: PlayNextTrack) -> Result<()> {
+        let PlayNextTrack { ctx, force } = args;
+
         if self.is_playing() && !force {
             info!("Already playing a track, skipping.");
             return Ok(());

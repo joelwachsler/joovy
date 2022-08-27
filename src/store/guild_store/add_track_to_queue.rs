@@ -7,9 +7,13 @@ use crate::{
     store::{guild_store::GuildStore, guild_store_action::HasCtx, queued_track::QueuedTrack},
 };
 
+use super::play_next_track::PlayNextTrack;
+
 impl GuildStore {
-    pub async fn add_to_queue(&mut self, ctx: Arc<CommandContext>, query: &str) -> Result<()> {
-        let new_track = QueuedTrack::try_from_query(&ctx, query).await?;
+    pub async fn add_to_queue(&mut self, args: AddToQueue) -> Result<()> {
+        let AddToQueue { ctx, query } = args;
+
+        let new_track = QueuedTrack::try_from_query(&ctx, &query).await?;
         let new_track_name = new_track.name();
         self.add_to_queue_internal(new_track);
 
@@ -17,7 +21,8 @@ impl GuildStore {
             .await?;
 
         if !self.is_playing() {
-            self.play_next_track(ctx, false).await?;
+            self.play_next_track(PlayNextTrack::builder().ctx(ctx.clone()).build().into())
+                .await?;
         }
 
         Ok(())

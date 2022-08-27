@@ -9,7 +9,9 @@ use crate::{
 };
 
 impl GuildStore {
-    pub async fn disconnect(&mut self, ctx: &CommandContext) -> Result<()> {
+    pub async fn disconnect(&mut self, args: Disconnect) -> Result<()> {
+        let Disconnect { ctx } = args;
+
         ctx.songbird().await.remove(ctx.songbird_guild_id()).await?;
         ctx.send("Bye!").await?;
 

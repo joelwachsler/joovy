@@ -11,7 +11,9 @@ use crate::{
 };
 
 impl GuildStore {
-    pub async fn print_queue(&mut self, ctx: &CommandContext) -> Result<()> {
+    pub async fn print_queue(&mut self, args: PrintQueue) -> Result<()> {
+        let PrintQueue { ctx } = args;
+
         let queue = self.queue();
 
         let current_track_index = self.current_track_index().unwrap_or_default();

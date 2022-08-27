@@ -7,8 +7,10 @@ use super::GuildStore;
 use crate::{command_context::CommandContext, store::guild_store_action::HasCtx};
 
 impl GuildStore {
-    pub async fn remove(&mut self, ctx: &CommandContext, from: u64, to: Option<u64>) -> Result<()> {
-        if let Some(to) = to {
+    pub async fn remove(&mut self, args: Remove) -> Result<()> {
+        let Remove { ctx, from, to } = args;
+
+        if let Some(to) = args.to {
             if from > to {
                 ctx.send(format!(
                     "To cannot be greater than from, (from: {from}, to: {to})"
@@ -34,6 +36,7 @@ impl GuildStore {
 pub struct Remove {
     ctx: Arc<CommandContext>,
     pub from: u64,
+    #[builder(default)]
     pub to: Option<u64>,
 }
 
