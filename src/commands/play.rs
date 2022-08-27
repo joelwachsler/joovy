@@ -5,7 +5,7 @@ use serenity::async_trait;
 use serenity::builder::CreateApplicationCommand;
 use serenity::model::prelude::command;
 
-use crate::{command_context::CommandContext, store::guild_store::add_track_to_queue::AddToQueue};
+use crate::{command_context::CommandContext, store::guild_action::add_track_to_queue::AddToQueue};
 
 use super::{JoovyCommand, JoovyCommands};
 

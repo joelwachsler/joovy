@@ -1,10 +1,3 @@
-pub mod add_track_to_queue;
-pub mod disconnect;
-pub mod play_next_track;
-pub mod print_queue;
-pub mod remove;
-pub mod remove_last;
-
 use anyhow::Result;
 use tracing::info;
 
@@ -122,5 +115,9 @@ impl GuildStore {
 
     pub fn queue(&self) -> Vec<&QueuedTrack> {
         self.queue.iter().collect()
+    }
+
+    pub fn add_to_queue_internal(&mut self, track: QueuedTrack) {
+        self.queue.push(track);
     }
 }

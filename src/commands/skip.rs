@@ -5,8 +5,8 @@ use serenity::builder::CreateApplicationCommand;
 use serenity::{async_trait, model::prelude::command::CommandOptionType::Integer};
 
 use crate::command_context::CommandContext;
-use crate::store::guild_store::play_next_track::PlayNextTrack;
-use crate::store::guild_store::remove::Remove;
+use crate::store::guild_action::play_next_track::PlayNextTrack;
+use crate::store::guild_action::remove::Remove;
 
 use super::{JoovyCommand, JoovyCommands};
 

@@ -4,7 +4,7 @@ use anyhow::Result;
 use serenity::async_trait;
 use serenity::builder::CreateApplicationCommand;
 
-use crate::{command_context::CommandContext, store::guild_store::remove_last::RemoveLast};
+use crate::{command_context::CommandContext, store::guild_action::remove_last::RemoveLast};
 
 use super::{JoovyCommand, JoovyCommands};
 

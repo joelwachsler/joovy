@@ -38,12 +38,6 @@ impl Execute for AddToQueue {
     }
 }
 
-impl GuildStore {
-    fn add_to_queue_internal(&mut self, track: QueuedTrack) {
-        self.queue.push(track);
-    }
-}
-
 #[derive(TypedBuilder)]
 pub struct AddToQueue {
     ctx: Arc<CommandContext>,

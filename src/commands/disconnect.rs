@@ -23,7 +23,7 @@ impl JoovyCommand for Disconnect {
     }
 
     async fn execute(&self, ctx: Arc<CommandContext>) -> Result<()> {
-        use crate::store::guild_store::disconnect::Disconnect;
+        use crate::store::guild_action::disconnect::Disconnect;
 
         let _ = ctx
             .send_action(Disconnect::builder().ctx(ctx.clone()).build())

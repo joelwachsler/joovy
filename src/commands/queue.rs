@@ -4,7 +4,7 @@ use anyhow::Result;
 use serenity::async_trait;
 use serenity::builder::CreateApplicationCommand;
 
-use crate::{command_context::CommandContext, store::guild_store::print_queue::PrintQueue};
+use crate::{command_context::CommandContext, store::guild_action::print_queue::PrintQueue};
 
 use super::{JoovyCommand, JoovyCommands};
 
