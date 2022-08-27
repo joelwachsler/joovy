@@ -3,9 +3,12 @@ use serenity::async_trait;
 use songbird::{Event, TrackEvent};
 use songbird::{EventContext, EventHandler as SongbirdEventHandler};
 use std::sync::Arc;
+use tokio::sync::broadcast;
+use tokio::time;
 use tracing::info;
 use typed_builder::TypedBuilder;
 
+use super::disconnect::Disconnect;
 use super::GuildStore;
 use crate::command_context::voice::IntoInput;
 use crate::command_context::CommandContext;
@@ -15,6 +18,11 @@ use crate::store::guild_action::{Execute, HasCtx};
 impl Execute for PlayNextTrack {
     async fn execute(&self, store: &mut GuildStore) -> Result<()> {
         let PlayNextTrack { ctx, force } = self;
+
+        if let Some(disconnect_handle) = &store.disconnect_handle {
+            disconnect_handle.send(())?;
+            store.disconnect_handle = None;
+        }
 
         if store.is_playing() && !force {
             info!("Already playing a track, skipping.");
@@ -51,11 +59,34 @@ impl Execute for PlayNextTrack {
                 .await?;
         } else {
             handler.stop();
-            let _ = ctx.send("End of playlist").await;
+            let _ = ctx
+                .send("End of playlist, will disconnect in 5 minutes.")
+                .await;
+
+            let (abort_handle, abort) = broadcast::channel(1);
+            start_disconnect_timer(ctx.clone(), abort);
+            store.disconnect_handle = Some(abort_handle);
         }
 
         Ok(())
     }
+}
+
+fn start_disconnect_timer(ctx: Arc<CommandContext>, mut abort: broadcast::Receiver<()>) {
+    tokio::spawn(async move {
+        let cloned_ctx = ctx.clone();
+        tokio::select! {
+            _ = abort.recv() => {
+                info!("Aborted");
+            },
+            _ = time::sleep(time::Duration::from_secs(60 * 5)) => {
+                info!("Sending disconnect request");
+                let _ = ctx
+                    .send_action(Disconnect::builder().ctx(cloned_ctx).build())
+                    .await;
+            },
+        }
+    });
 }
 
 #[async_trait]

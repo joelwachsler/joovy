@@ -1,4 +1,5 @@
 use anyhow::Result;
+use tokio::sync::broadcast;
 use tracing::info;
 
 use super::{guild_action::GuildStoreReceiver, queued_track::QueuedTrack};
@@ -51,6 +52,7 @@ pub async fn init_guild_store_receiver(
 pub struct GuildStore {
     current_track: CurrentTrack,
     queue: Vec<QueuedTrack>,
+    pub disconnect_handle: Option<broadcast::Sender<()>>,
 }
 
 impl Default for GuildStore {
@@ -58,6 +60,7 @@ impl Default for GuildStore {
         Self {
             current_track: CurrentTrack::None,
             queue: Default::default(),
+            disconnect_handle: Default::default(),
         }
     }
 }
