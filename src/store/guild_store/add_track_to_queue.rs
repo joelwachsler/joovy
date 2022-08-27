@@ -19,7 +19,7 @@ impl Execute for AddToQueue {
     async fn execute(&self, store: &mut GuildStore) -> Result<()> {
         let AddToQueue { ctx, query } = self;
 
-        let new_track = QueuedTrack::try_from_query(&ctx, &query).await?;
+        let new_track = QueuedTrack::try_from_query(ctx, query).await?;
         let new_track_name = new_track.name();
         store.add_to_queue_internal(new_track);
 
@@ -87,15 +87,15 @@ mod tests {
         let mut store = GuildStore::default();
 
         assert_eq!(store.next_track_in_queue(), None);
-        assert_eq!(store.is_playing(), false);
+        assert!(!store.is_playing());
         store.add_to_queue_internal(QueuedTrack::create_for_test("foo"));
-        assert_eq!(store.is_playing(), false);
+        assert!(!store.is_playing());
         assert_eq!(store.next_track_in_queue().unwrap().title(), "foo");
-        assert_eq!(store.is_playing(), true);
+        assert!(store.is_playing());
         assert_eq!(store.next_track_in_queue(), None);
-        assert_eq!(store.is_playing(), false);
+        assert!(!store.is_playing());
         store.add_to_queue_internal(QueuedTrack::create_for_test("bar"));
         assert_eq!(store.next_track_in_queue().unwrap().title(), "bar");
-        assert_eq!(store.is_playing(), true);
+        assert!(store.is_playing());
     }
 }
