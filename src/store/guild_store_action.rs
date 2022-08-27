@@ -28,11 +28,7 @@ pub enum GuildStoreAction {
 
 #[enum_dispatch(GuildStoreAction)]
 pub trait HasCtx {
-    fn ctx_base(&self) -> Option<Arc<CommandContext>>;
-
-    fn ctx(&self) -> Arc<CommandContext> {
-        self.ctx_base().expect("Context is not defined")
-    }
+    fn ctx(&self) -> Arc<CommandContext>;
 }
 
 pub struct GuildStoresActionHandler {

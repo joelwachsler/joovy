@@ -1,8 +1,8 @@
 use std::sync::Arc;
 
 use anyhow::Result;
-use derive_builder::Builder;
 use serenity::utils::Color;
+use typed_builder::TypedBuilder;
 
 use super::GuildStore;
 use crate::{
@@ -62,14 +62,13 @@ fn print_queue(queue: Vec<&QueuedTrack>, current_track_index: usize) -> Option<V
     Some(output)
 }
 
-#[derive(Builder, Default)]
-#[builder(setter(into))]
+#[derive(TypedBuilder)]
 pub struct PrintQueue {
-    ctx: Option<Arc<CommandContext>>,
+    ctx: Arc<CommandContext>,
 }
 
 impl HasCtx for PrintQueue {
-    fn ctx_base(&self) -> Option<Arc<CommandContext>> {
+    fn ctx(&self) -> Arc<CommandContext> {
         self.ctx.clone()
     }
 }

@@ -1,6 +1,6 @@
 use anyhow::Result;
-use derive_builder::Builder;
 use std::sync::Arc;
+use typed_builder::TypedBuilder;
 
 use crate::{
     command_context::CommandContext,
@@ -28,15 +28,14 @@ impl GuildStore {
     }
 }
 
-#[derive(Builder, Default)]
-#[builder(setter(into))]
+#[derive(TypedBuilder)]
 pub struct AddToQueue {
-    ctx: Option<Arc<CommandContext>>,
+    ctx: Arc<CommandContext>,
     pub query: String,
 }
 
 impl HasCtx for AddToQueue {
-    fn ctx_base(&self) -> Option<Arc<CommandContext>> {
+    fn ctx(&self) -> Arc<CommandContext> {
         self.ctx.clone()
     }
 }

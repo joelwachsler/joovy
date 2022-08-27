@@ -4,7 +4,7 @@ use anyhow::Result;
 use serenity::async_trait;
 use serenity::builder::CreateApplicationCommand;
 
-use crate::{command_context::CommandContext, store::guild_store::remove_last::RemoveLastBuilder};
+use crate::{command_context::CommandContext, store::guild_store::remove_last::RemoveLast};
 
 use super::{JoovyCommand, JoovyCommands};
 
@@ -23,13 +23,8 @@ impl JoovyCommand for SkipLast {
     }
 
     async fn execute(&self, ctx: Arc<CommandContext>) -> Result<()> {
-        ctx.send_action(
-            RemoveLastBuilder::default()
-                .ctx(ctx.clone())
-                .build()
-                .unwrap(),
-        )
-        .await?;
+        ctx.send_action(RemoveLast::builder().ctx(ctx.clone()).build())
+            .await?;
 
         Ok(())
     }

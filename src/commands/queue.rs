@@ -4,7 +4,7 @@ use anyhow::Result;
 use serenity::async_trait;
 use serenity::builder::CreateApplicationCommand;
 
-use crate::{command_context::CommandContext, store::guild_store::print_queue::PrintQueueBuilder};
+use crate::{command_context::CommandContext, store::guild_store::print_queue::PrintQueue};
 
 use super::{JoovyCommand, JoovyCommands};
 
@@ -24,12 +24,7 @@ impl JoovyCommand for Queue {
 
     async fn execute(&self, ctx: Arc<CommandContext>) -> Result<()> {
         let _ = ctx
-            .send_action(
-                PrintQueueBuilder::default()
-                    .ctx(ctx.clone())
-                    .build()
-                    .unwrap(),
-            )
+            .send_action(PrintQueue::builder().ctx(ctx.clone()).build())
             .await;
 
         Ok(())

@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use anyhow::Result;
-use derive_builder::Builder;
+use typed_builder::TypedBuilder;
 
 use super::GuildStore;
 use crate::{command_context::CommandContext, store::guild_store_action::HasCtx};
@@ -30,16 +30,15 @@ impl GuildStore {
     }
 }
 
-#[derive(Builder, Default)]
-#[builder(setter(into))]
+#[derive(TypedBuilder)]
 pub struct Remove {
-    ctx: Option<Arc<CommandContext>>,
+    ctx: Arc<CommandContext>,
     pub from: u64,
     pub to: Option<u64>,
 }
 
 impl HasCtx for Remove {
-    fn ctx_base(&self) -> Option<Arc<CommandContext>> {
+    fn ctx(&self) -> Arc<CommandContext> {
         self.ctx.clone()
     }
 }

@@ -5,7 +5,6 @@ use serenity::async_trait;
 use serenity::builder::CreateApplicationCommand;
 
 use crate::command_context::CommandContext;
-use crate::store::guild_store::disconnect::DisconnectBuilder;
 
 use super::{JoovyCommand, JoovyCommands};
 
@@ -24,13 +23,10 @@ impl JoovyCommand for Disconnect {
     }
 
     async fn execute(&self, ctx: Arc<CommandContext>) -> Result<()> {
+        use crate::store::guild_store::disconnect::Disconnect;
+
         let _ = ctx
-            .send_action(
-                DisconnectBuilder::default()
-                    .ctx(ctx.clone())
-                    .build()
-                    .unwrap(),
-            )
+            .send_action(Disconnect::builder().ctx(ctx.clone()).build())
             .await;
 
         Ok(())

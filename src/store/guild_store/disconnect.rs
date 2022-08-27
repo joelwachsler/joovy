@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use anyhow::Result;
-use derive_builder::Builder;
+use typed_builder::TypedBuilder;
 
 use crate::{
     command_context::CommandContext,
@@ -17,14 +17,13 @@ impl GuildStore {
     }
 }
 
-#[derive(Builder, Default)]
-#[builder(setter(into))]
+#[derive(TypedBuilder)]
 pub struct Disconnect {
-    ctx: Option<Arc<CommandContext>>,
+    ctx: Arc<CommandContext>,
 }
 
 impl HasCtx for Disconnect {
-    fn ctx_base(&self) -> Option<Arc<CommandContext>> {
+    fn ctx(&self) -> Arc<CommandContext> {
         self.ctx.clone()
     }
 }
