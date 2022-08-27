@@ -9,7 +9,7 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        VARIANT: buster
+        VARIANT: bullseye
         CARGO_HOME: /workspace/.cargo
 
     volumes:
