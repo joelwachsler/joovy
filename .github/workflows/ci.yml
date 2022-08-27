@@ -66,6 +66,9 @@ jobs:
           components: rustfmt
           override: true
 
+      - name: Setup build environment
+        run: apt-get install -y lld
+
       - name: Run cargo fmt
         uses: actions-rs/cargo@v1
         with:
@@ -89,6 +92,9 @@ jobs:
           toolchain: stable
           components: clippy
           override: true
+
+      - name: Setup build environment
+        run: apt-get install -y lld
 
       - name: Run cargo clippy
         uses: actions-rs/cargo@v1
