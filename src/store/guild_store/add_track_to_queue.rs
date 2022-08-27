@@ -7,7 +7,7 @@ use crate::{
     command_context::CommandContext,
     store::{
         guild_store::GuildStore,
-        guild_store_action::{Execute, HasCtx},
+        guild_action::{Execute, HasCtx},
         queued_track::QueuedTrack,
     },
 };

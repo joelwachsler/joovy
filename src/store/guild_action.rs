@@ -15,12 +15,12 @@ use crate::store::guild_store::print_queue::PrintQueue;
 use crate::store::guild_store::remove::Remove;
 use crate::store::guild_store::remove_last::RemoveLast;
 
-pub type GuildStoreSender = Sender<GuildStoreAction>;
-pub type GuildStoreReceiver = Receiver<GuildStoreAction>;
+pub type GuildStoreSender = Sender<GuildAction>;
+pub type GuildStoreReceiver = Receiver<GuildAction>;
 
 #[enum_dispatch]
 #[derive(AsRefStr)]
-pub enum GuildStoreAction {
+pub enum GuildAction {
     AddToQueue,
     PlayNextTrack,
     Disconnect,
@@ -29,22 +29,22 @@ pub enum GuildStoreAction {
     PrintQueue,
 }
 
-#[enum_dispatch(GuildStoreAction)]
+#[enum_dispatch(GuildAction)]
 pub trait HasCtx {
     fn ctx(&self) -> Arc<CommandContext>;
 }
 
 #[async_trait]
-#[enum_dispatch(GuildStoreAction)]
+#[enum_dispatch(GuildAction)]
 pub trait Execute {
     async fn execute(&self, store: &mut GuildStore) -> Result<()>;
 }
 
-pub struct GuildStoresActionHandler {
+pub struct GuildActionHandler {
     guild_senders: HashMap<u64, GuildStoreSender>,
 }
 
-impl GuildStoresActionHandler {
+impl GuildActionHandler {
     pub fn new() -> Self {
         Self {
             guild_senders: HashMap::new(),
@@ -65,8 +65,8 @@ impl GuildStoresActionHandler {
                 }
             };
 
-            if let Ok(store_sender) = self.get_store_sender(&ctx, &channel_id).await {
-                if let GuildStoreAction::Disconnect(_) = next_action {
+            if let Ok(store_sender) = self.store_sender(&ctx, &channel_id).await {
+                if let GuildAction::Disconnect(_) = next_action {
                     self.remove_guild_sender(&channel_id);
                 }
 
@@ -75,7 +75,7 @@ impl GuildStoresActionHandler {
         }
     }
 
-    async fn get_store_sender(
+    async fn store_sender(
         &mut self,
         ctx: &CommandContext,
         channel_id: &u64,

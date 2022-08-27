@@ -8,10 +8,10 @@ pub mod remove_last;
 use anyhow::Result;
 use tracing::info;
 
-use super::{guild_store_action::GuildStoreReceiver, queued_track::QueuedTrack};
+use super::{guild_action::GuildStoreReceiver, queued_track::QueuedTrack};
 use crate::{
     command_context::CommandContext,
-    store::guild_store_action::{Execute, GuildStoreAction, HasCtx},
+    store::guild_action::{Execute, GuildAction, HasCtx},
 };
 
 #[derive(Debug)]
@@ -46,7 +46,7 @@ pub async fn init_guild_store_receiver(
                     .await;
             }
 
-            if let GuildStoreAction::Disconnect(_) = next_action {
+            if let GuildAction::Disconnect(_) = next_action {
                 break;
             }
         }

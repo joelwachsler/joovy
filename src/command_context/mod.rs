@@ -12,7 +12,7 @@ use serenity::{
     prelude::Context,
 };
 
-use crate::store::guild_store_action::GuildStoreAction;
+use crate::store::guild_action::GuildAction;
 use crate::store::guild_stores::HasGuildStores;
 
 pub struct CommandContext {
@@ -70,7 +70,7 @@ impl CommandContext {
         value.unwrap().as_str().unwrap().to_string()
     }
 
-    pub async fn send_action(&self, action: impl Into<GuildStoreAction>) -> Result<()> {
+    pub async fn send_action(&self, action: impl Into<GuildAction>) -> Result<()> {
         let _ = self.guild_stores().await.sender().send(action.into()).await;
 
         Ok(())

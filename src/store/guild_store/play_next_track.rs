@@ -9,7 +9,7 @@ use typed_builder::TypedBuilder;
 use super::GuildStore;
 use crate::command_context::voice::IntoInput;
 use crate::command_context::CommandContext;
-use crate::store::guild_store_action::{Execute, HasCtx};
+use crate::store::guild_action::{Execute, HasCtx};
 
 #[async_trait]
 impl Execute for PlayNextTrack {

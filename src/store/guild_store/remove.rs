@@ -7,7 +7,7 @@ use typed_builder::TypedBuilder;
 use super::GuildStore;
 use crate::{
     command_context::CommandContext,
-    store::guild_store_action::{Execute, HasCtx},
+    store::guild_action::{Execute, HasCtx},
 };
 
 #[async_trait]
