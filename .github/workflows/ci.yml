@@ -28,6 +28,9 @@ jobs:
           path: ~/.cargo/registry
           key: ${{ runner.os }}-cargo-test-${{ hashFiles('Cargo.toml') }}
 
+      - name: Setup build environment
+        run: sudo apt-get install -y lld clang
+
       - name: Install latest stable
         uses: actions-rs/toolchain@v1
         with:
@@ -59,15 +62,15 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Setup build environment
+        run: sudo apt-get install -y lld clang
+
       - name: Install latest stable
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
           components: rustfmt
           override: true
-
-      - name: Setup build environment
-        run: sudo apt-get install -y lld
 
       - name: Run cargo fmt
         uses: actions-rs/cargo@v1
@@ -86,15 +89,15 @@ jobs:
           path: ~/.cargo/registry
           key: ${{ runner.os }}-cargo-clippy-${{ hashFiles('Cargo.toml') }}
 
+      - name: Setup build environment
+        run: sudo apt-get install -y lld clang
+
       - name: Install latest stable
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
           components: clippy
           override: true
-
-      - name: Setup build environment
-        run: sudo apt-get install -y lld
 
       - name: Run cargo clippy
         uses: actions-rs/cargo@v1
