@@ -6,7 +6,7 @@ use std::sync::Arc;
 use tracing::{debug, error, info};
 
 use crate::command_context::CommandContext;
-use crate::commands::JoovyCommands;
+use crate::commands::{JoovyCommand, JoovyCommands};
 
 pub struct CommandHandler;
 
@@ -39,10 +39,10 @@ impl EventHandler for CommandHandler {
             debug!("Trying to command {}, found: {:?}", cmd_name, found_cmd);
             let cmd_context = Arc::new(CommandContext::new(ctx.clone(), command.clone()));
 
-            if let Some(res) = found_cmd {
+            if let Some(command) = found_cmd {
                 let _ = cmd_context.reply_ack("Processing...").await;
 
-                let exec_res = res.execute(cmd_context.clone()).await;
+                let exec_res = command.execute(cmd_context.clone()).await;
                 if let Err(why) = exec_res {
                     let _ = cmd_context
                         .reply(format!("Failed to execute: {}, reason: {}", cmd_name, why))
