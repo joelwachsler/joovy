@@ -2,7 +2,7 @@ use serenity::{async_trait, prelude::TypeMapKey};
 use std::sync::Arc;
 use tokio::sync::mpsc::{self, Sender};
 
-use super::guild_action::{GuildAction, GuildStoreSender, GuildActionHandler};
+use super::guild_action::{GuildAction, GuildActionHandler, GuildStoreSender};
 use crate::command_context::CommandContext;
 
 pub struct GuildStores {
