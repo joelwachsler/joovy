@@ -10,18 +10,18 @@ use crate::{
     store::guild_store_action::{Execute, HasCtx},
 };
 
-impl GuildStore {
-    pub async fn remove_last(&mut self, args: &RemoveLast) -> Result<()> {
-        let RemoveLast { ctx } = args;
+#[async_trait]
+impl Execute for RemoveLast {
+    async fn execute(&self, store: &mut GuildStore) -> Result<()> {
+        let RemoveLast { ctx } = self;
 
-        let track_to_skip = self.queue().len() - 1;
-        self.remove(
-            &Remove::builder()
-                .ctx(ctx.clone())
-                .from(track_to_skip as u64)
-                .build(),
-        )
-        .await?;
+        let track_to_skip = store.queue().len() - 1;
+        Remove::builder()
+            .ctx(ctx.clone())
+            .from(track_to_skip as u64)
+            .build()
+            .execute(store)
+            .await?;
 
         Ok(())
     }
@@ -35,12 +35,5 @@ pub struct RemoveLast {
 impl HasCtx for RemoveLast {
     fn ctx(&self) -> Arc<CommandContext> {
         self.ctx.clone()
-    }
-}
-
-#[async_trait]
-impl Execute for RemoveLast {
-    async fn execute(&self, store: &mut GuildStore) -> Result<()> {
-        store.remove_last(self).await
     }
 }

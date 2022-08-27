@@ -11,20 +11,21 @@ use crate::command_context::voice::IntoInput;
 use crate::command_context::CommandContext;
 use crate::store::guild_store_action::{Execute, HasCtx};
 
-impl GuildStore {
-    pub async fn play_next_track(&mut self, args: &PlayNextTrack) -> Result<()> {
-        let PlayNextTrack { ctx, force } = args;
+#[async_trait]
+impl Execute for PlayNextTrack {
+    async fn execute(&self, store: &mut GuildStore) -> Result<()> {
+        let PlayNextTrack { ctx, force } = self;
 
-        if self.is_playing() && !force {
+        if store.is_playing() && !force {
             info!("Already playing a track, skipping.");
             return Ok(());
-        } else if let Some(current_track) = self.current_track() {
+        } else if let Some(current_track) = store.current_track() {
             ctx.reply(format!("Skipping {}", current_track.name()))
                 .await?;
         }
 
         let mut next_track = || {
-            while let Some(next_track) = self.next_track_in_queue() {
+            while let Some(next_track) = store.next_track_in_queue() {
                 if !next_track.should_skip() {
                     return Some(next_track);
                 } else {
@@ -89,12 +90,5 @@ pub struct PlayNextTrack {
 impl HasCtx for PlayNextTrack {
     fn ctx(&self) -> Arc<CommandContext> {
         self.ctx.clone()
-    }
-}
-
-#[async_trait]
-impl Execute for PlayNextTrack {
-    async fn execute(&self, store: &mut GuildStore) -> Result<()> {
-        store.play_next_track(self).await
     }
 }

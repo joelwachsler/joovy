@@ -14,25 +14,31 @@ use crate::{
 
 use super::play_next_track::PlayNextTrack;
 
-impl GuildStore {
-    pub async fn add_to_queue(&mut self, args: &AddToQueue) -> Result<()> {
-        let AddToQueue { ctx, query } = args;
+#[async_trait]
+impl Execute for AddToQueue {
+    async fn execute(&self, store: &mut GuildStore) -> Result<()> {
+        let AddToQueue { ctx, query } = self;
 
         let new_track = QueuedTrack::try_from_query(&ctx, &query).await?;
         let new_track_name = new_track.name();
-        self.add_to_queue_internal(new_track);
+        store.add_to_queue_internal(new_track);
 
         ctx.send(format!("{} has been added to the queue", new_track_name))
             .await?;
 
-        if !self.is_playing() {
-            self.play_next_track(&PlayNextTrack::builder().ctx(ctx.clone()).build().into())
+        if !store.is_playing() {
+            PlayNextTrack::builder()
+                .ctx(ctx.clone())
+                .build()
+                .execute(store)
                 .await?;
         }
 
         Ok(())
     }
+}
 
+impl GuildStore {
     fn add_to_queue_internal(&mut self, track: QueuedTrack) {
         self.queue.push(track);
     }
@@ -47,13 +53,6 @@ pub struct AddToQueue {
 impl HasCtx for AddToQueue {
     fn ctx(&self) -> Arc<CommandContext> {
         self.ctx.clone()
-    }
-}
-
-#[async_trait]
-impl Execute for AddToQueue {
-    async fn execute(&self, store: &mut GuildStore) -> Result<()> {
-        store.add_to_queue(self).await
     }
 }
 

@@ -10,12 +10,13 @@ use crate::{
     store::guild_store_action::{Execute, HasCtx},
 };
 
-impl GuildStore {
-    pub async fn remove(&mut self, args: &Remove) -> Result<()> {
-        let Remove { ctx, from, to } = args;
+#[async_trait]
+impl Execute for Remove {
+    async fn execute(&self, store: &mut GuildStore) -> Result<()> {
+        let Remove { ctx, from, to } = self;
 
-        if let Some(to) = args.to {
-            if from > &to {
+        if let Some(to) = to {
+            if from > to {
                 ctx.send(format!(
                     "To cannot be greater than from, (from: {from}, to: {to})"
                 ))
@@ -25,7 +26,7 @@ impl GuildStore {
         }
 
         for i in (*from)..to.unwrap_or(from + 1) {
-            if let Some(track) = self.edit_track(i as usize) {
+            if let Some(track) = store.edit_track(i as usize) {
                 track.skip_track();
                 ctx.send(format!("{} has been removed from the queue.", track.name()))
                     .await?;
@@ -47,12 +48,5 @@ pub struct Remove {
 impl HasCtx for Remove {
     fn ctx(&self) -> Arc<CommandContext> {
         self.ctx.clone()
-    }
-}
-
-#[async_trait]
-impl Execute for Remove {
-    async fn execute(&self, store: &mut GuildStore) -> Result<()> {
-        store.remove(self).await
     }
 }

@@ -13,13 +13,14 @@ use crate::{
     },
 };
 
-impl GuildStore {
-    pub async fn print_queue(&mut self, args: &PrintQueue) -> Result<()> {
-        let PrintQueue { ctx } = args;
+#[async_trait]
+impl Execute for PrintQueue {
+    async fn execute(&self, store: &mut GuildStore) -> Result<()> {
+        let PrintQueue { ctx } = self;
 
-        let queue = self.queue();
+        let queue = store.queue();
 
-        let current_track_index = self.current_track_index().unwrap_or_default();
+        let current_track_index = store.current_track_index().unwrap_or_default();
         let output = match print_queue(queue, current_track_index) {
             Some(output) => output,
             None => {
@@ -143,12 +144,5 @@ mod tests {
                 "`2` [ (0:00)]() [<@0>]",
             ]
         );
-    }
-}
-
-#[async_trait]
-impl Execute for PrintQueue {
-    async fn execute(&self, store: &mut GuildStore) -> Result<()> {
-        store.print_queue(self).await
     }
 }

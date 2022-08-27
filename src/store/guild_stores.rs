@@ -5,7 +5,6 @@ use tokio::sync::mpsc::{self, Sender};
 use super::guild_store_action::{GuildStoreAction, GuildStoreSender, GuildStoresActionHandler};
 use crate::command_context::CommandContext;
 
-/// The current state of all connected guilds.
 pub struct GuildStores {
     sender: GuildStoreSender,
 }

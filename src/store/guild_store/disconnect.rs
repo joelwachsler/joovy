@@ -12,9 +12,10 @@ use crate::{
     },
 };
 
-impl GuildStore {
-    pub async fn disconnect(&mut self, args: &Disconnect) -> Result<()> {
-        let Disconnect { ctx } = args;
+#[async_trait]
+impl Execute for Disconnect {
+    async fn execute(&self, _: &mut GuildStore) -> Result<()> {
+        let Disconnect { ctx } = self;
 
         ctx.songbird().await.remove(ctx.songbird_guild_id()).await?;
         ctx.send("Bye!").await?;
@@ -31,12 +32,5 @@ pub struct Disconnect {
 impl HasCtx for Disconnect {
     fn ctx(&self) -> Arc<CommandContext> {
         self.ctx.clone()
-    }
-}
-
-#[async_trait]
-impl Execute for Disconnect {
-    async fn execute(&self, store: &mut GuildStore) -> Result<()> {
-        store.disconnect(self).await
     }
 }
