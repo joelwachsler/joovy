@@ -9,10 +9,10 @@ use typed_builder::TypedBuilder;
 use super::GuildStore;
 use crate::command_context::voice::IntoInput;
 use crate::command_context::CommandContext;
-use crate::store::guild_store_action::HasCtx;
+use crate::store::guild_store_action::{Execute, HasCtx};
 
 impl GuildStore {
-    pub async fn play_next_track(&mut self, args: PlayNextTrack) -> Result<()> {
+    pub async fn play_next_track(&mut self, args: &PlayNextTrack) -> Result<()> {
         let PlayNextTrack { ctx, force } = args;
 
         if self.is_playing() && !force {
@@ -89,5 +89,12 @@ pub struct PlayNextTrack {
 impl HasCtx for PlayNextTrack {
     fn ctx(&self) -> Arc<CommandContext> {
         self.ctx.clone()
+    }
+}
+
+#[async_trait]
+impl Execute for PlayNextTrack {
+    async fn execute(&self, store: &mut GuildStore) -> Result<()> {
+        store.play_next_track(self).await
     }
 }

@@ -1,17 +1,20 @@
 use std::sync::Arc;
 
 use anyhow::Result;
-use serenity::utils::Color;
+use serenity::{async_trait, utils::Color};
 use typed_builder::TypedBuilder;
 
 use super::GuildStore;
 use crate::{
     command_context::CommandContext,
-    store::{guild_store_action::HasCtx, queued_track::QueuedTrack},
+    store::{
+        guild_store_action::{Execute, HasCtx},
+        queued_track::QueuedTrack,
+    },
 };
 
 impl GuildStore {
-    pub async fn print_queue(&mut self, args: PrintQueue) -> Result<()> {
+    pub async fn print_queue(&mut self, args: &PrintQueue) -> Result<()> {
         let PrintQueue { ctx } = args;
 
         let queue = self.queue();
@@ -140,5 +143,12 @@ mod tests {
                 "`2` [ (0:00)]() [<@0>]",
             ]
         );
+    }
+}
+
+#[async_trait]
+impl Execute for PrintQueue {
+    async fn execute(&self, store: &mut GuildStore) -> Result<()> {
+        store.print_queue(self).await
     }
 }

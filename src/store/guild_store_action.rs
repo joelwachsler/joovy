@@ -1,10 +1,12 @@
 use anyhow::Result;
 use enum_dispatch::enum_dispatch;
+use serenity::async_trait;
 use std::{collections::HashMap, sync::Arc};
+use strum::AsRefStr;
 use tokio::sync::mpsc::{self, Receiver, Sender};
 use tracing::info;
 
-use super::guild_store::init_guild_store_receiver;
+use super::guild_store::{init_guild_store_receiver, GuildStore};
 use crate::command_context::CommandContext;
 use crate::store::guild_store::add_track_to_queue::AddToQueue;
 use crate::store::guild_store::disconnect::Disconnect;
@@ -17,6 +19,7 @@ pub type GuildStoreSender = Sender<GuildStoreAction>;
 pub type GuildStoreReceiver = Receiver<GuildStoreAction>;
 
 #[enum_dispatch]
+#[derive(AsRefStr)]
 pub enum GuildStoreAction {
     AddToQueue,
     PlayNextTrack,
@@ -29,6 +32,12 @@ pub enum GuildStoreAction {
 #[enum_dispatch(GuildStoreAction)]
 pub trait HasCtx {
     fn ctx(&self) -> Arc<CommandContext>;
+}
+
+#[async_trait]
+#[enum_dispatch(GuildStoreAction)]
+pub trait Execute {
+    async fn execute(&self, store: &mut GuildStore) -> Result<()>;
 }
 
 pub struct GuildStoresActionHandler {

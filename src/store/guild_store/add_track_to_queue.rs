@@ -1,16 +1,21 @@
 use anyhow::Result;
+use serenity::async_trait;
 use std::sync::Arc;
 use typed_builder::TypedBuilder;
 
 use crate::{
     command_context::CommandContext,
-    store::{guild_store::GuildStore, guild_store_action::HasCtx, queued_track::QueuedTrack},
+    store::{
+        guild_store::GuildStore,
+        guild_store_action::{Execute, HasCtx},
+        queued_track::QueuedTrack,
+    },
 };
 
 use super::play_next_track::PlayNextTrack;
 
 impl GuildStore {
-    pub async fn add_to_queue(&mut self, args: AddToQueue) -> Result<()> {
+    pub async fn add_to_queue(&mut self, args: &AddToQueue) -> Result<()> {
         let AddToQueue { ctx, query } = args;
 
         let new_track = QueuedTrack::try_from_query(&ctx, &query).await?;
@@ -21,7 +26,7 @@ impl GuildStore {
             .await?;
 
         if !self.is_playing() {
-            self.play_next_track(PlayNextTrack::builder().ctx(ctx.clone()).build().into())
+            self.play_next_track(&PlayNextTrack::builder().ctx(ctx.clone()).build().into())
                 .await?;
         }
 
@@ -42,6 +47,13 @@ pub struct AddToQueue {
 impl HasCtx for AddToQueue {
     fn ctx(&self) -> Arc<CommandContext> {
         self.ctx.clone()
+    }
+}
+
+#[async_trait]
+impl Execute for AddToQueue {
+    async fn execute(&self, store: &mut GuildStore) -> Result<()> {
+        store.add_to_queue(self).await
     }
 }
 
