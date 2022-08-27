@@ -40,3 +40,21 @@ Create a file called `.env` in the root directory of the project. Copy the appli
 ### Start application
 
 After you've completed all steps above all that's left to do is to start the application, and you can do so by issuing `cargo run`.
+
+
+## Database handling
+
+Install sea-orm-cli
+```sh
+cargo install sea-orm-cli
+```
+
+Create new migration
+```sh
+sea migrate generate my_migration_name
+```
+
+Update entities
+```sh
+sea generate entity -o entity/src
+```
