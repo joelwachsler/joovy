@@ -1,3 +1,4 @@
+use sea_orm::DatabaseConnection;
 use serenity::{async_trait, prelude::TypeMapKey};
 use std::sync::Arc;
 use tokio::sync::mpsc::{self, Sender};
@@ -14,10 +15,10 @@ impl GuildStores {
         Self { sender }
     }
 
-    pub fn init_store() -> Arc<GuildStores> {
+    pub fn init_store(conn: DatabaseConnection) -> Arc<GuildStores> {
         let (tx, rx) = mpsc::channel::<GuildAction>(100);
         let store = Arc::new(GuildStores::new(tx));
-        tokio::spawn(async move { GuildActionHandler::new().init(rx).await });
+        tokio::spawn(async move { GuildActionHandler::new(conn).init(rx).await });
 
         store
     }

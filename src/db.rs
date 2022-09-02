@@ -1,9 +1,9 @@
 use anyhow::Result;
 use migration::{Migrator, MigratorTrait};
-use sea_orm::ConnectOptions;
+use sea_orm::{ConnectOptions, DatabaseConnection};
 use std::env;
 
-pub async fn init() -> Result<()> {
+pub async fn init() -> Result<DatabaseConnection> {
     let db_url = env::var("DATABASE_URL")
         .unwrap_or_else(|_| "postgres://postgres:postgres@localhost:5432/postgres".to_string());
 
@@ -13,5 +13,5 @@ pub async fn init() -> Result<()> {
 
     Migrator::up(&conn, None).await?;
 
-    Ok(())
+    Ok(conn)
 }

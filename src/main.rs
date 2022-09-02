@@ -12,8 +12,8 @@ use tracing::instrument;
 #[instrument]
 async fn main() -> Result<()> {
     logger::init().expect("Failed to init logger");
-    db::init().await?;
-    client::run().await?;
+    let conn = db::init().await?;
+    client::run(conn).await?;
 
     Ok(())
 }

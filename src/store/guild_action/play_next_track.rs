@@ -13,6 +13,7 @@ use super::GuildStore;
 use crate::command_context::voice::IntoInput;
 use crate::command_context::CommandContext;
 use crate::store::guild_action::{Execute, HasCtx};
+use crate::store::queued_track::QueuedTrack;
 
 #[async_trait]
 impl Execute for PlayNextTrack {
@@ -24,30 +25,18 @@ impl Execute for PlayNextTrack {
             store.disconnect_handle = None;
         }
 
-        if store.is_playing() && !force {
+        if store.is_playing().await? && !force {
             info!("Already playing a track, skipping.");
             return Ok(());
-        } else if let Some(current_track) = store.current_track() {
+        } else if let Some(current_track) = store.current_track().await? {
             ctx.reply(format!("Skipping {}", current_track.name()))
                 .await?;
         }
 
-        let mut next_track = || {
-            while let Some(next_track) = store.next_track_in_queue() {
-                if !next_track.should_skip() {
-                    return Some(next_track);
-                } else {
-                    info!("Skipping {}", next_track.name());
-                }
-            }
-
-            None
-        };
-
         let handler_lock = ctx.songbird_call_lock().await?;
         let mut handler = handler_lock.lock().await;
 
-        if let Some(next_track) = next_track() {
+        if let Some(next_track) = next_track(store).await? {
             let next_input = next_track.to_input().await?;
             let handle = handler.play_only_source(next_input);
             let _ = handle.add_event(
@@ -70,6 +59,18 @@ impl Execute for PlayNextTrack {
 
         Ok(())
     }
+}
+
+async fn next_track(store: &mut GuildStore) -> Result<Option<QueuedTrack>> {
+    while let Some(next_track) = store.next_track_in_queue().await? {
+        if !next_track.should_skip() {
+            return Ok(Some(next_track));
+        } else {
+            info!("Skipping {}", next_track.name());
+        }
+    }
+
+    Ok(None)
 }
 
 fn start_disconnect_timer(ctx: Arc<CommandContext>, mut abort: broadcast::Receiver<()>) {

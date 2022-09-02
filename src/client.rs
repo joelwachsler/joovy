@@ -2,6 +2,7 @@ use std::env;
 
 use anyhow::Result;
 
+use sea_orm::DatabaseConnection;
 use serenity::framework::standard::StandardFramework;
 use serenity::prelude::*;
 use songbird::SerenityInit;
@@ -10,7 +11,7 @@ use tracing::{info, instrument};
 use crate::{command_handler::CommandHandler, store::guild_stores::GuildStores};
 
 #[instrument]
-pub async fn run() -> Result<()> {
+pub async fn run(conn: DatabaseConnection) -> Result<()> {
     let token = env::var("DISCORD_TOKEN").expect("DISCORD_TOKEN not set");
     let intents = GatewayIntents::non_privileged() | GatewayIntents::MESSAGE_CONTENT;
 
@@ -33,7 +34,7 @@ pub async fn run() -> Result<()> {
 
     {
         let mut data = client.data.write().await;
-        data.insert::<GuildStores>(GuildStores::init_store());
+        data.insert::<GuildStores>(GuildStores::init_store(conn));
     }
 
     let _ = client

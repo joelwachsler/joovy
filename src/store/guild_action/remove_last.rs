@@ -15,7 +15,7 @@ impl Execute for RemoveLast {
     async fn execute(&self, store: &mut GuildStore) -> Result<()> {
         let RemoveLast { ctx } = self;
 
-        let track_to_skip = store.queue().len() - 1;
+        let track_to_skip = store.queue().await?.len() - 1;
         Remove::builder()
             .ctx(ctx.clone())
             .from(track_to_skip as u64)

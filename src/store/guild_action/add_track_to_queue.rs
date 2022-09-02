@@ -21,12 +21,12 @@ impl Execute for AddToQueue {
 
         let new_track = QueuedTrack::try_from_query(ctx, query).await?;
         let new_track_name = new_track.name();
-        store.add_to_queue_internal(new_track);
+        store.add_to_queue_internal(&new_track).await?;
 
         ctx.send(format!("{} has been added to the queue", new_track_name))
             .await?;
 
-        if !store.is_playing() {
+        if !store.is_playing().await? {
             PlayNextTrack::builder()
                 .ctx(ctx.clone())
                 .build()
@@ -54,42 +54,71 @@ impl HasCtx for AddToQueue {
 mod tests {
     use super::*;
 
-    #[test]
-    fn empty_queue() {
-        let mut store = GuildStore::default();
-        assert_eq!(store.next_track_in_queue(), None);
+    macro_rules! add_to_queue {
+        ($store:expr, $title:expr) => {
+            let _ = $store
+                .add_to_queue_internal(&QueuedTrack::create_for_test($title))
+                .await;
+        };
     }
 
-    #[test]
-    fn single_item() {
-        let mut store = GuildStore::default();
-        store.add_to_queue_internal(QueuedTrack::create_for_test("foo"));
-        assert_eq!(store.next_track_in_queue().unwrap().title(), "foo");
+    macro_rules! has_next_track_title {
+        ($store:expr, $title:expr) => {
+            assert_eq!(
+                $store.next_track_in_queue().await.unwrap().unwrap().title(),
+                $title
+            );
+        };
     }
 
-    #[test]
-    fn multiple_items() {
-        let mut store = GuildStore::default();
-        store.add_to_queue_internal(QueuedTrack::create_for_test("foo"));
-        store.add_to_queue_internal(QueuedTrack::create_for_test("bar"));
-        assert_eq!(store.next_track_in_queue().unwrap().title(), "foo");
-        assert_eq!(store.next_track_in_queue().unwrap().title(), "bar");
+    macro_rules! has_next_in_queue {
+        ($store:expr, $item:expr) => {
+            assert_eq!($store.next_track_in_queue().await.unwrap(), $item);
+        };
     }
 
-    #[test]
-    fn index_handling() {
+    macro_rules! is_playing {
+        ($store:expr, $playing:expr) => {
+            assert_eq!($store.is_playing().await.unwrap(), $playing);
+        };
+    }
+
+    #[tokio::test]
+    async fn empty_queue() {
+        let mut store = GuildStore::default();
+        has_next_in_queue!(store, None);
+    }
+
+    #[tokio::test]
+    async fn single_item() {
+        let mut store = GuildStore::default();
+        add_to_queue!(store, "foo");
+        has_next_track_title!(store, "foo");
+    }
+
+    #[tokio::test]
+    async fn multiple_items() {
+        let mut store = GuildStore::default();
+        add_to_queue!(store, "foo");
+        add_to_queue!(store, "bar");
+        has_next_track_title!(store, "foo");
+        has_next_track_title!(store, "bar");
+    }
+
+    #[tokio::test]
+    async fn index_handling() {
         let mut store = GuildStore::default();
 
-        assert_eq!(store.next_track_in_queue(), None);
-        assert!(!store.is_playing());
-        store.add_to_queue_internal(QueuedTrack::create_for_test("foo"));
-        assert!(!store.is_playing());
-        assert_eq!(store.next_track_in_queue().unwrap().title(), "foo");
-        assert!(store.is_playing());
-        assert_eq!(store.next_track_in_queue(), None);
-        assert!(!store.is_playing());
-        store.add_to_queue_internal(QueuedTrack::create_for_test("bar"));
-        assert_eq!(store.next_track_in_queue().unwrap().title(), "bar");
-        assert!(store.is_playing());
+        has_next_in_queue!(store, None);
+        is_playing!(store, false);
+        add_to_queue!(store, "foo");
+        is_playing!(store, false);
+        has_next_track_title!(store, "foo");
+        is_playing!(store, true);
+        has_next_in_queue!(store, None);
+        is_playing!(store, false);
+        add_to_queue!(store, "bar");
+        has_next_track_title!(store, "bar");
+        is_playing!(store, true);
     }
 }

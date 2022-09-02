@@ -1,5 +1,6 @@
 use anyhow::Result;
 use enum_dispatch::enum_dispatch;
+use sea_orm::DatabaseConnection;
 use serenity::async_trait;
 use std::{collections::HashMap, sync::Arc};
 use strum::AsRefStr;
@@ -49,12 +50,14 @@ pub trait Execute {
 
 pub struct GuildActionHandler {
     guild_senders: HashMap<u64, GuildStoreSender>,
+    conn: DatabaseConnection,
 }
 
 impl GuildActionHandler {
-    pub fn new() -> Self {
+    pub fn new(conn: DatabaseConnection) -> Self {
         Self {
             guild_senders: HashMap::new(),
+            conn,
         }
     }
 

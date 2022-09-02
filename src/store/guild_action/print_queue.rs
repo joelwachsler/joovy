@@ -18,10 +18,10 @@ impl Execute for PrintQueue {
     async fn execute(&self, store: &mut GuildStore) -> Result<()> {
         let PrintQueue { ctx } = self;
 
-        let queue = store.queue();
+        let queue = store.queue().await?;
 
-        let current_track_index = store.current_track_index().unwrap_or_default();
-        let output = match print_queue(queue, current_track_index) {
+        let current_track_index = store.current_track_index().await?.unwrap_or_default();
+        let output = match print_queue(&queue, current_track_index) {
             Some(output) => output,
             None => {
                 ctx.send("The queue is empty 👀").await?;
@@ -41,7 +41,7 @@ impl Execute for PrintQueue {
     }
 }
 
-fn print_queue(queue: Vec<&QueuedTrack>, current_track_index: usize) -> Option<Vec<String>> {
+fn print_queue(queue: &[QueuedTrack], current_track_index: usize) -> Option<Vec<String>> {
     if queue.is_empty() {
         return None;
     }
@@ -85,15 +85,14 @@ mod tests {
 
     #[test]
     fn empty_queue() {
-        assert_eq!(print_queue(vec![], 0), None);
+        assert_eq!(print_queue(&[], 0), None);
     }
 
     #[test]
     fn single_selected_item_in_queue() {
-        let track = QueuedTrack::default();
-        let queue = vec![&track];
+        let queue = vec![QueuedTrack::default()];
         assert_eq!(
-            print_queue(queue, 0).unwrap(),
+            print_queue(&queue, 0).unwrap(),
             vec![
                 "⬐ current track",
                 "`0` [ (0:00)]() [<@0>]",
@@ -104,10 +103,9 @@ mod tests {
 
     #[test]
     fn multiple_items_in_queue() {
-        let track = QueuedTrack::default();
-        let queue = vec![&track, &track];
+        let queue = vec![QueuedTrack::default(), QueuedTrack::default()];
         assert_eq!(
-            print_queue(queue, 0).unwrap(),
+            print_queue(&queue, 0).unwrap(),
             vec![
                 "⬐ current track",
                 "`0` [ (0:00)]() [<@0>]",
@@ -119,10 +117,9 @@ mod tests {
 
     #[test]
     fn after_first_item_in_queue() {
-        let track = QueuedTrack::default();
-        let queue = vec![&track, &track];
+        let queue = vec![QueuedTrack::default(), QueuedTrack::default()];
         assert_eq!(
-            print_queue(queue, 1).unwrap(),
+            print_queue(&queue, 1).unwrap(),
             vec![
                 "⬐ current track",
                 "`1` [ (0:00)]() [<@0>]",
@@ -133,10 +130,13 @@ mod tests {
 
     #[test]
     fn first_skipped_two_tracks_left() {
-        let track = QueuedTrack::default();
-        let queue = vec![&track, &track, &track];
+        let queue = vec![
+            QueuedTrack::default(),
+            QueuedTrack::default(),
+            QueuedTrack::default(),
+        ];
         assert_eq!(
-            print_queue(queue, 1).unwrap(),
+            print_queue(&queue, 1).unwrap(),
             vec![
                 "⬐ current track",
                 "`1` [ (0:00)]() [<@0>]",

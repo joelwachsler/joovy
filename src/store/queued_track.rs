@@ -7,6 +7,7 @@ pub struct QueuedTrack {
     title: String,
     url: String,
     author: u64,
+    username: String,
     duration: u32,
     skip: bool,
 }
@@ -16,13 +17,24 @@ impl QueuedTrack {
         &self.url
     }
 
+    pub fn author(&self) -> u64 {
+        self.author
+    }
+
+    pub fn username(&self) -> &str {
+        &self.username
+    }
+
     pub async fn try_from_query(ctx: &CommandContext, query: &str) -> Result<QueuedTrack> {
         let res = search::search(query).await?;
+        let user = &ctx.interaction().user;
+
         Ok(QueuedTrack {
             title: res.title().into(),
             url: res.url().into(),
             duration: res.duration(),
-            author: *ctx.interaction().user.id.as_u64(),
+            author: *user.id.as_u64(),
+            username: user.name.clone(),
             skip: false,
         })
     }
@@ -70,6 +82,7 @@ impl QueuedTrack {
             title: title.into(),
             url: "url".into(),
             author: 1,
+            username: "username".into(),
             duration: 1,
             skip: false,
         }
