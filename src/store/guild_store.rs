@@ -80,6 +80,10 @@ impl GuildStore {
         })
     }
 
+    pub fn store(&self) -> &StoreType {
+        &self.store
+    }
+
     pub async fn next_track_in_queue(&mut self) -> Result<Option<QueuedTrack>> {
         let queue = self.store.queue().await?;
         if queue.is_empty() {
@@ -142,9 +146,17 @@ impl GuildStore {
     }
 }
 
+pub struct TrackQueryResult {
+    pub title: String,
+    pub url: String,
+    pub duration: i32,
+}
+
 #[async_trait]
 pub trait Store {
     async fn queue(&self) -> Result<Vec<QueuedTrack>>;
     async fn add_track_to_queue(&mut self, track: &QueuedTrack) -> Result<()>;
     async fn skip_track(&mut self, index: i32) -> Result<()>;
+    async fn find_track_query_result(&self, query: &str) -> Result<Option<TrackQueryResult>>;
+    async fn add_track_query_result(&self, query: &str, track: &QueuedTrack) -> Result<()>;
 }

@@ -19,7 +19,7 @@ impl Execute for AddToQueue {
     async fn execute(&self, store: &mut GuildStore) -> Result<()> {
         let AddToQueue { ctx, query } = self;
 
-        let new_track = QueuedTrack::try_from_query(ctx, query).await?;
+        let new_track = QueuedTrack::try_from_query(ctx, query, store.store()).await?;
         let new_track_name = new_track.name();
         store.add_to_queue_internal(&new_track).await?;
 

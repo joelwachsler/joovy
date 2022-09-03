@@ -5,12 +5,18 @@ mod track_query_result;
 
 use anyhow::Result;
 use chrono::Utc;
-use sea_orm::{prelude::Uuid, ActiveModelTrait, DatabaseConnection, ModelTrait, Set};
+use sea_orm::{
+    prelude::Uuid, ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, ModelTrait,
+    QueryFilter, Set,
+};
 use serenity::{async_trait, futures::future::try_join_all};
 
 use self::{playlist::create_playlist, track::ToQueuedTrack};
 
-use super::{guild_store::Store, queued_track::QueuedTrack};
+use super::{
+    guild_store::{Store, TrackQueryResult},
+    queued_track::QueuedTrack,
+};
 
 pub struct DbStore {
     conn: DatabaseConnection,
@@ -72,5 +78,48 @@ impl Store for DbStore {
         }
 
         Ok(())
+    }
+
+    async fn find_track_query_result(&self, query: &str) -> Result<Option<TrackQueryResult>> {
+        let res = entity::track_query::Entity::find()
+            .filter(entity::track_query::Column::Query.eq(query))
+            .one(self.conn())
+            .await?;
+
+        if let Some(track_query) = res {
+            let res = track_query
+                .find_related(entity::track_query_result::Entity)
+                .one(self.conn())
+                .await?;
+            Ok(res.map(|item| item.into()))
+        } else {
+            Ok(None)
+        }
+    }
+
+    async fn add_track_query_result(&self, query: &str, track: &QueuedTrack) -> Result<()> {
+        let res = self
+            .get_or_create_track_query_result(track.title(), track.url(), track.duration())
+            .await?;
+
+        let track_query = entity::track_query::ActiveModel {
+            query: Set(query.into()),
+            track_query_result: Set(res.id),
+            ..Default::default()
+        };
+
+        track_query.insert(self.conn()).await?;
+
+        Ok(())
+    }
+}
+
+impl From<entity::track_query_result::Model> for TrackQueryResult {
+    fn from(model: entity::track_query_result::Model) -> Self {
+        TrackQueryResult {
+            title: model.title,
+            url: model.url,
+            duration: model.duration,
+        }
     }
 }

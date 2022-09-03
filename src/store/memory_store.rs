@@ -1,7 +1,10 @@
 use anyhow::Result;
 use serenity::async_trait;
 
-use super::{guild_store::Store, queued_track::QueuedTrack};
+use super::{
+    guild_store::{Store, TrackQueryResult},
+    queued_track::QueuedTrack,
+};
 
 #[derive(Default)]
 pub struct MemoryStore {
@@ -25,6 +28,14 @@ impl Store for MemoryStore {
             .get_mut(index as usize)
             .map(|track| track.skip_track());
 
+        Ok(())
+    }
+
+    async fn find_track_query_result(&self, query: &str) -> Result<Option<TrackQueryResult>> {
+        Ok(None)
+    }
+
+    async fn add_track_query_result(&self, query: &str, track: &QueuedTrack) -> Result<()> {
         Ok(())
     }
 }

@@ -2,6 +2,8 @@ use anyhow::Result;
 
 use crate::command_context::CommandContext;
 
+use super::guild_store::StoreType;
+
 #[derive(Debug, Clone, Eq, PartialEq, Default)]
 pub struct QueuedTrack {
     pub title: String,
@@ -29,18 +31,36 @@ impl QueuedTrack {
         &self.duration
     }
 
-    pub async fn try_from_query(ctx: &CommandContext, query: &str) -> Result<QueuedTrack> {
-        let res = search::search(query).await?;
+    pub async fn try_from_query(
+        ctx: &CommandContext,
+        query: &str,
+        store: &StoreType,
+    ) -> Result<QueuedTrack> {
         let user = &ctx.interaction().user;
+        if let Some(track) = store.find_track_query_result(query).await? {
+            Ok(QueuedTrack {
+                title: track.title,
+                url: track.url,
+                author: *user.id.as_u64(),
+                username: user.name.clone(),
+                duration: track.duration,
+                skip: false,
+            })
+        } else {
+            let res = search::search(query).await?;
 
-        Ok(QueuedTrack {
-            title: res.title().into(),
-            url: res.url().into(),
-            duration: res.duration() as i32,
-            author: *user.id.as_u64(),
-            username: user.name.clone(),
-            skip: false,
-        })
+            let queued_track = QueuedTrack {
+                title: res.title().into(),
+                url: res.url().into(),
+                duration: res.duration() as i32,
+                author: *user.id.as_u64(),
+                username: user.name.clone(),
+                skip: false,
+            };
+
+            store.add_track_query_result(query, &queued_track).await?;
+            Ok(queued_track)
+        }
     }
 
     /// The name to display if printed in the discord chat. Unlike the title this name
