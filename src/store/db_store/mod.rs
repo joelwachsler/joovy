@@ -1,75 +1,76 @@
+mod author;
+mod playlist;
+
 use anyhow::Result;
 use chrono::Utc;
-use entity::author::Column;
-use sea_orm::{ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, Set};
+use sea_orm::{
+    prelude::Uuid, ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, Set,
+};
 use serenity::async_trait;
-use tracing::error;
 
-use super::{guild_store::Store, queued_track::QueuedTrack};
+use super::{
+    guild_store::{CurrentTrack, Store},
+    queued_track::QueuedTrack,
+};
 
 pub struct DbStore {
     conn: DatabaseConnection,
+    playlist: entity::playlist::Model,
 }
 
 impl DbStore {
-    pub fn new(conn: DatabaseConnection) -> Self {
-        Self { conn }
+    pub async fn create(conn: DatabaseConnection, channel_id: &str) -> Result<Self> {
+        let playlist = create_playlist(&conn, channel_id).await?;
+        Ok(Self { conn, playlist })
+    }
+
+    fn conn(&self) -> &DatabaseConnection {
+        &self.conn
     }
 }
 
 #[async_trait]
 impl Store for DbStore {
-    // async fn queue_changed(&self, new_queue: Vec<QueuedTrack>) -> Result<()> {
-    //     for item in new_queue {
-    //         let _ = self
-    //             .get_or_create_author(item.author(), item.username())
-    //             .await
-    //             .map_err(|e| error!("Failed to get or create user: {e:?}"));
-    //     }
-
-    //     Ok(())
-    // }
-}
-
-impl DbStore {
-    async fn get_or_create_author(
-        &self,
-        discord_id: u64,
-        username: &str,
-    ) -> Result<entity::author::Model> {
-        if let Some(author) = self.find_author(discord_id).await? {
-            return Ok(author);
-        }
-
-        let res = self.create_author(discord_id, username).await?;
-        Ok(res)
+    async fn current_track(&self) -> Result<CurrentTrack> {
+        Ok(self.current_track)
     }
 
-    async fn create_author(
-        &self,
-        discord_id: u64,
-        username: &str,
-    ) -> Result<entity::author::Model> {
-        let new_user = entity::author::ActiveModel {
-            discord_id: Set(discord_id),
-            username: Set(username.into()),
-            created_at: Set(Utc::now().into()),
-            updated_at: Set(Utc::now().into()),
-            ..Default::default()
-        };
-
-        new_user.insert(&self.conn).await?;
-
-        let res = self.find_author(discord_id).await?.unwrap();
-        Ok(res)
+    async fn set_current_track(&mut self, track: &CurrentTrack) -> Result<()> {
+        self.current_track = *track;
+        Ok(())
     }
 
-    async fn find_author(&self, discord_id: u64) -> Result<Option<entity::author::Model>> {
-        let res = entity::author::Entity::find()
-            .filter(Column::DiscordId.eq(discord_id))
-            .one(&self.conn)
+    async fn queue(&self) -> Result<Vec<QueuedTrack>> {
+        let res = entity::track::Entity::find()
+            .filter(entity::track::Column::Playlist.eq(self.playlist_id))
+            .all(&self.conn)
             .await?;
 
-        Ok(res)
+        Ok(res.into_iter().map(|item| item.into()).collect())
+    }
+
+    async fn add_track_to_queue(&mut self, track: &QueuedTrack) -> Result<()> {
+        self.queue.push(track.clone());
+        Ok(())
+    }
+
+    async fn edit_track(&mut self, index: usize, track: &QueuedTrack) -> Result<()> {
+        self.queue[index] = track.clone();
+        Ok(())
+    }
+}
+
+impl From<entity::track::Model> for QueuedTrack {
+    fn from(item: entity::track::Model) -> Self {
+        // QueuedTrack {
+        //     title: item.,
+        //     url: item.link,
+        //     author: item.author,
+        //     username: item.id,
+        //     duration: todo!(),
+        //     skip: todo!(),
+        // }
+
+        todo!()
     }
 }
