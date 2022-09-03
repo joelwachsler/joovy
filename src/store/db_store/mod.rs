@@ -1,27 +1,32 @@
 mod author;
 mod playlist;
+mod track;
+mod track_query_result;
 
 use anyhow::Result;
 use chrono::Utc;
-use sea_orm::{
-    prelude::Uuid, ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, Set,
-};
-use serenity::async_trait;
+use sea_orm::{prelude::Uuid, ActiveModelTrait, DatabaseConnection, ModelTrait, Set};
+use serenity::{async_trait, futures::future::try_join_all};
 
-use super::{
-    guild_store::{CurrentTrack, Store},
-    queued_track::QueuedTrack,
-};
+use self::{playlist::create_playlist, track::ToQueuedTrack};
+
+use super::{guild_store::Store, queued_track::QueuedTrack};
 
 pub struct DbStore {
     conn: DatabaseConnection,
-    playlist: entity::playlist::Model,
+    index: i32,
+    playlist: Uuid,
 }
 
 impl DbStore {
-    pub async fn create(conn: DatabaseConnection, channel_id: &str) -> Result<Self> {
-        let playlist = create_playlist(&conn, channel_id).await?;
-        Ok(Self { conn, playlist })
+    pub async fn create(conn: &DatabaseConnection, channel_id: &u64) -> Result<Self> {
+        let playlist = create_playlist(conn, channel_id).await?;
+
+        Ok(Self {
+            conn: conn.clone(),
+            index: 0,
+            playlist: playlist.id,
+        })
     }
 
     fn conn(&self) -> &DatabaseConnection {
@@ -31,46 +36,41 @@ impl DbStore {
 
 #[async_trait]
 impl Store for DbStore {
-    async fn current_track(&self) -> Result<CurrentTrack> {
-        Ok(self.current_track)
-    }
-
-    async fn set_current_track(&mut self, track: &CurrentTrack) -> Result<()> {
-        self.current_track = *track;
-        Ok(())
-    }
-
     async fn queue(&self) -> Result<Vec<QueuedTrack>> {
-        let res = entity::track::Entity::find()
-            .filter(entity::track::Column::Playlist.eq(self.playlist_id))
-            .all(&self.conn)
+        let playlist = self.find_playlist(&self.playlist).await?.unwrap();
+        let tracks = playlist
+            .find_related(entity::track::Entity)
+            .all(self.conn())
             .await?;
 
-        Ok(res.into_iter().map(|item| item.into()).collect())
+        let tracks_as_queued_tracks = tracks
+            .into_iter()
+            .map(|track| track.into_to_queued_track(self.conn()));
+
+        Ok(try_join_all(tracks_as_queued_tracks).await?)
     }
 
     async fn add_track_to_queue(&mut self, track: &QueuedTrack) -> Result<()> {
-        self.queue.push(track.clone());
+        let author = self
+            .get_or_create_author(track.author() as i64, track.username())
+            .await?;
+        let track_query_result = self
+            .get_or_create_track_query_result(track.title(), track.url(), track.duration())
+            .await?;
+
+        self.create_track(author.id, track_query_result.id).await?;
+
         Ok(())
     }
 
-    async fn edit_track(&mut self, index: usize, track: &QueuedTrack) -> Result<()> {
-        self.queue[index] = track.clone();
+    async fn skip_track(&mut self, index: i32) -> Result<()> {
+        if let Some(track) = self.find_track(index).await? {
+            let mut model: entity::track::ActiveModel = track.into();
+            model.skip = Set(true);
+            model.updated_at = Set(Utc::now().into());
+            model.insert(self.conn()).await?;
+        }
+
         Ok(())
-    }
-}
-
-impl From<entity::track::Model> for QueuedTrack {
-    fn from(item: entity::track::Model) -> Self {
-        // QueuedTrack {
-        //     title: item.,
-        //     url: item.link,
-        //     author: item.author,
-        //     username: item.id,
-        //     duration: todo!(),
-        //     skip: todo!(),
-        // }
-
-        todo!()
     }
 }

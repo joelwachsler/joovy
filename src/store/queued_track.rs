@@ -4,12 +4,12 @@ use crate::command_context::CommandContext;
 
 #[derive(Debug, Clone, Eq, PartialEq, Default)]
 pub struct QueuedTrack {
-    title: String,
-    url: String,
-    author: u64,
-    username: String,
-    duration: u32,
-    skip: bool,
+    pub title: String,
+    pub url: String,
+    pub author: u64,
+    pub username: String,
+    pub duration: i32,
+    pub skip: bool,
 }
 
 impl QueuedTrack {
@@ -25,6 +25,10 @@ impl QueuedTrack {
         &self.username
     }
 
+    pub fn duration(&self) -> &i32 {
+        &self.duration
+    }
+
     pub async fn try_from_query(ctx: &CommandContext, query: &str) -> Result<QueuedTrack> {
         let res = search::search(query).await?;
         let user = &ctx.interaction().user;
@@ -32,7 +36,7 @@ impl QueuedTrack {
         Ok(QueuedTrack {
             title: res.title().into(),
             url: res.url().into(),
-            duration: res.duration(),
+            duration: res.duration() as i32,
             author: *user.id.as_u64(),
             username: user.name.clone(),
             skip: false,
@@ -71,7 +75,6 @@ impl QueuedTrack {
         self.skip
     }
 
-    #[cfg(test)]
     pub fn title(&self) -> &str {
         &self.title
     }

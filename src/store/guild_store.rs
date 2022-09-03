@@ -22,9 +22,10 @@ pub enum CurrentTrack {
 pub async fn init_guild_store_receiver(
     mut receiver: GuildStoreReceiver,
     initial_ctx: &CommandContext,
+    store: StoreType,
 ) {
     info!("Initializing new guild store receiver...");
-    let mut store = match GuildStore::new(initial_ctx).await {
+    let mut store = match GuildStore::new(initial_ctx, store).await {
         Ok(store) => store,
         Err(err) => {
             let _ = initial_ctx
@@ -50,25 +51,33 @@ pub async fn init_guild_store_receiver(
     });
 }
 
+pub type StoreType = Box<dyn Store + Send + Sync>;
+
 /// The current state of a single guild.
 pub struct GuildStore {
     pub disconnect_handle: Option<broadcast::Sender<()>>,
-    store: Box<dyn Store + Send + Sync>,
+    current_track: CurrentTrack,
+    store: StoreType,
 }
 
 impl Default for GuildStore {
     fn default() -> Self {
         Self {
             disconnect_handle: Default::default(),
+            current_track: CurrentTrack::None,
             store: Box::new(MemoryStore::default()),
         }
     }
 }
 
 impl GuildStore {
-    pub async fn new(ctx: &CommandContext) -> Result<Self> {
+    pub async fn new(ctx: &CommandContext, store: StoreType) -> Result<Self> {
         ctx.join_voice().await?;
-        Ok(GuildStore::default())
+        Ok(GuildStore {
+            disconnect_handle: Default::default(),
+            current_track: CurrentTrack::None,
+            store,
+        })
     }
 
     pub async fn next_track_in_queue(&mut self) -> Result<Option<QueuedTrack>> {
@@ -77,49 +86,40 @@ impl GuildStore {
             return Ok(None);
         }
 
-        let current_track = self.store.current_track().await?;
-
-        match current_track {
+        match self.current_track {
             CurrentTrack::Last(track) => {
                 if queue.len() != track {
-                    self.set_track(&CurrentTrack::Index(track + 1)).await?;
+                    self.current_track = CurrentTrack::Index(track + 1);
                 }
             }
             CurrentTrack::Index(track) => {
                 if queue.len() <= track + 1 {
-                    self.set_track(&CurrentTrack::Last(track)).await?;
+                    self.current_track = CurrentTrack::Last(track);
                 } else {
-                    self.set_track(&CurrentTrack::Index(track + 1)).await?;
+                    self.current_track = CurrentTrack::Index(track + 1);
                 }
             }
             CurrentTrack::None => {
-                self.store
-                    .set_current_track(&CurrentTrack::Index(0))
-                    .await?
+                self.current_track = CurrentTrack::Index(0);
             }
         }
 
         self.current_track().await
     }
 
-    async fn set_track(&mut self, track: &CurrentTrack) -> Result<()> {
-        self.store.set_current_track(track).await
-    }
-
-    pub async fn current_track_index(&self) -> Result<Option<usize>> {
-        match self.store.current_track().await? {
-            CurrentTrack::Index(index) => Ok(Some(index)),
-            _ => Ok(None),
+    pub fn current_track_index(&self) -> Option<usize> {
+        match self.current_track {
+            CurrentTrack::Index(index) => Some(index),
+            _ => None,
         }
     }
 
     pub async fn is_playing(&self) -> Result<bool> {
-        let current_track = self.store.current_track().await?;
-        Ok(matches!(current_track, CurrentTrack::Index(_)))
+        Ok(matches!(self.current_track, CurrentTrack::Index(_)))
     }
 
     pub async fn current_track(&self) -> Result<Option<QueuedTrack>> {
-        let track_index = match self.current_track_index().await? {
+        let track_index = match self.current_track_index() {
             Some(index) => index,
             None => return Ok(None),
         };
@@ -129,27 +129,22 @@ impl GuildStore {
         Ok(track.cloned())
     }
 
-    pub async fn update_track(&mut self, index: usize, track: &QueuedTrack) -> Result<()> {
-        self.store.edit_track(index, track).await?;
-        Ok(())
+    pub async fn skip_track(&mut self, index: i32) -> Result<()> {
+        self.store.skip_track(index).await
     }
 
     pub async fn queue(&self) -> Result<Vec<QueuedTrack>> {
-        let res = self.store.queue().await?;
-        Ok(res)
+        self.store.queue().await
     }
 
     pub async fn add_to_queue_internal(&mut self, track: &QueuedTrack) -> Result<()> {
-        self.store.add_track_to_queue(track).await?;
-        Ok(())
+        self.store.add_track_to_queue(track).await
     }
 }
 
 #[async_trait]
 pub trait Store {
-    async fn current_track(&self) -> Result<CurrentTrack>;
-    async fn set_current_track(&mut self, track: &CurrentTrack) -> Result<()>;
     async fn queue(&self) -> Result<Vec<QueuedTrack>>;
     async fn add_track_to_queue(&mut self, track: &QueuedTrack) -> Result<()>;
-    async fn edit_track(&mut self, index: usize, track: &QueuedTrack) -> Result<()>;
+    async fn skip_track(&mut self, index: i32) -> Result<()>;
 }

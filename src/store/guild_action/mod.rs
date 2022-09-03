@@ -7,6 +7,7 @@ use strum::AsRefStr;
 use tokio::sync::mpsc::{self, Receiver, Sender};
 use tracing::info;
 
+use super::db_store::DbStore;
 use super::guild_store::{init_guild_store_receiver, GuildStore};
 use crate::command_context::CommandContext;
 use crate::store::guild_action::add_track_to_queue::AddToQueue;
@@ -91,8 +92,9 @@ impl GuildActionHandler {
         channel_id: &u64,
     ) -> Result<GuildStoreSender> {
         if !self.guild_senders.contains_key(channel_id) {
+            let store = Box::new(DbStore::create(&self.conn, channel_id).await?);
             let (tx, rx) = mpsc::channel(100);
-            init_guild_store_receiver(rx, ctx).await;
+            init_guild_store_receiver(rx, ctx, store).await;
             self.guild_senders.insert(*channel_id, tx);
         }
 

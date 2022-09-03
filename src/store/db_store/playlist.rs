@@ -1,26 +1,29 @@
 use anyhow::Result;
 use chrono::Utc;
-use entity::playlist::{ActiveModel, Entity, Model};
+use entity::playlist::*;
 use sea_orm::{prelude::*, Set};
 
-pub async fn create_playlist(conn: &DatabaseConnection, channel_id: &str) -> Result<Model> {
+use super::DbStore;
+
+pub async fn create_playlist(conn: &DatabaseConnection, channel_id: &u64) -> Result<Model> {
     let id = Uuid::new_v4();
 
-    let new_playlist = ActiveModel {
+    let playlist = ActiveModel {
         id: Set(id),
-        channel_id: Set(channel_id.into()),
+        channel_id: Set(*channel_id as i64),
         created_at: Set(Utc::now().into()),
         updated_at: Set(Utc::now().into()),
     };
 
-    new_playlist.insert(conn).await?;
-
-    let res = find_playlist(conn, &id).await?.unwrap();
-    Ok(res)
+    Ok(playlist.insert(conn).await?)
 }
 
 pub async fn find_playlist(conn: &DatabaseConnection, id: &Uuid) -> Result<Option<Model>> {
-    let res = Entity::find_by_id(id.clone()).one(conn).await?;
+    Ok(Entity::find_by_id(*id).one(conn).await?)
+}
 
-    Ok(res)
+impl DbStore {
+    pub async fn find_playlist(&self, id: &Uuid) -> Result<Option<Model>> {
+        find_playlist(self.conn(), id).await
+    }
 }

@@ -29,9 +29,7 @@ impl Execute for Remove {
 
         for i in (*from)..to.unwrap_or(from + 1) {
             if let Some(track) = queue.get(i as usize) {
-                let mut cloned_track = track.clone();
-                cloned_track.skip_track();
-                store.update_track(i as usize, &cloned_track).await?;
+                store.skip_track(i as i32).await?;
                 ctx.send(format!("{} has been removed from the queue.", track.name()))
                     .await?;
             }

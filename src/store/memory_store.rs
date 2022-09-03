@@ -1,36 +1,15 @@
 use anyhow::Result;
 use serenity::async_trait;
 
-use super::{
-    guild_store::{CurrentTrack, Store},
-    queued_track::QueuedTrack,
-};
+use super::{guild_store::Store, queued_track::QueuedTrack};
 
+#[derive(Default)]
 pub struct MemoryStore {
-    current_track: CurrentTrack,
     queue: Vec<QueuedTrack>,
-}
-
-impl Default for MemoryStore {
-    fn default() -> Self {
-        Self {
-            current_track: CurrentTrack::None,
-            queue: vec![],
-        }
-    }
 }
 
 #[async_trait]
 impl Store for MemoryStore {
-    async fn current_track(&self) -> Result<CurrentTrack> {
-        Ok(self.current_track)
-    }
-
-    async fn set_current_track(&mut self, track: &CurrentTrack) -> Result<()> {
-        self.current_track = *track;
-        Ok(())
-    }
-
     async fn queue(&self) -> Result<Vec<QueuedTrack>> {
         Ok(self.queue.clone())
     }
@@ -40,8 +19,12 @@ impl Store for MemoryStore {
         Ok(())
     }
 
-    async fn edit_track(&mut self, index: usize, track: &QueuedTrack) -> Result<()> {
-        self.queue[index] = track.clone();
+    async fn skip_track(&mut self, index: i32) -> Result<()> {
+        let _ = self
+            .queue
+            .get_mut(index as usize)
+            .map(|track| track.skip_track());
+
         Ok(())
     }
 }
