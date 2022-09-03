@@ -19,7 +19,12 @@ impl MigrationTrait for Migration {
                             .primary_key(),
                     )
                     .col(ColumnDef::new(TrackQueryResult::Title).string().not_null())
-                    .col(ColumnDef::new(TrackQueryResult::Url).string().not_null())
+                    .col(
+                        ColumnDef::new(TrackQueryResult::Url)
+                            .string()
+                            .not_null()
+                            .unique_key(),
+                    )
                     .col(
                         ColumnDef::new(TrackQueryResult::Duration)
                             .string()

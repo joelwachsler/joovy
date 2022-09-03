@@ -20,8 +20,7 @@ impl MigrationTrait for Migration {
                     )
                     .col(
                         ColumnDef::new(Author::DiscordId)
-                            .big_integer()
-                            .unsigned()
+                            .big_unsigned()
                             .unique_key()
                             .not_null(),
                     )
