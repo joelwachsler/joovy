@@ -3,3 +3,5 @@
 pub use super::author::Entity as Author;
 pub use super::playlist::Entity as Playlist;
 pub use super::track::Entity as Track;
+pub use super::track_query::Entity as TrackQuery;
+pub use super::track_query_result::Entity as TrackQueryResult;

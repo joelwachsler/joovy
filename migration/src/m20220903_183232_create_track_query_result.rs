@@ -9,30 +9,29 @@ impl MigrationTrait for Migration {
         manager
             .create_table(
                 Table::create()
-                    .table(Author::Table)
+                    .table(TrackQueryResult::Table)
                     .if_not_exists()
                     .col(
-                        ColumnDef::new(Author::Id)
+                        ColumnDef::new(TrackQueryResult::Id)
                             .integer()
                             .not_null()
                             .auto_increment()
                             .primary_key(),
                     )
+                    .col(ColumnDef::new(TrackQueryResult::Title).string().not_null())
+                    .col(ColumnDef::new(TrackQueryResult::Url).string().not_null())
                     .col(
-                        ColumnDef::new(Author::DiscordId)
-                            .big_integer()
-                            .unsigned()
-                            .unique_key()
+                        ColumnDef::new(TrackQueryResult::Duration)
+                            .string()
                             .not_null(),
                     )
-                    .col(ColumnDef::new(Author::Username).string().not_null())
                     .col(
-                        ColumnDef::new(Author::CreatedAt)
+                        ColumnDef::new(TrackQueryResult::CreatedAt)
                             .timestamp_with_time_zone()
                             .not_null(),
                     )
                     .col(
-                        ColumnDef::new(Author::UpdatedAt)
+                        ColumnDef::new(TrackQueryResult::UpdatedAt)
                             .timestamp_with_time_zone()
                             .not_null(),
                     )
@@ -43,17 +42,18 @@ impl MigrationTrait for Migration {
 
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
-            .drop_table(Table::drop().table(Author::Table).to_owned())
+            .drop_table(Table::drop().table(TrackQueryResult::Table).to_owned())
             .await
     }
 }
 
 #[derive(Iden)]
-pub enum Author {
+pub enum TrackQueryResult {
     Table,
     Id,
-    DiscordId,
-    Username,
+    Title,
+    Url,
+    Duration,
     CreatedAt,
     UpdatedAt,
 }

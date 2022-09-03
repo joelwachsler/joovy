@@ -14,11 +14,11 @@ entity Track {
 }
 
 entity TrackQuery {
-  query
+  query: string
 }
 
 entity TrackQueryResult {
-  name: string
+  title: string
   url: string
   duration: int
 }

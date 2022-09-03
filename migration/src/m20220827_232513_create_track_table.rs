@@ -30,10 +30,8 @@ impl MigrationTrait for Migration {
                             .from_col(Track::Playlist)
                             .to_col(Playlist::Id),
                     )
-                    .col(ColumnDef::new(Track::Name).string().not_null())
-                    .col(ColumnDef::new(Track::Link).string().not_null())
                     .col(
-                        ColumnDef::new(Track::Removed)
+                        ColumnDef::new(Track::Skip)
                             .boolean()
                             .not_null()
                             .default(false),
@@ -69,13 +67,11 @@ impl MigrationTrait for Migration {
 }
 
 #[derive(Iden)]
-enum Track {
+pub enum Track {
     Table,
     Id,
     Playlist,
-    Name,
-    Link,
-    Removed,
+    Skip,
     Author,
     CreatedAt,
     UpdatedAt,

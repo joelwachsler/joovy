@@ -2,18 +2,17 @@
 
 use sea_orm::entity::prelude::*;
 
-#[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel)]
+#[derive(Clone, Debug, PartialEq, DeriveEntityModel)]
 #[sea_orm(table_name = "track")]
 pub struct Model {
     #[sea_orm(primary_key)]
     pub id: i32,
     pub playlist: Uuid,
-    pub name: String,
-    pub link: String,
-    pub removed: bool,
+    pub skip: bool,
     pub author: i32,
     pub created_at: DateTimeWithTimeZone,
     pub updated_at: DateTimeWithTimeZone,
+    pub track_query_result: i32,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
@@ -34,6 +33,14 @@ pub enum Relation {
         on_delete = "NoAction"
     )]
     Playlist,
+    #[sea_orm(
+        belongs_to = "super::track_query_result::Entity",
+        from = "Column::TrackQueryResult",
+        to = "super::track_query_result::Column::Id",
+        on_update = "NoAction",
+        on_delete = "NoAction"
+    )]
+    TrackQueryResult,
 }
 
 impl Related<super::author::Entity> for Entity {
@@ -45,6 +52,12 @@ impl Related<super::author::Entity> for Entity {
 impl Related<super::playlist::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::Playlist.def()
+    }
+}
+
+impl Related<super::track_query_result::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::TrackQueryResult.def()
     }
 }
 

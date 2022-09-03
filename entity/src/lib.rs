@@ -5,3 +5,5 @@ pub mod prelude;
 pub mod author;
 pub mod playlist;
 pub mod track;
+pub mod track_query;
+pub mod track_query_result;
