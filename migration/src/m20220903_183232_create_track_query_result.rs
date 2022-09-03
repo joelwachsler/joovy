@@ -27,7 +27,7 @@ impl MigrationTrait for Migration {
                     )
                     .col(
                         ColumnDef::new(TrackQueryResult::Duration)
-                            .string()
+                            .integer()
                             .not_null(),
                     )
                     .col(

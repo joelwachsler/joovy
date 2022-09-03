@@ -36,6 +36,7 @@ impl MigrationTrait for Migration {
                             .not_null()
                             .default(false),
                     )
+                    .col(ColumnDef::new(Track::Index).integer().not_null())
                     .col(ColumnDef::new(Track::Author).integer().not_null())
                     .foreign_key(
                         ForeignKeyCreateStatement::new()
@@ -71,6 +72,7 @@ pub enum Track {
     Table,
     Id,
     Playlist,
+    Index,
     Skip,
     Author,
     CreatedAt,

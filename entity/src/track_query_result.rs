@@ -10,7 +10,7 @@ pub struct Model {
     pub title: String,
     #[sea_orm(unique)]
     pub url: String,
-    pub duration: String,
+    pub duration: i32,
     pub created_at: DateTimeWithTimeZone,
     pub updated_at: DateTimeWithTimeZone,
 }

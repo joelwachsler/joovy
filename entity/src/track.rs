@@ -9,6 +9,7 @@ pub struct Model {
     pub id: i32,
     pub playlist: Uuid,
     pub skip: bool,
+    pub index: i32,
     pub author: i32,
     pub created_at: DateTimeWithTimeZone,
     pub updated_at: DateTimeWithTimeZone,

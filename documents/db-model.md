@@ -6,10 +6,10 @@ entity Author {
 
 entity Playlist {
   channel_id: int
-  end_of_playlist: bool
 }
 
 entity Track {
+  index: int
   skip: bool
 }
 
@@ -25,7 +25,6 @@ entity TrackQueryResult {
 
 Author --{ Track: Requester
 Playlist -{ Track: Playlist tracks
-Playlist -- Track: Current track
 Track }-- TrackQueryResult
 TrackQueryResult --{ TrackQuery: Resulted in track
 

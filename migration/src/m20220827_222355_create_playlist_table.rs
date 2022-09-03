@@ -12,7 +12,11 @@ impl MigrationTrait for Migration {
                     .table(Playlist::Table)
                     .if_not_exists()
                     .col(ColumnDef::new(Playlist::Id).uuid().not_null().primary_key())
-                    .col(ColumnDef::new(Playlist::ChannelId).string().not_null())
+                    .col(
+                        ColumnDef::new(Playlist::ChannelId)
+                            .big_unsigned()
+                            .not_null(),
+                    )
                     .col(
                         ColumnDef::new(Playlist::CreatedAt)
                             .timestamp_with_time_zone()
