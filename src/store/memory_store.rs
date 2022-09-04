@@ -31,11 +31,11 @@ impl Store for MemoryStore {
         Ok(())
     }
 
-    async fn find_track_query_result(&self, query: &str) -> Result<Option<TrackQueryResult>> {
+    async fn find_track_query_result(&self, _query: &str) -> Result<Option<TrackQueryResult>> {
         Ok(None)
     }
 
-    async fn add_track_query_result(&self, query: &str, track: &QueuedTrack) -> Result<()> {
+    async fn add_track_query_result(&self, _query: &str, _track: &QueuedTrack) -> Result<()> {
         Ok(())
     }
 }
