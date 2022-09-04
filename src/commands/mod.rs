@@ -15,6 +15,7 @@ use self::disconnect::Disconnect;
 use self::ping::Ping;
 use self::play::Play;
 use self::queue::Queue;
+use self::regenerate::Regenerate;
 use self::skip::Skip;
 use self::skip_last::SkipLast;
 
@@ -22,6 +23,7 @@ mod disconnect;
 mod ping;
 mod play;
 mod queue;
+mod regenerate;
 mod skip;
 mod skip_last;
 
@@ -46,6 +48,7 @@ pub enum JoovyCommands {
     Skip,
     SkipLast,
     Queue,
+    Regenerate,
 }
 
 impl JoovyCommands {

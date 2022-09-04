@@ -10,6 +10,7 @@ use sea_orm::{
     QueryFilter, Set,
 };
 use serenity::{async_trait, futures::future::try_join_all};
+use tracing::info;
 
 use self::{playlist::create_playlist, track::ToQueuedTrack};
 
@@ -22,6 +23,7 @@ pub struct DbStore {
     conn: DatabaseConnection,
     index: i32,
     playlist: Uuid,
+    channel_id: u64,
 }
 
 impl DbStore {
@@ -32,6 +34,7 @@ impl DbStore {
             conn: conn.clone(),
             index: 0,
             playlist: playlist.id,
+            channel_id: *channel_id,
         })
     }
 
@@ -40,20 +43,27 @@ impl DbStore {
     }
 }
 
+async fn playlist_to_queued_tracks(
+    conn: &DatabaseConnection,
+    playlist: &entity::playlist::Model,
+) -> Result<Vec<QueuedTrack>> {
+    let tracks = playlist
+        .find_related(entity::track::Entity)
+        .all(conn)
+        .await?;
+
+    let tracks_as_queued_tracks = tracks
+        .into_iter()
+        .map(|track| track.into_to_queued_track(conn));
+
+    try_join_all(tracks_as_queued_tracks).await
+}
+
 #[async_trait]
 impl Store for DbStore {
     async fn queue(&self) -> Result<Vec<QueuedTrack>> {
         let playlist = self.find_playlist(&self.playlist).await?.unwrap();
-        let tracks = playlist
-            .find_related(entity::track::Entity)
-            .all(self.conn())
-            .await?;
-
-        let tracks_as_queued_tracks = tracks
-            .into_iter()
-            .map(|track| track.into_to_queued_track(self.conn()));
-
-        Ok(try_join_all(tracks_as_queued_tracks).await?)
+        playlist_to_queued_tracks(self.conn(), &playlist).await
     }
 
     async fn add_track_to_queue(&mut self, track: &QueuedTrack) -> Result<()> {
@@ -111,6 +121,18 @@ impl Store for DbStore {
         track_query.insert(self.conn()).await?;
 
         Ok(())
+    }
+
+    async fn get_previous_queue(&self) -> Result<Option<Vec<QueuedTrack>>> {
+        let last_playlist = self.find_last_playlists(1).await?;
+        info!("Found the following playlists: {:?}", last_playlist);
+        let last_playlist = match last_playlist.get(0) {
+            Some(playlist) => playlist,
+            None => return Ok(None),
+        };
+
+        let res = playlist_to_queued_tracks(self.conn(), last_playlist).await?;
+        Ok(Some(res))
     }
 }
 

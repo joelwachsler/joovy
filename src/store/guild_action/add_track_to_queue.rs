@@ -1,4 +1,4 @@
-use anyhow::Result;
+use anyhow::{bail, Result};
 use serenity::async_trait;
 use std::sync::Arc;
 use typed_builder::TypedBuilder;
@@ -17,9 +17,16 @@ use super::play_next_track::PlayNextTrack;
 #[async_trait]
 impl Execute for AddToQueue {
     async fn execute(&self, store: &mut GuildStore) -> Result<()> {
-        let AddToQueue { ctx, query } = self;
+        let AddToQueue { ctx, query, track } = self;
 
-        let new_track = QueuedTrack::try_from_query(ctx, query, store.store()).await?;
+        let new_track = if let Some(track) = track {
+            track.clone()
+        } else if let Some(query) = query {
+            QueuedTrack::try_from_query(ctx, query, store.store()).await?
+        } else {
+            bail!("No query or track was defined...")
+        };
+
         let new_track_name = new_track.name();
         store.add_to_queue_internal(&new_track).await?;
 
@@ -41,7 +48,10 @@ impl Execute for AddToQueue {
 #[derive(TypedBuilder)]
 pub struct AddToQueue {
     ctx: Arc<CommandContext>,
-    pub query: String,
+    #[builder(default, setter(strip_option))]
+    pub query: Option<String>,
+    #[builder(default, setter(strip_option))]
+    pub track: Option<QueuedTrack>,
 }
 
 impl HasCtx for AddToQueue {

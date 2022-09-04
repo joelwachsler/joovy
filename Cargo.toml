@@ -28,3 +28,4 @@ sea-orm = { version = "0.9.2", features = [
 migration = { path = "migration" }
 entity = { path = "entity" }
 chrono = "0.4"
+rand = "0.8"

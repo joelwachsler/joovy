@@ -7,6 +7,8 @@ use strum::AsRefStr;
 use tokio::sync::mpsc::{self, Receiver, Sender};
 use tracing::info;
 
+use self::regenerate_queue::RegenerateQueue;
+
 use super::db_store::DbStore;
 use super::guild_store::{init_guild_store_receiver, GuildStore};
 use crate::command_context::CommandContext;
@@ -21,6 +23,7 @@ pub mod add_track_to_queue;
 pub mod disconnect;
 pub mod play_next_track;
 pub mod print_queue;
+pub mod regenerate_queue;
 pub mod remove;
 pub mod remove_last;
 
@@ -36,6 +39,7 @@ pub enum GuildAction {
     Remove,
     RemoveLast,
     PrintQueue,
+    RegenerateQueue,
 }
 
 #[enum_dispatch(GuildAction)]

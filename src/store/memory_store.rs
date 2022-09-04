@@ -38,4 +38,8 @@ impl Store for MemoryStore {
     async fn add_track_query_result(&self, _query: &str, _track: &QueuedTrack) -> Result<()> {
         Ok(())
     }
+
+    async fn get_previous_queue(&self) -> Result<Option<Vec<QueuedTrack>>> {
+        Ok(None)
+    }
 }
