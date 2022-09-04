@@ -1,3 +1,4 @@
+use serenity::model::application::command::Command;
 use serenity::model::prelude::interaction::Interaction;
 use serenity::{async_trait, model::prelude::*, prelude::*};
 use std::env;
@@ -16,18 +17,26 @@ impl EventHandler for CommandHandler {
         info!("{} is connected!", ready.user.name);
         info!("Registering slash commands...");
 
-        let guild_id = GuildId(
-            env::var("GUILD_ID")
-                .expect("GUILD_ID must be defined")
-                .parse()
-                .expect("GUILD_ID must be an integer"),
-        );
+        let guild_id = env::var("GUILD_ID")
+            .map(|guild_id| guild_id.parse().expect("GUILD_ID must be an integer"))
+            .map(GuildId)
+            .ok();
 
-        let _ = GuildId::set_application_commands(&guild_id, ctx, |commands| {
-            JoovyCommands::register_application_commands(commands)
-        })
-        .await
-        .map_err(|why| error!("Failed to create slash commands: {}", why));
+        if let Some(guild_id) = guild_id {
+            info!("Registering guild application commands");
+            let _ = GuildId::set_application_commands(&guild_id, ctx, |commands| {
+                JoovyCommands::register_application_commands(commands)
+            })
+            .await
+            .unwrap_or_else(|why| panic!("Failed to create guild slash commands: {}", why));
+        } else {
+            info!("Registering global application commands");
+            Command::set_global_application_commands(&ctx, |commands| {
+                JoovyCommands::register_application_commands(commands)
+            })
+            .await
+            .unwrap_or_else(|why| panic!("Failed to create global slash commands: {}", why));
+        }
 
         info!("Finished and ready to serve!");
     }
