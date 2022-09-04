@@ -110,4 +110,16 @@ impl QueuedTrack {
             skip: false,
         }
     }
+
+    #[cfg(test)]
+    pub fn create_for_test_two(title: &str, url: &str) -> QueuedTrack {
+        QueuedTrack {
+            title: title.into(),
+            url: url.into(),
+            author: 1,
+            username: "username".into(),
+            duration: 1,
+            skip: false,
+        }
+    }
 }

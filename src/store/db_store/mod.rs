@@ -10,7 +10,6 @@ use sea_orm::{
     QueryFilter, Set,
 };
 use serenity::{async_trait, futures::future::try_join_all};
-use tracing::info;
 
 use self::{playlist::create_playlist, track::ToQueuedTrack};
 
@@ -123,16 +122,13 @@ impl Store for DbStore {
         Ok(())
     }
 
-    async fn get_previous_queue(&self) -> Result<Option<Vec<QueuedTrack>>> {
-        let last_playlist = self.find_last_playlists(1).await?;
-        info!("Found the following playlists: {:?}", last_playlist);
-        let last_playlist = match last_playlist.get(0) {
-            Some(playlist) => playlist,
-            None => return Ok(None),
-        };
+    async fn get_previous_queue(&self, max_playlists: u64) -> Result<Vec<Vec<QueuedTrack>>> {
+        let playlists = self.find_last_playlists(max_playlists).await?;
+        let to_queued_tracks = playlists
+            .iter()
+            .map(|playlist| playlist_to_queued_tracks(self.conn(), playlist));
 
-        let res = playlist_to_queued_tracks(self.conn(), last_playlist).await?;
-        Ok(Some(res))
+        try_join_all(to_queued_tracks).await
     }
 }
 

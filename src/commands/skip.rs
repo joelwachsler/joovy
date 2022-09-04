@@ -8,7 +8,7 @@ use crate::command_context::CommandContext;
 use crate::store::guild_action::play_next_track::PlayNextTrack;
 use crate::store::guild_action::remove::Remove;
 
-use super::{JoovyCommand, JoovyCommands};
+use super::{CommandDataOptionUtil, JoovyCommand, JoovyCommands};
 
 const FROM: &str = "from";
 const TO: &str = "to";
@@ -30,6 +30,7 @@ impl JoovyCommand for Skip {
                     .name(FROM)
                     .kind(Integer)
                     .description("Start number to remove from (inclusive)")
+                    .min_int_value(0)
                     .required(false)
             })
             .create_option(|option| {
@@ -37,21 +38,15 @@ impl JoovyCommand for Skip {
                     .name(TO)
                     .kind(Integer)
                     .description("End number to remove to (inclusive)")
+                    .min_int_value(1)
             })
     }
 
     async fn execute(&self, ctx: Arc<CommandContext>) -> Result<()> {
         let options = &ctx.interaction().data.options;
-        let get_int_opt = |name| {
-            options
-                .iter()
-                .find(|opt| opt.name == name)
-                .and_then(|v| v.value.clone())
-                .and_then(|v| v.as_u64())
-        };
 
-        if let Some(from) = get_int_opt(FROM) {
-            let to = get_int_opt(TO);
+        if let Some(from) = options.get_u64(FROM) {
+            let to = options.get_u64(TO);
 
             ctx.send_action(Remove::builder().ctx(ctx.clone()).from(from).to(to).build())
                 .await?;

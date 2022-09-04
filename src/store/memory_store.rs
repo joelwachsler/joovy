@@ -39,7 +39,7 @@ impl Store for MemoryStore {
         Ok(())
     }
 
-    async fn get_previous_queue(&self) -> Result<Option<Vec<QueuedTrack>>> {
-        Ok(None)
+    async fn get_previous_queue(&self, _max_playlists: u64) -> Result<Vec<Vec<QueuedTrack>>> {
+        Ok(vec![])
     }
 }

@@ -159,5 +159,5 @@ pub trait Store {
     async fn skip_track(&mut self, index: i32) -> Result<()>;
     async fn find_track_query_result(&self, query: &str) -> Result<Option<TrackQueryResult>>;
     async fn add_track_query_result(&self, query: &str, track: &QueuedTrack) -> Result<()>;
-    async fn get_previous_queue(&self) -> Result<Option<Vec<QueuedTrack>>>;
+    async fn get_previous_queue(&self, max_playlists: u64) -> Result<Vec<Vec<QueuedTrack>>>;
 }
