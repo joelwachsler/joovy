@@ -1,4 +1,4 @@
-use anyhow::Result;
+use anyhow::{Result, bail};
 
 use crate::command_context::CommandContext;
 
@@ -36,6 +36,10 @@ impl QueuedTrack {
         query: &str,
         store: &StoreType,
     ) -> Result<QueuedTrack> {
+        if query.contains("list=") {
+            bail!("Playlists are not currently supported!")
+        }
+
         let user = &ctx.interaction().user;
         if let Some(track) = store.find_track_query_result(query).await? {
             Ok(QueuedTrack {
