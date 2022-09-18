@@ -66,7 +66,7 @@ impl GuildActionHandler {
         }
     }
 
-    pub async fn init(&mut self, mut receiver: GuildStoreReceiver) {
+    pub async fn init_receiver(&mut self, mut receiver: GuildStoreReceiver) {
         while let Some(next_action) = receiver.recv().await {
             let ctx = next_action.ctx();
             let channel_id = match self.channel_id(&ctx).await {
@@ -76,6 +76,7 @@ impl GuildActionHandler {
                     let _ = ctx
                         .send("Failed to initialize, are you currently in a voice channel?")
                         .await;
+
                     continue;
                 }
             };

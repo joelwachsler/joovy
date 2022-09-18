@@ -1,4 +1,4 @@
-use crate::store::queued_track::QueuedTrack;
+use crate::store::{guild_store::Store, queued_track::QueuedTrack};
 
 use super::DbStore;
 use anyhow::Result;
@@ -10,7 +10,7 @@ use serenity::async_trait;
 impl DbStore {
     pub async fn create_track(&mut self, author: i32, track_query_result: i32) -> Result<Model> {
         let track = ActiveModel {
-            index: Set(self.get_and_increment_index()),
+            index: Set(self.number_of_tracks_in_queue().await?),
             playlist: Set(self.playlist),
             skip: Set(false),
             author: Set(author),
@@ -33,10 +33,9 @@ impl DbStore {
         Ok(res)
     }
 
-    fn get_and_increment_index(&mut self) -> i32 {
-        let index = self.index;
-        self.index += 1;
-        index
+    async fn number_of_tracks_in_queue(&self) -> Result<i32> {
+        let queue = self.queue().await?;
+        Ok(queue.len() as i32)
     }
 }
 

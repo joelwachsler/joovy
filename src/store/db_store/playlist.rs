@@ -23,8 +23,17 @@ pub async fn find_playlist(conn: &DatabaseConnection, id: &Uuid) -> Result<Optio
 }
 
 impl DbStore {
-    pub async fn find_playlist(&self, id: &Uuid) -> Result<Option<Model>> {
-        find_playlist(self.conn(), id).await
+    pub async fn find_playlist(&self) -> Result<Option<Model>> {
+        find_playlist(self.conn(), &self.playlist).await
+    }
+
+    pub async fn get_playlist(&self) -> Result<Model> {
+        let res = self
+            .find_playlist()
+            .await?
+            .expect("Programming error: Failed to find playlist");
+
+        Ok(res)
     }
 
     pub async fn find_last_playlists(&self, limit: u64) -> Result<Vec<Model>> {

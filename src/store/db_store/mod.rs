@@ -20,7 +20,6 @@ use super::{
 
 pub struct DbStore {
     conn: DatabaseConnection,
-    index: i32,
     playlist: Uuid,
     channel_id: u64,
 }
@@ -31,7 +30,6 @@ impl DbStore {
 
         Ok(Self {
             conn: conn.clone(),
-            index: 0,
             playlist: playlist.id,
             channel_id: *channel_id,
         })
@@ -61,7 +59,7 @@ async fn playlist_to_queued_tracks(
 #[async_trait]
 impl Store for DbStore {
     async fn queue(&self) -> Result<Vec<QueuedTrack>> {
-        let playlist = self.find_playlist(&self.playlist).await?.unwrap();
+        let playlist = self.get_playlist().await?;
         playlist_to_queued_tracks(self.conn(), &playlist).await
     }
 

@@ -18,7 +18,7 @@ impl GuildStores {
     pub fn init_store(conn: DatabaseConnection) -> Arc<GuildStores> {
         let (tx, rx) = mpsc::channel::<GuildAction>(100);
         let store = Arc::new(GuildStores::new(tx));
-        tokio::spawn(async move { GuildActionHandler::new(conn).init(rx).await });
+        tokio::spawn(async move { GuildActionHandler::new(conn).init_receiver(rx).await });
 
         store
     }
