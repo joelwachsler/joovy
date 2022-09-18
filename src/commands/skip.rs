@@ -24,7 +24,7 @@ impl JoovyCommand for Skip {
     ) -> &'a mut CreateApplicationCommand {
         command
             .name(JoovyCommands::Skip(Skip).as_ref())
-            .description("Removes tracks from the queue. If from is not defined the current track will be skipped.")
+            .description("Removes tracks from the queue. If no arguments are given, the current track will be skipped.")
             .create_option(|option| {
                 option
                     .name(FROM)
