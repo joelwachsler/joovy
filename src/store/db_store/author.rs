@@ -30,6 +30,7 @@ impl DbStore {
             .filter(Column::DiscordId.eq(discord_id))
             .one(self.conn())
             .await?;
+
         Ok(res)
     }
 }

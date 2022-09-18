@@ -8,7 +8,7 @@ use serenity::prelude::*;
 use songbird::SerenityInit;
 use tracing::{info, instrument};
 
-use crate::{command_handler::CommandHandler, store::guild_stores::GuildStores};
+use crate::{commands::CommandHandler, store::guild_stores::GuildStores};
 
 #[instrument]
 pub async fn run(conn: DatabaseConnection) -> Result<()> {
