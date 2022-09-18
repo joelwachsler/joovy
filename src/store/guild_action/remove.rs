@@ -18,7 +18,7 @@ impl Execute for Remove {
         if let Some(to) = to {
             if from > to {
                 ctx.send(format!(
-                    "To cannot be greater than from, (from: {from}, to: {to})"
+                    "To should not be greater than from, (from: {from}, to: {to})"
                 ))
                 .await?;
                 return Ok(());
