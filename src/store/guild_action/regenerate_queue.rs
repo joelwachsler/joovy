@@ -80,7 +80,6 @@ impl HasCtx for RegenerateQueue {
 }
 
 trait UniqueTracks {
-    // Filters out tracks with unique urls.
     fn get_unique_tracks(&self) -> Vec<&QueuedTrack>;
 }
 
