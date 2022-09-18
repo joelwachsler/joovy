@@ -30,7 +30,7 @@ impl JoovyCommand for Regenerate {
     ) -> &'a mut CreateApplicationCommand {
         command
             .name(JoovyCommands::Regenerate(Regenerate).as_ref())
-            .description("Create a playlist from a number of previous playlists")
+            .description("Create a new playlist by sampling previous playlists")
             .create_option(|option| {
                 option
                     .name(SHUFFLE)
