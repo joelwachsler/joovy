@@ -11,7 +11,10 @@ use sea_orm::{
 };
 use serenity::{async_trait, futures::future::try_join_all};
 
-use self::{playlist::create_playlist, track::ToQueuedTrack};
+use self::{
+    playlist::{create_playlist, find_last_playlists},
+    track::ToQueuedTrack,
+};
 
 use super::{
     guild_store::{CurrentTrack, Playlist, Store, TrackQueryResult},
@@ -35,32 +38,53 @@ impl DbStore {
         })
     }
 
+    pub async fn create_with_current_playlist(
+        conn: &DatabaseConnection,
+        channel_id: &u64,
+    ) -> Result<Option<Self>> {
+        let playlist = find_last_playlists(conn, channel_id, None, 1).await?;
+        let playlist = playlist.first();
+
+        let playlist = match playlist {
+            Some(playlist) => playlist,
+            None => return Ok(None),
+        };
+
+        Ok(Some(Self {
+            conn: conn.clone(),
+            playlist: playlist.id,
+            channel_id: *channel_id,
+        }))
+    }
+
     fn conn(&self) -> &DatabaseConnection {
         &self.conn
     }
 }
 
-async fn playlist_to_queued_tracks(
-    conn: &DatabaseConnection,
-    playlist: &entity::playlist::Model,
-) -> Result<Vec<QueuedTrack>> {
-    let tracks = playlist
-        .find_related(entity::track::Entity)
-        .all(conn)
-        .await?;
+#[async_trait]
+pub trait ToQueuedTracks {
+    async fn to_queued_tracks(&self, conn: &DatabaseConnection) -> Result<Vec<QueuedTrack>>;
+}
 
-    let tracks_as_queued_tracks = tracks
-        .into_iter()
-        .map(|track| track.into_to_queued_track(conn));
+#[async_trait]
+impl ToQueuedTracks for entity::playlist::Model {
+    async fn to_queued_tracks(&self, conn: &DatabaseConnection) -> Result<Vec<QueuedTrack>> {
+        let tracks = self.find_related(entity::track::Entity).all(conn).await?;
 
-    try_join_all(tracks_as_queued_tracks).await
+        let tracks_as_queued_tracks = tracks
+            .into_iter()
+            .map(|track| track.into_to_queued_track(conn));
+
+        try_join_all(tracks_as_queued_tracks).await
+    }
 }
 
 #[async_trait]
 impl Store for DbStore {
     async fn queue(&self) -> Result<Vec<QueuedTrack>> {
         let playlist = self.get_playlist().await?;
-        playlist_to_queued_tracks(self.conn(), &playlist).await
+        playlist.to_queued_tracks(self.conn()).await
     }
 
     async fn add_track_to_queue(&mut self, track: &QueuedTrack) -> Result<()> {
@@ -124,7 +148,7 @@ impl Store for DbStore {
         let playlists = self.find_last_playlists(max_playlists).await?;
         let to_queued_tracks = playlists
             .iter()
-            .map(|playlist| playlist_to_queued_tracks(self.conn(), playlist));
+            .map(|playlist| playlist.to_queued_tracks(self.conn()));
 
         try_join_all(to_queued_tracks).await
     }

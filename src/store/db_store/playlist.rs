@@ -23,6 +23,24 @@ pub async fn find_playlist(conn: &DatabaseConnection, id: &Uuid) -> Result<Optio
     Ok(Entity::find_by_id(*id).one(conn).await?)
 }
 
+pub async fn find_last_playlists(
+    conn: &DatabaseConnection,
+    channel_id: &u64,
+    current_playlist: Option<&Uuid>,
+    limit: u64,
+) -> Result<Vec<Model>> {
+    let mut query = Entity::find()
+        .filter(Column::ChannelId.eq(*channel_id))
+        .order_by_desc(Column::UpdatedAt)
+        .limit(limit);
+
+    if let Some(current_playlist) = current_playlist {
+        query = query.filter(Column::Id.ne(*current_playlist));
+    }
+
+    Ok(query.all(conn).await?)
+}
+
 impl DbStore {
     pub async fn find_playlist(&self) -> Result<Option<Model>> {
         find_playlist(self.conn(), &self.playlist).await
@@ -38,14 +56,6 @@ impl DbStore {
     }
 
     pub async fn find_last_playlists(&self, limit: u64) -> Result<Vec<Model>> {
-        let res = Entity::find()
-            .filter(Column::ChannelId.eq(self.channel_id))
-            .filter(Column::Id.ne(self.playlist))
-            .order_by_desc(Column::UpdatedAt)
-            .limit(limit)
-            .all(self.conn())
-            .await?;
-
-        Ok(res)
+        find_last_playlists(self.conn(), &self.channel_id, Some(&self.playlist), limit).await
     }
 }

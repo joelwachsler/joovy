@@ -29,3 +29,6 @@ migration = { path = "migration" }
 entity = { path = "entity" }
 chrono = "0.4"
 rand = "0.8"
+actix-web = "4.0.5"
+async-graphql = { version = "4.0.5", features = ["string_number"] }
+async-graphql-actix-web = "4.0.5"
