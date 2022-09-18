@@ -51,7 +51,6 @@ impl Execute for RegenerateQueue {
         let prev_tracks: Vec<QueuedTrack> = prev_tracks.into_iter().take(*max_tracks).collect();
 
         for track in prev_tracks {
-            // this track was skipped which probably means it was added erroneously
             if track.skip {
                 continue;
             }
