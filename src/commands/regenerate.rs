@@ -35,14 +35,14 @@ impl JoovyCommand for Regenerate {
                 option
                     .name(SHUFFLE)
                     .kind(Boolean)
-                    .description("Should we shuffle the playlist? (default is false)")
+                    .description("Should we shuffle the playlist? (default: false)")
                     .required(false)
             })
             .create_option(|option| {
                 option
                     .name(DEDUP)
                     .kind(Boolean)
-                    .description("Should duplicates be removed? (default is true)")
+                    .description("Should duplicates be removed? (default: true)")
                     .required(false)
             })
             .create_option(|option| {
@@ -50,7 +50,7 @@ impl JoovyCommand for Regenerate {
                     .name(GO_BACK)
                     .kind(Integer)
                     .description(
-                        format!("The number of playlists to go back and take tracks from (default is {GO_BACK_DEFAULT})"),
+                        format!("The number of playlists to go back and take tracks from (default: {GO_BACK_DEFAULT})"),
                     )
                     .min_int_value(0)
                     .max_int_value(100)
@@ -61,7 +61,7 @@ impl JoovyCommand for Regenerate {
                     .name(MAX_TRACKS)
                     .kind(Integer)
                     .description(
-                        format!("The maximum number of tracks to add to the new playlist (default is {MAX_TRACKS_DEFAULT})"),
+                        format!("The maximum number of tracks to add to the new playlist (default: {MAX_TRACKS_DEFAULT})"),
                     )
                     .min_int_value(0)
                     .max_int_value(100)
