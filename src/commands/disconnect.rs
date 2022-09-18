@@ -19,7 +19,7 @@ impl JoovyCommand for Disconnect {
     ) -> &'a mut CreateApplicationCommand {
         command
             .name(JoovyCommands::Disconnect(Disconnect).as_ref())
-            .description("Disconnects from the voice channel")
+            .description("Disconnects the bot from its current voice channel")
     }
 
     async fn execute(&self, ctx: Arc<CommandContext>) -> Result<()> {
