@@ -12,7 +12,7 @@ use crate::{command_handler::CommandHandler, store::guild_stores::GuildStores};
 
 #[instrument]
 pub async fn run(conn: DatabaseConnection) -> Result<()> {
-    let token = env::var("DISCORD_TOKEN").expect("DISCORD_TOKEN not set");
+    let token = env::var("DISCORD_TOKEN").expect("Missing DISCORD_TOKEN in env");
     let intents = GatewayIntents::non_privileged() | GatewayIntents::MESSAGE_CONTENT;
 
     let mut client = Client::builder(token, intents)
