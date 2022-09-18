@@ -17,7 +17,9 @@ pub async fn run(conn: DatabaseConnection) -> Result<()> {
 
     let mut client = Client::builder(token, intents)
         .event_handler(CommandHandler)
-        // Not used, but it's harder to hand pick features than to just register a framework.
+        // Even though the framework functionality is not used (we don't use it because it does
+        // not support slash commands) a lot of needed serenity features are automatically
+        // registered which are hard to register by hand. 
         .framework(StandardFramework::new())
         .register_songbird()
         .await
