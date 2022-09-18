@@ -20,7 +20,7 @@ impl Execute for PrintQueue {
 
         let queue = store.queue().await?;
 
-        let current_track_index = store.current_track_index().unwrap_or_default();
+        let current_track_index = store.current_track_index().await?.unwrap_or_default();
         let output = match print_queue(&queue, current_track_index) {
             Some(output) => output,
             None => {

@@ -2,13 +2,22 @@ use anyhow::Result;
 use serenity::async_trait;
 
 use super::{
-    guild_store::{Store, TrackQueryResult},
+    guild_store::{CurrentTrack, Playlist, Store, TrackQueryResult},
     queued_track::QueuedTrack,
 };
 
-#[derive(Default)]
 pub struct MemoryStore {
     queue: Vec<QueuedTrack>,
+    current_track: CurrentTrack,
+}
+
+impl Default for MemoryStore {
+    fn default() -> Self {
+        Self {
+            queue: Default::default(),
+            current_track: CurrentTrack::None,
+        }
+    }
 }
 
 #[async_trait]
@@ -39,7 +48,18 @@ impl Store for MemoryStore {
         Ok(())
     }
 
-    async fn get_previous_queue(&self, _max_playlists: u64) -> Result<Vec<Vec<QueuedTrack>>> {
+    async fn previous_queue(&self, _max_playlists: u64) -> Result<Vec<Vec<QueuedTrack>>> {
         Ok(vec![])
+    }
+
+    async fn playlist(&self) -> Result<Playlist> {
+        Ok(Playlist {
+            current_track: self.current_track,
+        })
+    }
+
+    async fn set_current_track(&mut self, current_track: CurrentTrack) -> Result<()> {
+        self.current_track = current_track;
+        Ok(())
     }
 }

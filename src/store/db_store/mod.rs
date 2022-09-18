@@ -6,15 +6,15 @@ mod track_query_result;
 use anyhow::Result;
 use chrono::Utc;
 use sea_orm::{
-    prelude::Uuid, ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, ModelTrait,
-    QueryFilter, Set,
+    prelude::Uuid, ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, IntoActiveModel,
+    ModelTrait, QueryFilter, Set,
 };
 use serenity::{async_trait, futures::future::try_join_all};
 
 use self::{playlist::create_playlist, track::ToQueuedTrack};
 
 use super::{
-    guild_store::{Store, TrackQueryResult},
+    guild_store::{CurrentTrack, Playlist, Store, TrackQueryResult},
     queued_track::QueuedTrack,
 };
 
@@ -120,13 +120,52 @@ impl Store for DbStore {
         Ok(())
     }
 
-    async fn get_previous_queue(&self, max_playlists: u64) -> Result<Vec<Vec<QueuedTrack>>> {
+    async fn previous_queue(&self, max_playlists: u64) -> Result<Vec<Vec<QueuedTrack>>> {
         let playlists = self.find_last_playlists(max_playlists).await?;
         let to_queued_tracks = playlists
             .iter()
             .map(|playlist| playlist_to_queued_tracks(self.conn(), playlist));
 
         try_join_all(to_queued_tracks).await
+    }
+
+    async fn playlist(&self) -> Result<Playlist> {
+        let playlist = self.get_playlist().await?;
+        let is_last = playlist.last_track;
+        let current_track = match playlist.current_track {
+            Some(track) => {
+                if is_last {
+                    CurrentTrack::Last(track as usize)
+                } else {
+                    CurrentTrack::Index(track as usize)
+                }
+            }
+            None => CurrentTrack::None,
+        };
+
+        Ok(Playlist { current_track })
+    }
+
+    async fn set_current_track(&mut self, current_track: CurrentTrack) -> Result<()> {
+        let mut playlist = self.get_playlist().await?.into_active_model();
+        playlist.updated_at = Set(Utc::now().into());
+        match current_track {
+            CurrentTrack::Last(index) => {
+                playlist.last_track = Set(true);
+                playlist.current_track = Set(Some(index as i32));
+            }
+            CurrentTrack::Index(index) => {
+                playlist.last_track = Set(false);
+                playlist.current_track = Set(Some(index as i32));
+            }
+            CurrentTrack::None => {
+                playlist.last_track = Set(false);
+                playlist.current_track = Set(None);
+            }
+        }
+        playlist.update(self.conn()).await?;
+
+        Ok(())
     }
 }
 

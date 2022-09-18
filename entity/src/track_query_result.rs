@@ -17,21 +17,21 @@ pub struct Model {
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
-    #[sea_orm(has_many = "super::track_query::Entity")]
-    TrackQuery,
     #[sea_orm(has_many = "super::track::Entity")]
     Track,
-}
-
-impl Related<super::track_query::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::TrackQuery.def()
-    }
+    #[sea_orm(has_many = "super::track_query::Entity")]
+    TrackQuery,
 }
 
 impl Related<super::track::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::Track.def()
+    }
+}
+
+impl Related<super::track_query::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::TrackQuery.def()
     }
 }
 

@@ -53,10 +53,8 @@ pub async fn init_guild_store_receiver(
 
 pub type StoreType = Box<dyn Store + Send + Sync>;
 
-/// The current state of a single guild.
 pub struct GuildStore {
     pub disconnect_handle: Option<broadcast::Sender<()>>,
-    current_track: CurrentTrack,
     store: StoreType,
 }
 
@@ -64,7 +62,6 @@ impl Default for GuildStore {
     fn default() -> Self {
         Self {
             disconnect_handle: Default::default(),
-            current_track: CurrentTrack::None,
             store: Box::new(MemoryStore::default()),
         }
     }
@@ -75,7 +72,6 @@ impl GuildStore {
         ctx.join_voice().await?;
         Ok(GuildStore {
             disconnect_handle: Default::default(),
-            current_track: CurrentTrack::None,
             store,
         })
     }
@@ -90,40 +86,45 @@ impl GuildStore {
             return Ok(None);
         }
 
-        match self.current_track {
+        let new_track = match self.store().playlist().await?.current_track {
             CurrentTrack::Last(track) => {
                 if queue.len() != track {
-                    self.current_track = CurrentTrack::Index(track + 1);
+                    CurrentTrack::Index(track + 1)
+                } else {
+                    CurrentTrack::Index(track)
                 }
             }
             CurrentTrack::Index(track) => {
                 if queue.len() <= track + 1 {
-                    self.current_track = CurrentTrack::Last(track);
+                    CurrentTrack::Last(track)
                 } else {
-                    self.current_track = CurrentTrack::Index(track + 1);
+                    CurrentTrack::Index(track + 1)
                 }
             }
-            CurrentTrack::None => {
-                self.current_track = CurrentTrack::Index(0);
-            }
-        }
+            CurrentTrack::None => CurrentTrack::Index(0),
+        };
+
+        self.store.set_current_track(new_track).await?;
 
         self.current_track().await
     }
 
-    pub fn current_track_index(&self) -> Option<usize> {
-        match self.current_track {
-            CurrentTrack::Index(index) => Some(index),
-            _ => None,
+    pub async fn current_track_index(&self) -> Result<Option<usize>> {
+        match self.store.playlist().await?.current_track {
+            CurrentTrack::Index(index) => Ok(Some(index)),
+            _ => Ok(None),
         }
     }
 
     pub async fn is_playing(&self) -> Result<bool> {
-        Ok(matches!(self.current_track, CurrentTrack::Index(_)))
+        Ok(matches!(
+            self.store.playlist().await?.current_track,
+            CurrentTrack::Index(_)
+        ))
     }
 
     pub async fn current_track(&self) -> Result<Option<QueuedTrack>> {
-        let track_index = match self.current_track_index() {
+        let track_index = match self.current_track_index().await? {
             Some(index) => index,
             None => return Ok(None),
         };
@@ -152,6 +153,10 @@ pub struct TrackQueryResult {
     pub duration: i32,
 }
 
+pub struct Playlist {
+    pub current_track: CurrentTrack,
+}
+
 #[async_trait]
 pub trait Store {
     async fn queue(&self) -> Result<Vec<QueuedTrack>>;
@@ -159,5 +164,7 @@ pub trait Store {
     async fn skip_track(&mut self, index: i32) -> Result<()>;
     async fn find_track_query_result(&self, query: &str) -> Result<Option<TrackQueryResult>>;
     async fn add_track_query_result(&self, query: &str, track: &QueuedTrack) -> Result<()>;
-    async fn get_previous_queue(&self, max_playlists: u64) -> Result<Vec<Vec<QueuedTrack>>>;
+    async fn previous_queue(&self, max_playlists: u64) -> Result<Vec<Vec<QueuedTrack>>>;
+    async fn playlist(&self) -> Result<Playlist>;
+    async fn set_current_track(&mut self, current_track: CurrentTrack) -> Result<()>;
 }

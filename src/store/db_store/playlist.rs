@@ -13,6 +13,7 @@ pub async fn create_playlist(conn: &DatabaseConnection, channel_id: &u64) -> Res
         channel_id: Set(*channel_id as i64),
         created_at: Set(Utc::now().into()),
         updated_at: Set(Utc::now().into()),
+        ..Default::default()
     };
 
     Ok(playlist.insert(conn).await?)

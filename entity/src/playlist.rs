@@ -10,6 +10,8 @@ pub struct Model {
     pub channel_id: i64,
     pub created_at: DateTimeWithTimeZone,
     pub updated_at: DateTimeWithTimeZone,
+    pub current_track: Option<i32>,
+    pub last_track: bool,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

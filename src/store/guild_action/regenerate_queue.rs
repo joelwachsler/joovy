@@ -28,7 +28,7 @@ impl Execute for RegenerateQueue {
 
         let mut prev_tracks: Vec<QueuedTrack> = store
             .store()
-            .get_previous_queue(*go_back)
+            .previous_queue(*go_back)
             .await?
             .into_iter()
             .flatten()

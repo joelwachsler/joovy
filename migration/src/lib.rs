@@ -7,6 +7,7 @@ mod m20220903_183232_create_track_query_result;
 mod m20220903_184828_add_track_query_result_to_track;
 mod m20220903_185259_add_track_query_table;
 mod m20220903_185411_track_query_result_to_track_query_table;
+mod m20220918_200712_add_current_track_to_playlist;
 
 pub struct Migrator;
 
@@ -21,6 +22,7 @@ impl MigratorTrait for Migrator {
             Box::new(m20220903_184828_add_track_query_result_to_track::Migration),
             Box::new(m20220903_185259_add_track_query_table::Migration),
             Box::new(m20220903_185411_track_query_result_to_track_query_table::Migration),
+            Box::new(m20220918_200712_add_current_track_to_playlist::Migration),
         ]
     }
 }
