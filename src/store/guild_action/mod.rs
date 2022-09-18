@@ -74,7 +74,7 @@ impl GuildActionHandler {
                 Err(err) => {
                     info!("Failed to join channel: {}", err);
                     let _ = ctx
-                        .send("Failed to initialize, are you joined to a voice channel?")
+                        .send("Failed to initialize, are you currently in a voice channel?")
                         .await;
                     continue;
                 }
