@@ -29,7 +29,7 @@ impl JoovyCommand for Skip {
                 option
                     .name(FROM)
                     .kind(Integer)
-                    .description("Start number to remove from (inclusive)")
+                    .description("The track number to remove from")
                     .min_int_value(0)
                     .required(false)
             })
@@ -37,7 +37,7 @@ impl JoovyCommand for Skip {
                 option
                     .name(TO)
                     .kind(Integer)
-                    .description("End number to remove to (inclusive)")
+                    .description("Final track to remove (inclusive)")
                     .min_int_value(1)
             })
     }
