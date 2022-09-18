@@ -19,7 +19,7 @@ pub async fn run(conn: DatabaseConnection) -> Result<()> {
         .event_handler(CommandHandler)
         // Even though the framework functionality is not used (we don't use it because it does
         // not support slash commands) a lot of needed serenity features are automatically
-        // registered which are hard to register by hand. 
+        // registered which are hard to register by hand.
         .framework(StandardFramework::new())
         .register_songbird()
         .await
