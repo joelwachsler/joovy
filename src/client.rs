@@ -17,7 +17,7 @@ pub async fn run(conn: DatabaseConnection) -> Result<()> {
 
     let mut client = Client::builder(token, intents)
         .event_handler(CommandHandler)
-        // not used by harder to hand pick features than to just register a framework
+        // Not used, but it's harder to hand pick features than to just register a framework.
         .framework(StandardFramework::new())
         .register_songbird()
         .await
